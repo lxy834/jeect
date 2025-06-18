@@ -27,35 +27,9 @@ public class GatewayRoutersConfig {
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
-    
-    @Value("${jeecg.route.config.data-id:#{null}}")
-    public void setRouteDataId(String dataId) {
-        this.dataId = dataId + ".json";
-    }
-
-    @Value("${spring.cloud.nacos.config.group:DEFAULT_GROUP:#{null}}")
-    public void setRouteGroup(String routeGroup) {
-        this.routeGroup = routeGroup;
-    }
-
-    @Value("${spring.cloud.nacos.discovery.server-addr}")
+    @Value("${spring.cloud.consul.host}")
     public void setServerAddr(String serverAddr) {
         this.serverAddr = serverAddr;
-    }
-
-    @Value("${spring.cloud.nacos.config.namespace:#{null}}")
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    @Value("${spring.cloud.nacos.config.username:#{null}}")
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Value("${spring.cloud.nacos.config.password:#{null}}")
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getDataType() {

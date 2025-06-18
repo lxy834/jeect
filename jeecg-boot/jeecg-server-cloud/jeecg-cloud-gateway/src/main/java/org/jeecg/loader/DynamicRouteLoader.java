@@ -144,10 +144,10 @@ public class DynamicRouteLoader implements ApplicationEventPublisherAware {
      */
     private void loadRoutesByRedis(BaseMap baseMap) {
         List<MyRouteDefinition> routes = Lists.newArrayList();
-        configService = createConfigService();
-        if (configService == null) {
-            log.warn("initConfigService fail");
-        }
+//        configService = createConfigService();
+//        if (configService == null) {
+//            log.warn("initConfigService fail");
+//        }
         Object configInfo = redisUtil.get(CacheConstant.GATEWAY_ROUTES);
         if (ObjectUtil.isNotEmpty(configInfo)) {
             log.info("获取网关当前配置:\r\n{}", configInfo);
@@ -160,7 +160,7 @@ public class DynamicRouteLoader implements ApplicationEventPublisherAware {
         }else{
             log.warn("ERROR: 从Redis获取网关配置为空，请确认system服务是否启动成功！");
         }
-        
+
         for (MyRouteDefinition definition : routes) {
             log.info("update route : {}", definition.toString());
             Integer status=definition.getStatus();

@@ -41,9 +41,9 @@ public class MySwaggerResourceProvider implements SwaggerResourcesProvider {
     private NamingService naming;
 
     /**
-     * nacos服务地址
+     * consul服务地址
      */
-    @Value("${spring.cloud.nacos.discovery.server-addr}")
+    @Value("${spring.cloud.consul.host}")
     private String serverAddr;
     /**
      * nacos namespace
