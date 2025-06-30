@@ -28,7 +28,7 @@ public interface ServiceNameConstants {
 	/**
 	 * 微服务名：系统管理模块
 	 */
-	String SERVICE_SYSTEM = "jeecg-system";
+	String SERVICE_SYSTEM = "xinwei5-auth";
 	/**
 	 * 微服务名： demo模块
 	 */
@@ -37,7 +37,7 @@ public interface ServiceNameConstants {
 	 * 微服务名：joa模块
 	 */
 	String SERVICE_JOA = "jeecg-joa";
-	
+
 //	/**
 //	 * 微服务名：online在线模块
 //	 */

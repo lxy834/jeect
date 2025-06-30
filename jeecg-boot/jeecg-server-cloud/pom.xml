@@ -14,10 +14,9 @@
     <name>JEECG SERVER CLOUD</name>
 
     <modules>
-        <module>jeecg-cloud-gateway</module>
+        <module>xinwei-gateway</module>
 <!--        <module>jeecg-cloud-nacos</module>-->
-        <module>jeecg-system-cloud-start</module>
-        <module>jeecg-demo-cloud-start</module>
+        <module>xinwei-system</module>
 
         <!-- 监控和测试例子 -->
         <module>jeecg-visual</module>

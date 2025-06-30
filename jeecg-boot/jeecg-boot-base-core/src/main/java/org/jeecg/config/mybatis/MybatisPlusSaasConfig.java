@@ -36,15 +36,15 @@ public class MybatisPlusSaasConfig {
     /**
      * 是否开启系统模块的租户隔离
      *  控制范围：用户、角色、部门、我的部门、字典、分类字典、多数据源、职务、通知公告
-     *  
+     *
      *  实现功能
      *  1.用户表通过硬编码实现租户ID隔离
      *  2.角色、部门、我的部门、字典、分类字典、多数据源、职务、通知公告除了硬编码还加入的 TENANT_TABLE 配置中，实现租户隔离更安全
      *  3.菜单表、租户表不做租户隔离
      *  4.通过拦截器MybatisInterceptor实现，增删改查数据 自动注入租户ID
      */
-    public static final Boolean OPEN_SYSTEM_TENANT_CONTROL = false;
-    
+    public static final Boolean OPEN_SYSTEM_TENANT_CONTROL = true;
+
     /**
      * 哪些表需要做多租户 表需要添加一个字段 tenant_id
      */
@@ -72,6 +72,9 @@ public class MybatisPlusSaasConfig {
             TENANT_TABLE.add("airag_knowledge");
             TENANT_TABLE.add("airag_knowledge_doc");
             TENANT_TABLE.add("airag_model");
+
+            //ftu
+            TENANT_TABLE.add("ftu_f411_device");
         }
 
         //2.示例测试
@@ -123,7 +126,7 @@ public class MybatisPlusSaasConfig {
         interceptor.addInnerInterceptor(dynamicTableNameInnerInterceptor());
         //update-end-author:zyf date:20220425 for:【VUEN-606】注入动态表名适配拦截器解决多表名问题
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
-        //【jeecg-boot/issues/3847】增加@Version乐观锁支持 
+        //【jeecg-boot/issues/3847】增加@Version乐观锁支持
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
         return interceptor;
     }

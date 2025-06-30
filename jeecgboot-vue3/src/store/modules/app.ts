@@ -26,6 +26,9 @@ interface AppState {
   messageHrefParams: any,
   // 应用参数
   mainAppProps: MainAppProps,
+  layoutHideSider: boolean,
+  layoutHideHeader: boolean,
+  layoutHideMultiTabs: boolean
 }
 let timeId: TimeoutHandle;
 export const useAppStore = defineStore({
@@ -37,6 +40,9 @@ export const useAppStore = defineStore({
     beforeMiniInfo: {},
     messageHrefParams: {},
     mainAppProps: {},
+    layoutHideSider: false,
+    layoutHideHeader: false,
+    layoutHideMultiTabs: false
   }),
   getters: {
     getPageLoading(): boolean {
@@ -148,6 +154,15 @@ export const useAppStore = defineStore({
     },
     setMessageHrefParams(params: any): void {
       this.messageHrefParams = params;
+    },
+    setLayoutHideSider(value: boolean) {
+      this.layoutHideSider = value;
+    },
+    setLayoutHideHeader(value: boolean) {
+      this.layoutHideHeader = value;
+    },
+    setLayoutHideMultiTabs(value: boolean) {
+      this.layoutHideMultiTabs = value;
     },
 
     // 设置主应用参数

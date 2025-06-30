@@ -4,7 +4,6 @@ import '/@/design/index.less';
 import 'ant-design-vue/dist/reset.css';
 // 注册图标
 import 'virtual:svg-icons-register';
-
 import App from './App.vue';
 import { createApp } from 'vue';
 import { initAppConfigStore } from '/@/logics/initAppConfig';
@@ -73,7 +72,7 @@ async function bootstrap(props?: MainAppProps) {
 
   // 注册super应用路由
   await registerSuper(app);
-  
+
   // 配置路由
   setupRouter(app);
 
