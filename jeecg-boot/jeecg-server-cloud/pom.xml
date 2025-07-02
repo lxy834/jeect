@@ -18,8 +18,11 @@
 <!--        <module>jeecg-cloud-nacos</module>-->
         <module>xinwei-system</module>
 
+        <module>xinwei-generate</module>
+        <module>xinwei-ftu</module>
+
         <!-- 监控和测试例子 -->
-        <module>jeecg-visual</module>
+<!--        <module>jeecg-visual</module>-->
     </modules>
 
 </project>

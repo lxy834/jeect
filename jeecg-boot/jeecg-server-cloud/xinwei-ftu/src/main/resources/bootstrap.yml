@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+    consul:
+      host: 127.0.0.1
+#      host: 162.14.66.67
+      port: 8500
+      discovery:
+        health-check-critical-timeout: 30s
+        service-name: ${spring.application.name}
+        heartbeat:
+          enabled: true
+        instance-id: ${spring.application.name}-${server.port}
+        enabled: true

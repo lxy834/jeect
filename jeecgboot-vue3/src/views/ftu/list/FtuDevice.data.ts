@@ -64,7 +64,7 @@ export const columns: BasicColumn[] = [
    {
     title: '型号',
     align:"center",
-    dataIndex: 'model'
+    dataIndex: 'ftuModel'
    },
    {
     title: '变电站',
@@ -144,7 +144,7 @@ export const searchFormSchema: FormSchema[] = [
 	},
   {
     label: "型号",
-    field: "model",
+    field: "ftuModel",
     component: 'JInput',
   },
 ];
@@ -259,7 +259,7 @@ export const formSchema: FormSchema[] = [
   },
   {
     label: '型号',
-    field: 'model',
+    field: 'ftuModel',
     component: 'Input',
     dynamicRules: ({model,schema}) => {
           return [

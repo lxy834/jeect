@@ -29,17 +29,17 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @EnableFeignClients(basePackages = {"org.jeecg"})
 @EnableScheduling
-public class XinweiSystemCloudApplication extends SpringBootServletInitializer implements CommandLineRunner {
+public class XinweiSystemApplication extends SpringBootServletInitializer implements CommandLineRunner {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(XinweiSystemCloudApplication.class);
+        return application.sources(XinweiSystemApplication.class);
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        ConfigurableApplicationContext application = SpringApplication.run(XinweiSystemCloudApplication.class, args);
+        ConfigurableApplicationContext application = SpringApplication.run(XinweiSystemApplication.class, args);
         Environment env = application.getEnvironment();
         String ip = InetAddress.getLocalHost().getHostAddress();
         String port = env.getProperty("server.port");
@@ -63,6 +63,7 @@ public class XinweiSystemCloudApplication extends SpringBootServletInitializer i
     public void run(String... args) {
         BaseMap params = new BaseMap();
         params.put(GlobalConstants.HANDLER_NAME, GlobalConstants.LODER_ROUDER_HANDLER);
+//        redisTemplate.getConnectionFactory().getConnection().flushAll();
         //刷新网关
         redisTemplate.convertAndSend(GlobalConstants.REDIS_TOPIC_NAME, params);
     }

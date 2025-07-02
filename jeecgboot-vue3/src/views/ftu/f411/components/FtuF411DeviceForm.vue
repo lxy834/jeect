@@ -4,7 +4,7 @@
 <script lang="ts">
     import {defineComponent} from 'vue';
     import {BasicForm, useForm} from '/@/components/Form/index';
-    import {ftuF411DeviceFormSchema} from '../FtuDevice.data';
+    import {ftuWarnInfoColumns} from '../FtuF411Device.data';
     import {defHttp} from '/@/utils/http/axios';
     import { VALIDATE_FAILED } from '/@/utils/common/vxeUtils'
 
@@ -20,7 +20,7 @@
         },
         setup(props,{emit}) {
             const [registerForm, { setProps, resetFields, setFieldsValue, getFieldsValue, validate, scrollToField }] = useForm({
-                schemas: ftuF411DeviceFormSchema,
+                schemas: ftuWarnInfoColumns,
                 showActionButtonGroup: false,
                 baseColProps: {span: 12}
             });

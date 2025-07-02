@@ -5,7 +5,7 @@
             <div class="app-loading-dots">
                 <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
             </div>
-            <div class="app-loading-title">JeecgBoot 企业级低代码平台</div>
+            <div class="app-loading-title">信位云5.0平台</div>
         </div>
     </div>
 </template>
@@ -19,7 +19,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useUserStore } from '/@/store/modules/user';
   import { useI18n } from '/@/hooks/web/useI18n';
-  
+
   export default {
     name: "TokenLogin",
     setup(){
@@ -31,7 +31,7 @@
       if(!routeQuery){
         createMessage.warning('参数无效')
       }
-     
+
       const token = routeQuery['loginToken'];
       if(!token){
         createMessage.warning('token无效')
@@ -53,12 +53,12 @@
           duration: 4,
         });
       }
-      
+
       function requestSuccess(res){
         let info = routeQuery.info;
         if(info){
           let query = JSON.parse(info);
-          
+
           //update-begin-author:taoyan date:2023-4-27 for: QQYUN-4882【简流】节点消息通知 邮箱 点击办理跳到了应用首页
           let path = '';
           if(query.isLowApp === 1){
@@ -68,7 +68,7 @@
             path = '/task/handle/' + taskId
           }
           //update-end-author:taoyan date:2023-4-27 for: QQYUN-4882【简流】节点消息通知 邮箱 点击办理跳到了应用首页
-          
+
           router.replace({ path, query });
           notification.success({
             message: t('sys.login.loginSuccessTitle'),

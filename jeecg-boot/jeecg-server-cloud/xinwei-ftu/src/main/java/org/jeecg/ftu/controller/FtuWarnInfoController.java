@@ -11,10 +11,12 @@ import java.net.URLDecoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.query.QueryRuleEnum;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.ftu.entity.FtuWarnInfo;
+import org.jeecg.ftu.service.AutoLogService;
 import org.jeecg.ftu.service.IFtuWarnInfoService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -22,6 +24,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 
+import org.jeecg.modules.base.service.BaseCommonService;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -52,7 +55,9 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarnInfoService> {
 	@Autowired
 	private IFtuWarnInfoService ftuWarnInfoService;
-	
+	@Autowired
+	private AutoLogService autoLogService;
+
 	/**
 	 * 分页列表查询
 	 *
@@ -72,9 +77,10 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
         QueryWrapper<FtuWarnInfo> queryWrapper = QueryGenerator.initQueryWrapper(ftuWarnInfo, req.getParameterMap());
 		Page<FtuWarnInfo> page = new Page<FtuWarnInfo>(pageNo, pageSize);
 		IPage<FtuWarnInfo> pageList = ftuWarnInfoService.page(page, queryWrapper);
+		autoLogService.addLog("告警记录-分页列表查询", CommonConstant.LOG_TYPE_2,CommonConstant.OPERATE_TYPE_1,null);
 		return Result.OK(pageList);
 	}
-	
+
 	/**
 	 *   添加
 	 *
@@ -87,9 +93,10 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 	@PostMapping(value = "/add")
 	public Result<String> add(@RequestBody FtuWarnInfo ftuWarnInfo) {
 		ftuWarnInfoService.save(ftuWarnInfo);
+
 		return Result.OK("添加成功！");
 	}
-	
+
 	/**
 	 *  编辑
 	 *
@@ -104,7 +111,7 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 		ftuWarnInfoService.updateById(ftuWarnInfo);
 		return Result.OK("编辑成功!");
 	}
-	
+
 	/**
 	 *   通过id删除
 	 *
@@ -119,7 +126,7 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 		ftuWarnInfoService.removeById(id);
 		return Result.OK("删除成功!");
 	}
-	
+
 	/**
 	 *  批量删除
 	 *
@@ -134,7 +141,7 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 		this.ftuWarnInfoService.removeByIds(Arrays.asList(ids.split(",")));
 		return Result.OK("批量删除成功!");
 	}
-	
+
 	/**
 	 * 通过id查询
 	 *

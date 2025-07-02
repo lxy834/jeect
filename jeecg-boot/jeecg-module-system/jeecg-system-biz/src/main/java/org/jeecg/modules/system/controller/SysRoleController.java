@@ -71,13 +71,13 @@ import lombok.extern.slf4j.Slf4j;
 public class SysRoleController {
 	@Autowired
 	private ISysRoleService sysRoleService;
-	
+
 	@Autowired
 	private ISysPermissionDataRuleService sysPermissionDataRuleService;
-	
+
 	@Autowired
 	private ISysRolePermissionService sysRolePermissionService;
-	
+
 	@Autowired
 	private ISysPermissionService sysPermissionService;
 
@@ -87,7 +87,7 @@ public class SysRoleController {
 	private BaseCommonService baseCommonService;
 	@Autowired
 	private JeecgRedisClient jeecgRedisClient;
-	
+
 	/**
 	  * 分页列表查询 【系统角色，不做租户隔离】
 	 * @param role
@@ -109,16 +109,17 @@ public class SysRoleController {
         }
         //update-end---author:wangshuai---date:2025-03-26---for:【issues/7948】角色解决根据id查询回显不对---
 		Result<IPage<SysRole>> result = new Result<IPage<SysRole>>();
-		//QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(role, req.getParameterMap());
-		//IPage<SysRole> pageList = sysRoleService.page(page, queryWrapper);
 		Page<SysRole> page = new Page<SysRole>(pageNo, pageSize);
+		QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(role, req.getParameterMap());
+		IPage<SysRole> pageList = sysRoleService.page(page, queryWrapper);
+
 		//换成不做租户隔离的方法，实际上还是存在缺陷（缺陷：如果开启租户隔离，虽然能看到其他租户下的角色，编辑会提示报错）
-		IPage<SysRole> pageList = sysRoleService.listAllSysRole(page, role);
+//		IPage<SysRole> pageList = sysRoleService.listAllSysRole(page, role);
 		result.setSuccess(true);
 		result.setResult(pageList);
 		return result;
 	}
-	
+
 	/**
 	 * 分页列表查询【租户角色，做租户隔离】
 	 * @param role
@@ -137,7 +138,7 @@ public class SysRoleController {
 		if(MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
 			role.setTenantId(oConvertUtils.getInt(!"0".equals(TenantContext.getTenant()) ? TenantContext.getTenant() : "", -1));
 		}
-		
+
 		QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(role, req.getParameterMap());
 		Page<SysRole> page = new Page<SysRole>(pageNo, pageSize);
 		IPage<SysRole> pageList = sysRoleService.page(page, queryWrapper);
@@ -145,7 +146,7 @@ public class SysRoleController {
 		result.setResult(pageList);
 		return result;
 	}
-	
+
 	/**
 	  *   添加
 	 * @param role
@@ -171,7 +172,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  *  编辑
 	 * @param role
@@ -200,7 +201,7 @@ public class SysRoleController {
 				}
 			}
 			//------------------------------------------------------------------
-			
+
 			boolean ok = sysRoleService.updateById(role);
 			if(ok) {
 				result.success("修改成功!");
@@ -208,7 +209,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  *   通过id删除
 	 * @param id
@@ -229,17 +230,17 @@ public class SysRoleController {
 				return Result.error("删除角色失败,当前角色不在此租户中。");
 			}
 		}
-    	
+
 		//update-begin---author:wangshuai---date:2024-01-16---for:【QQYUN-7974】禁止删除 admin 角色---
 		//是否存在admin角色
 		sysRoleService.checkAdminRoleRejectDel(id);
 		//update-end---author:wangshuai---date:2024-01-16---for:【QQYUN-7974】禁止删除 admin 角色---
-    	
+
 		sysRoleService.deleteRole(id);
 
 		return Result.ok("删除角色成功");
 	}
-	
+
 	/**
 	  *  批量删除
 	 * @param ids
@@ -275,7 +276,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  * 通过id查询
 	 * @param id
@@ -296,7 +297,7 @@ public class SysRoleController {
 
 	/**
 	 * 查询全部角色（参与租户隔离）
-	 * 
+	 *
 	 * @return
 	 */
 	@RequestMapping(value = "/queryall", method = RequestMethod.GET)
@@ -338,7 +339,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	/**
 	  * 校验角色编码唯一
 	 */
@@ -391,7 +392,7 @@ public class SysRoleController {
 			sysRole.setTenantId(oConvertUtils.getInt(TenantContext.getTenant(), 0));
 		}
 		//------------------------------------------------------------------------------------------------
-		
+
 		// Step.1 组装查询条件
 		QueryWrapper<SysRole> queryWrapper = QueryGenerator.initQueryWrapper(sysRole, request.getParameterMap());
 		//Step.2 AutoPoi 导出Excel
@@ -438,7 +439,7 @@ public class SysRoleController {
 		}
 		return Result.error("文件导入失败！");
 	}
-	
+
 	/**
 	 * 查询数据规则数据
 	 */
@@ -467,7 +468,7 @@ public class SysRoleController {
 			//TODO 以后按钮权限的查询也走这个请求 无非在map中多加两个key
 		}
 	}
-	
+
 	/**
 	 * 保存数据规则至角色菜单关联表
 	 */
@@ -494,8 +495,8 @@ public class SysRoleController {
 		}
 		return Result.ok("保存成功!");
 	}
-	
-	
+
+
 	/**
 	 * 用户角色授权功能，查询菜单权限树
 	 * @param request
@@ -528,7 +529,7 @@ public class SysRoleController {
 		}
 		return result;
 	}
-	
+
 	private void getTreeModelList(List<TreeModel> treeList,List<SysPermission> metaList,TreeModel temp) {
 		for (SysPermission permission : metaList) {
 			String tempPid = permission.getParentId();
@@ -544,7 +545,7 @@ public class SysRoleController {
 					getTreeModelList(treeList, metaList, tree);
 				}
 			}
-			
+
 		}
 	}
 

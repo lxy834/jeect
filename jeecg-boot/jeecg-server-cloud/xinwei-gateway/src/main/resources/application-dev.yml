@@ -6,19 +6,9 @@ jeecg:
       data-id: jeecg-gateway-router
 spring:
   redis:
-    database: 0
-    host: jeecg-boot-redis
-    port: 6379
-    password:
-  cloud:
-    consul:
-      host: 127.0.0.1
-      port: 8500
-      discovery:
-        health-check-critical-timeout: 30s
-        service-name: ${spring.application.name}
-        heartbeat:
-          enabled: true
-        instance-id: ${spring.application.name}-${server.port}
+    database: 1
+    host: 162.14.66.67
+    password: fxtd@2025
+    port: 6389
 knife4j:
   production: false
