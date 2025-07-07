@@ -33,16 +33,16 @@
               :wheel="true"
               :isWatch="true"
               :classOptions="classOptions"
-              :dataList="list"
+              :dataList="state.ftuDeviceList"
             >
               <table class="real-time-table">
                 <thead>
                 <tr class="head">
 
                 </tr>
-                <tr v-for="(item,i) of list" :key="i">
-                  <td>{{item.device}}</td>
-                  <td>{{item.line}}</td>
+                <tr v-for="(item,i) of state.ftuDeviceList" :key="i">
+                  <td>{{item.deviceName}}</td>
+                  <td>{{item.insLineName}}</td>
                 </tr>
                 </thead>
               </table>
@@ -63,7 +63,7 @@
                 <i class="fas fa-satellite" />
               </div>
               <div class="stat-label">北斗模式</div>
-              <div class="stat-value">8</div>
+              <div class="stat-value">{{state.bdCount}}</div>
 
             </div>
             <div class="stat-item">
@@ -71,7 +71,7 @@
                 <i class="fas fa-broadcast-tower" />
               </div>
               <div class="stat-label">电鸿模式</div>
-              <div class="stat-value">20</div>
+              <div class="stat-value">{{state.dhCount}}</div>
 
             </div>
             <div class="stat-item">
@@ -79,7 +79,7 @@
                 <i class="fas fa-signal" />
               </div>
               <div class="stat-label">混合模式</div>
-              <div class="stat-value">2</div>
+              <div class="stat-value">{{state.hhCount}}</div>
 
             </div>
           </div>
@@ -153,6 +153,12 @@
             <span class="status-dot danger-bg"></span>
             <span>FTU告警</span>
           </div>
+
+           <div class="status-item">
+            <span class="status-dot hh-bg"></span>
+            <span>混合通信模式</span>
+          </div>
+
         </div>
       </div>
 
@@ -174,7 +180,7 @@
                 <th>电流 (A)</th>
                 <th>有功</th>
                 <th>功率因数</th>
-                <th>通道状态</th>
+                <th>数据通道</th>
               </tr>
               </thead>
               <tbody>
@@ -297,31 +303,29 @@
             <i class="fas fa-exchange-alt"></i>
             告警通知
           </div>
-
-          <table class="data-table">
+          <table class="real-time-table">
             <thead>
-            <tr>
-              <th>类型</th>
+            <tr class="head">
+             <th>类型</th>
               <th>内容</th>
               <th>时间</th>
             </tr>
             </thead>
-            <tbody>
-            </tbody>
           </table>
-          <vue3ScrollSeamless
-            style="margin: 0 auto; overflow: hidden;max-height: 100%;position: absolute"
-            :hover="true"
-            :wheel="true"
-            :isWatch="true"
-            :classOptions="classOptions"
-          >
-            <table class="data-table">
-              <thead>
-              <tr></tr>
-              </thead>
-              <tbody>
-              <tr>
+          <div>
+            <vue3ScrollSeamless
+              style="margin: 0 auto; overflow: auto;position: absolute;"
+              :hover="true"
+              :wheel="true"
+              :isWatch="true"
+              :classOptions="classOptions"
+            >
+              <table class="real-time-table">
+                <thead>
+                <tr class="head">
+
+                </tr>
+                <tr>
                 <td>告警通知</td>
                 <td>XXX线路XX设备参数异常</td>
                 <td>2025-06-24 11:35:56</td>
@@ -336,14 +340,16 @@
                 <td>XXX线路XX设备遥控分闸</td>
                 <td>2025-06-24 11:35:56</td>
               </tr>
-              </tbody>
-            </table>
-          </vue3ScrollSeamless>
+                </thead>
+              </table>
+
+            </vue3ScrollSeamless>
+          </div>
         </div>
 
       </div>
 
-      <el-dialog  v-model="state.dialogVisible" draggable style="margin-top: 1%">
+      <el-dialog  v-model="state.dialogVisible" draggable style="margin-top: 6%">
         <div id="main" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
         <div id="stat" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
       </el-dialog>
@@ -364,7 +370,7 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
 import {vue3ScrollSeamless} from "vue3-scroll-seamless";
 import * as echarts from 'echarts';
-import { Button } from "@/components/Button";
+import {list} from '@/views/ftu/list/FtuDevice.api.ts';
 import ElectricParametersChart from "@/views/index/componets/ElectricParametersChart.vue";
 window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
@@ -378,9 +384,173 @@ const state =reactive({
   dialogVisible:false,
   myChart:null,
   stat:null,
+  ftuDeviceList:[],
+  bdCount:0,
+  dhCount:0,
+  hhCount:0
 })
 
-let list = reactive([
+async function getList() {
+  let form = {
+    order: 'desc',
+    pageNo: 1,
+    pageSize: 10,
+  }
+  await list(form).then(res =>{
+    state.ftuDeviceList = res.records
+    initMap()
+  })
+
+}
+
+function initMap(){
+  // 初始化地图 - 使用真实地理位置展示
+  AMapLoader.load({
+    key: "e28af433d6fabd84d33509eca1a3efa3",
+    version: "2.0",
+    plugins: ["AMap.MoveAnimation ", "AMap.DistrictSearch",
+      "AMap.ToolBar",
+      "AMap.Driving",
+      "AMap.PolygonEditor",
+      "AMap.PolylineEditor",
+      "AMap.MouseTool",
+      "AMap.PlaceSearch",
+      "AMap.DistrictSearch",
+      "AMap.MarkerClusterer"
+    ]
+  }).then((AMap) => {
+    const map = new AMap.Map("map", {
+      center: [104.830389,26.592528], // 北京中心位置
+      zoom: 11,
+      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719" // 使用清新灰色风格地图
+    });
+
+
+    // 添加模拟标记点
+    let positions = [];
+    for (let i = 0; i < state.ftuDeviceList.length; i++) {
+
+      const position = {
+        position:[state.ftuDeviceList[i].lng,state.ftuDeviceList[i].lat],
+        deviceName:state.ftuDeviceList[i].deviceName,
+        insLineName:state.ftuDeviceList[i].insLineName,
+      }
+      switch (state.ftuDeviceList[i].status){
+        case 0:
+          position.status = "bd_active"
+          position.commStatus = "北斗在线"
+          state.bdCount=state.bdCount+1
+          break
+        case 1:
+          position.status = "dh_active"
+          position.commStatus = "电鸿在线"
+          state.dhCount=state.dhCount+1
+          break
+        case 2:
+          position.status = "f411_offline"
+          position.commStatus = "一体机离线"
+          break;
+        case 3:
+          position.status = "ftu_warning"
+          position.commStatus = "电鸿在线"
+          state.dhCount=state.dhCount+1
+          break;
+        case 4:
+          position.status = "error"
+          position.commStatus = "电鸿在线"
+          state.dhCount=state.dhCount+1
+          break
+        case 5:
+          position.status = "hh_comm"
+          position.commStatus = "混合模式"
+          state.hhCount=state.hhCount+1
+          break
+      }
+      positions.push(position)
+    }
+
+    console.log(positions)
+
+    let infoWindow
+    // 根据状态添加不同颜色的标记
+    positions.forEach(point => {
+      const color =
+        point.status === "bd_active" ? "#41C23C" :
+        point.status === "dh_active" ? "#2F89FC" :
+        point.status === "hh_comm" ? "#6633ff" :
+        point.status === "f411_offline" ? "#9BA3A9" :
+          point.status === "ftu_warning" ? "#FFC600" :
+            point.status === "error" ? "#FF3636" : "#95A5A6";
+
+      let marker = new AMap.Marker({
+        position: point.position,
+        map: map,
+        content: `<div style="
+          background: ${color};
+          width: 20px;
+          height: 20px;
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        "></div>`,
+        offset: new AMap.Pixel(-10, -20)
+      });
+
+      marker.setLabel({
+        direction: "bottom-center",
+        offset: new AMap.Pixel(0, 0),  //设置文本标注偏移量
+        // content: `<div style="background: ${color};font-size: 16px">${point.title}</div>` //设置文本标注内容
+      });
+
+      marker.on("click",(e)=>{
+        var info = [];
+        info.push(`<div style="background: black"><div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
+      <div style="width: 100%;text-align: right;color: white;font-weight: bold">${point.deviceName}</div>
+      <div style="height: 84%;width: 100%;display: flex">
+        <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
+          <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${point.deviceName}</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${point.insLineName}</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：SNXXXXXXX</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：${point.commStatus}</div>
+          <div style="height: 12%;margin-top: 2%;margin-left: 2%">历史数据：<span  class="info-content" style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
+        </div>
+        <div style="width: 40%;height: 96%;margin-top:4%">
+          <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
+        </div>
+      </div>
+    </div></div>`)
+        infoWindow = new AMap.InfoWindow({
+          offset: new AMap.Pixel(0, -15),
+          content: info.join("")  //使用默认信息窗体框样式，显示信息内容
+        });
+        infoWindow.open(map, marker.getPosition());
+        const infoWindowContent = document.querySelector('.info-content');
+        if (infoWindowContent) {
+
+          // if (viewButton) {
+
+          infoWindowContent.addEventListener('click', () => {
+              test(point);
+            });
+          // }
+        }
+      })
+
+      map.on("click", (e) => {
+        // 判断点击目标是否为 Marker
+        if (!(e.target instanceof AMap.Marker)) {
+          infoWindow.close();
+        }
+      });
+    });
+
+  }).catch((e) => {
+    console.error("地图加载失败:", e);
+  });
+
+}
+
+let lists = reactive([
   {
     'device': '城西变10kV西建Ⅰ回线市医院2012断路器FTU',
     'line': '10kV西建Ⅰ回线',
@@ -419,11 +589,12 @@ let list = reactive([
   }
 ]);
 const classOptions = {
-  limitMoveNum: 6,
+  limitMoveNum: 3,
   step: 0.1
 };
 
 function test(v){
+  console.log(v)
   state.dialogVisible = true
   setTimeout(function(){
     var chartDom = document.getElementById('main');
@@ -608,110 +779,8 @@ onMounted(() => {
       state.show = true
     }
   });
-  // 初始化地图 - 使用真实地理位置展示
-  AMapLoader.load({
-    key: "e28af433d6fabd84d33509eca1a3efa3",
-    version: "2.0",
-    plugins: ["AMap.MoveAnimation ", "AMap.DistrictSearch",
-      "AMap.ToolBar",
-      "AMap.Driving",
-      "AMap.PolygonEditor",
-      "AMap.PolylineEditor",
-      "AMap.MouseTool",
-      "AMap.PlaceSearch",
-      "AMap.DistrictSearch",
-      "AMap.MarkerClusterer"
-    ]
-  }).then((AMap) => {
-    const map = new AMap.Map("map", {
-      center: [104.830389,26.592528], // 北京中心位置
-      zoom: 11,
-      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719" // 使用清新灰色风格地图
-    });
 
-    // 添加模拟标记点
-    const positions = [
-      { position: [104.813738,26.616164], title: "城西变10kV西建Ⅰ回线市医院2012断路器FTU", status: "active" },
-      { position: [104.823738,26.56164], title: "杉树林变10kV杉东Ⅱ回线柏阳坡1号开关箱DTU", status: "active" },
-      { position: [104.830389,26.592528], title: "城西变10kV西三Ⅳ回线康乐北路西开关箱DTU", status: "warning" },
-      { position: [104.83789,26.56528], title: "明湖变10kV明明Ⅰ回线师院公租房G032断路器FTU", status: "active" },
-      { position: [104.70389,26.582528], title: "小屯变10kV屯八Ⅰ回线赛德公司5015断路器FTU", status: "offline" },
-      { position: [104.69,26.692528], title: "城中变10kV中川Ⅱ回线中川Ⅱ回-荷川1820断路器FTU", status: "error" },
-      { position: [104.810389,26.692528], title: "四格变10kV四坡线13+1号杆海子头SG011断路器FTU", status: "active" }
-    ];
-    let infoWindow
-    // 根据状态添加不同颜色的标记
-    positions.forEach(point => {
-      const color =
-        point.status === "active" ? "#4ABDAC" :
-          point.status === "warning" ? "#F39C12" :
-            point.status === "error" ? "#E74C3C" : "#95A5A6";
-
-      let marker = new AMap.Marker({
-        position: point.position,
-        map: map,
-        content: `<div style="
-          background: ${color};
-          width: 20px;
-          height: 20px;
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        "></div>`,
-        offset: new AMap.Pixel(-10, -20)
-      });
-
-      marker.setLabel({
-        direction: "bottom-center",
-        offset: new AMap.Pixel(0, 0),  //设置文本标注偏移量
-        // content: `<div style="background: ${color};font-size: 16px">${point.title}</div>` //设置文本标注内容
-      });
-
-      marker.on("click",(e)=>{
-        var info = [];
-        info.push(`<div style="background: black"><div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 210px;width: 420px;background-repeat: no-repeat;background-size: cover">
-      <div style="width: 100%;text-align: right;color: white;font-weight: bold">${point.title}</div>
-      <div style="height: 84%;width: 100%;display: flex">
-        <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
-          <div style="height: 18%;margin-top: 4%;margin-left: 2%">线路名称：10kV米仲线</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备名称：XXXXX线路通信终端</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：SNXXXXXXXX</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：北斗在线</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">历史数据：<span style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
-        </div>
-        <div style="width: 40%;height: 96%;margin-top:4%">
-          <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
-        </div>
-      </div>
-    </div></div>`)
-        infoWindow = new AMap.InfoWindow({
-          offset: new AMap.Pixel(0, -15),
-          content: info.join("")  //使用默认信息窗体框样式，显示信息内容
-        });
-        infoWindow.open(map, marker.getPosition());
-        const infoWindowContent = document.querySelector('.amap-info-content');
-        if (infoWindowContent) {
-          const viewButton = infoWindowContent.querySelector('div[style="color: #0a8fe9;cursor: pointer"]');
-          if (viewButton) {
-            viewButton.addEventListener('click', () => {
-              test(point);
-            });
-          }
-        }
-      })
-
-      map.on("click", (e) => {
-        // 判断点击目标是否为 Marker
-        if (!(e.target instanceof AMap.Marker)) {
-          infoWindow.close();
-        }
-      });
-    });
-
-  }).catch((e) => {
-    console.error("地图加载失败:", e);
-  });
-
+  getList()
   // 实现表格自动轮播
   if (feederTableContainer.value) {
     startAutoScroll(feederTableContainer.value);
@@ -724,7 +793,8 @@ onMounted(() => {
   appStore.setLayoutHideMultiTabs(true);
   appStore.setLayoutHideSider(true);
   state.show = true
-  // exit(true)
+
+
 });
 </script>
 
@@ -913,6 +983,10 @@ body {
 
 .danger-bg {
   background: #FF3636;
+}
+
+.hh-bg {
+  background: #6633ff;
 }
 
 .offline-bg {
@@ -1429,6 +1503,7 @@ body {
 }
 
 .data-table td {
+  text-align: left;
   padding: 10px 15px;
   color: white;
   border-bottom: 1px solid rgba(0, 240, 255, 0.1);

@@ -75,6 +75,9 @@ public class FtuDevice implements Serializable {
     @Dict(dicCode = "switch_status")
     @Schema(description = "开关状态")
     private java.lang.Integer switchStatus;
+
+    private java.lang.Integer status;
+
 	/**故障指示*/
 	@Excel(name = "故障指示", width = 15)
     @Schema(description = "故障指示")
@@ -111,4 +114,13 @@ public class FtuDevice implements Serializable {
 	@Excel(name = "变电站", width = 15)
     @Schema(description = "变电站")
     private java.lang.String station;
+
+    @Schema(description = "纬度")
+    private java.lang.Double lat;
+
+    @Schema(description = "经度")
+    private java.lang.Double lng;
+
+
+
 }

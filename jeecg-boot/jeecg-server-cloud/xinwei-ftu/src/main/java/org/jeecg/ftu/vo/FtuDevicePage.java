@@ -104,7 +104,7 @@ public class FtuDevicePage {
 	/**型号*/
 	@Excel(name = "型号", width = 15)
 	@Schema(description = "型号")
-    private java.lang.String model;
+    private java.lang.String ftuModel;
 	/**变电站*/
 	@Excel(name = "变电站", width = 15)
 	@Schema(description = "变电站")
