@@ -12,11 +12,11 @@
     import {computed, defineComponent} from 'vue';
     import {defHttp} from '/@/utils/http/axios';
     import { propTypes } from '/@/utils/propTypes';
-    import {getBpmFormSchema} from '../FtuWarnInfo.data';
-    import {saveOrUpdate} from '../FtuWarnInfo.api';
+    import {getBpmFormSchema} from '../SysUpdateLog.data';
+    import {saveOrUpdate} from '../SysUpdateLog.api';
     
     export default defineComponent({
-        name: "FtuWarnInfoForm",
+        name: "SysUpdateLogForm",
         components:{
             BasicForm
         },
@@ -40,7 +40,7 @@
             });
 
             let formData = {};
-            const queryByIdUrl = '/ftu/ftuWarnInfo/queryById';
+            const queryByIdUrl = '/ftu/sysUpdateLog/queryById';
             async function initFormData(){
                 let params = {id: props.formData.dataId};
                 const data = await defHttp.get({url: queryByIdUrl, params});

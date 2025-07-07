@@ -4,13 +4,13 @@ import { useMessage } from "/@/hooks/web/useMessage";
 const { createConfirm } = useMessage();
 
 enum Api {
-  list = '/ftu/ftuWarnInfo/list',
-  save='/ftu/ftuWarnInfo/add',
-  edit='/ftu/ftuWarnInfo/edit',
-  deleteOne = '/ftu/ftuWarnInfo/delete',
-  deleteBatch = '/ftu/ftuWarnInfo/deleteBatch',
-  importExcel = '/ftu/ftuWarnInfo/importExcel',
-  exportXls = '/ftu/ftuWarnInfo/exportXls',
+  list = '/ftu/sysUpdateLog/list',
+  save='/ftu/sysUpdateLog/add',
+  edit='/ftu/sysUpdateLog/edit',
+  deleteOne = '/ftu/sysUpdateLog/delete',
+  deleteBatch = '/ftu/sysUpdateLog/deleteBatch',
+  importExcel = '/ftu/sysUpdateLog/importExcel',
+  exportXls = '/ftu/sysUpdateLog/exportXls',
 }
 /**
  * 导出api

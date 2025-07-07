@@ -4,9 +4,9 @@
    <BasicTable @register="registerTable" :rowSelection="rowSelection">
      <!--插槽:table标题-->
       <template #tableTitle>
-          <a-button type="primary" v-auth="'ftu:ftu_warn_info:add'" @click="handleAdd" preIcon="ant-design:plus-outlined"> 新增</a-button>
-          <a-button  type="primary" v-auth="'ftu:ftu_warn_info:exportXls'" preIcon="ant-design:export-outlined" @click="onExportXls"> 导出</a-button>
-          <j-upload-button type="primary" v-auth="'ftu:ftu_warn_info:importExcel'" preIcon="ant-design:import-outlined" @click="onImportXls">导入</j-upload-button>
+          <a-button type="primary" v-auth="'ftu:sys_update_log:add'" @click="handleAdd" preIcon="ant-design:plus-outlined"> 新增</a-button>
+          <a-button  type="primary" v-auth="'ftu:sys_update_log:exportXls'" preIcon="ant-design:export-outlined" @click="onExportXls"> 导出</a-button>
+          <j-upload-button type="primary" v-auth="'ftu:sys_update_log:importExcel'" preIcon="ant-design:import-outlined" @click="onImportXls">导入</j-upload-button>
           <a-dropdown v-if="selectedRowKeys.length > 0">
               <template #overlay>
                 <a-menu>
@@ -16,7 +16,7 @@
                   </a-menu-item>
                 </a-menu>
               </template>
-              <a-button v-auth="'ftu:ftu_warn_info:deleteBatch'">批量操作
+              <a-button v-auth="'ftu:sys_update_log:deleteBatch'">批量操作
                 <Icon icon="mdi:chevron-down"></Icon>
               </a-button>
         </a-dropdown>
@@ -32,18 +32,18 @@
       </template>
     </BasicTable>
     <!-- 表单区域 -->
-    <FtuWarnInfoModal @register="registerModal" @success="handleSuccess"></FtuWarnInfoModal>
+    <SysUpdateLogModal @register="registerModal" @success="handleSuccess"></SysUpdateLogModal>
   </div>
 </template>
 
-<script lang="ts" name="ftu-ftuWarnInfo" setup>
+<script lang="ts" name="ftu-sysUpdateLog" setup>
   import {ref, reactive, computed, unref} from 'vue';
   import {BasicTable, useTable, TableAction} from '/@/components/Table';
   import {useModal} from '/@/components/Modal';
   import { useListPage } from '/@/hooks/system/useListPage'
-  import FtuWarnInfoModal from './components/FtuWarnInfoModal.vue'
-  import {columns, searchFormSchema, superQuerySchema} from './FtuWarnInfo.data';
-  import {list, deleteOne, batchDelete, getImportUrl,getExportUrl} from './FtuWarnInfo.api';
+  import SysUpdateLogModal from './components/SysUpdateLogModal.vue'
+  import {columns, searchFormSchema, superQuerySchema} from './SysUpdateLog.data';
+  import {list, deleteOne, batchDelete, getImportUrl,getExportUrl} from './SysUpdateLog.api';
   import { downloadFile } from '/@/utils/common/renderUtils';
   import { useUserStore } from '/@/store/modules/user';
   const queryParam = reactive<any>({});
@@ -54,7 +54,7 @@
   //注册table数据
   const { prefixCls,tableContext,onExportXls,onImportXls } = useListPage({
       tableProps:{
-           title: '告警记录',
+           title: '系统更新日志',
            api: list,
            columns,
            canResize:false,
@@ -77,7 +77,7 @@
             },
       },
        exportConfig: {
-            name:"告警记录",
+            name:"系统更新日志",
             url: getExportUrl,
             params: queryParam,
           },
@@ -156,7 +156,7 @@
          {
            label: '编辑',
            onClick: handleEdit.bind(null, record),
-           auth: 'ftu:ftu_warn_info:edit'
+           auth: 'ftu:sys_update_log:edit'
          }
        ]
    }
@@ -175,7 +175,7 @@
              confirm: handleDelete.bind(null, record),
              placement: 'topLeft',
            },
-           auth: 'ftu:ftu_warn_info:delete'
+           auth: 'ftu:sys_update_log:delete'
          }
        ]
    }

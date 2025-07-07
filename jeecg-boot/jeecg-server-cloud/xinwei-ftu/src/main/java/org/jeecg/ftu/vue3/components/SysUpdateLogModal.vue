@@ -1,6 +1,6 @@
 <template>
   <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="800" @ok="handleSubmit">
-      <BasicForm @register="registerForm" name="FtuWarnInfoForm" />
+      <BasicForm @register="registerForm" name="SysUpdateLogForm" />
   </BasicModal>
 </template>
 
@@ -8,8 +8,8 @@
     import {ref, computed, unref} from 'vue';
     import {BasicModal, useModalInner} from '/@/components/Modal';
     import {BasicForm, useForm} from '/@/components/Form/index';
-    import {formSchema} from '../FtuWarnInfo.data';
-    import {saveOrUpdate} from '../FtuWarnInfo.api';
+    import {formSchema} from '../SysUpdateLog.data';
+    import {saveOrUpdate} from '../SysUpdateLog.api';
     // Emits声明
     const emit = defineEmits(['register','success']);
     const isUpdate = ref(true);

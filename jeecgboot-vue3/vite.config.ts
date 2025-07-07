@@ -133,6 +133,15 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     // 预加载构建配置（首屏性能)
     plugins: createVitePlugins(viteEnv, isBuild, isQiankunMicro),
     optimizeDeps: {
+      include: [
+        "@jiaminghi/c-render",
+        "@jiaminghi/c-render/lib/plugin/util",
+        "@jiaminghi/charts/lib/util/index",
+        "@jiaminghi/charts/lib/util",
+        "@jiaminghi/charts/lib/extend/index",
+        "@jiaminghi/charts",
+        "@jiaminghi/color",
+      ],
       esbuildOptions: {
         target: 'es2020',
       },

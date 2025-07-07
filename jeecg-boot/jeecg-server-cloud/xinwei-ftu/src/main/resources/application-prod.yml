@@ -30,15 +30,20 @@ spring:
           slow-sql-millis: 5000
       datasource:
         master:
-          url: jdbc:dm://127.0.0.1:5236/FXTD
+          url: jdbc:dm://140.143.85.108:5236/FTU
+          username: FTU
+          password: qwer1234Q
+          driver-class-name: dm.jdbc.driver.DmDriver
+        sys:
+          url: jdbc:dm://140.143.85.108:5236/FXTD
           username: FXTD
           password: qwer1234Q
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
-    database: 0
-    host: jeecg-boot-redis
-    password:
-    port: 6379
+    database: 2
+    host: 162.14.66.67
+    password: fxtd@2025
+    port: 6389
   rabbitmq:
     host: jeecg-boot-rabbitmq
     username: guest

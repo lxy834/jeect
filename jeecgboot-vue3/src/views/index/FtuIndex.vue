@@ -1,49 +1,86 @@
 <template>
   <div class="dashboard-container">
     <div class="header-panel">
-      <h2 class="map-container-title">北斗通信电力配网数据采集传输系统</h2>
+      <div style="text-align: right;width: 100%">
+        <div class="qp icon-white">
+          <i class="fas fa-expand"  v-show="state.show" @click="exit(true)"/>
+          <i class="fa fa-compress" v-show="!state.show" @click="exit(false)"/>
+          <!--          <i class="fas fa-compress-wide" />-->
+        </div>
+      </div>
     </div>
     <!-- 主内容区 -->
     <div class="main-panel" id="map">
-      <!-- 左侧数据卡片 - 重新设计 -->
       <div class="left-stats">
 
         <div class="stat-card">
           <div class="card-title">
-            <i class="fas fa-clipboard-list"></i>
-            上线率统计
+            <i class="fas fa-exchange-alt"></i>
+            馈线信息
           </div>
-          <div id="main" class="event-stats"></div>
+          <table class="real-time-table">
+            <thead>
+            <tr class="head">
+              <th >终端名称</th>
+              <th >馈线名称</th>
+            </tr>
+            </thead>
+          </table>
+          <div>
+            <vue3ScrollSeamless
+              style="margin: 0 auto; overflow: auto;position: absolute;"
+              :hover="true"
+              :wheel="true"
+              :isWatch="true"
+              :classOptions="classOptions"
+              :dataList="list"
+            >
+              <table class="real-time-table">
+                <thead>
+                <tr class="head">
+
+                </tr>
+                <tr v-for="(item,i) of list" :key="i">
+                  <td>{{item.device}}</td>
+                  <td>{{item.line}}</td>
+                </tr>
+                </thead>
+              </table>
+
+            </vue3ScrollSeamless>
+          </div>
         </div>
 
-
-        <!-- 设备状态监测 -->
+        <!-- 信道信息 -->
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-microchip"></i>
-            设备统计
+            信道信息
           </div>
           <div class="device-stats">
             <div class="stat-item">
-              <div class="stat-icon icon-green">
-                <i class="fas fa-server"></i>
+              <div class="stat-icon icon-blue">
+                <i class="fas fa-satellite" />
               </div>
-              <div class="stat-value">248</div>
-              <div class="stat-label">FTU设备</div>
+              <div class="stat-label">北斗模式</div>
+              <div class="stat-value">8</div>
+
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon icon-green">
+                <i class="fas fa-broadcast-tower" />
+              </div>
+              <div class="stat-label">电鸿模式</div>
+              <div class="stat-value">20</div>
+
             </div>
             <div class="stat-item">
               <div class="stat-icon icon-purple">
-                <i class="fas fa-wifi"></i>
+                <i class="fas fa-signal" />
               </div>
-              <div class="stat-value">186</div>
-              <div class="stat-label">F411设备</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-icon icon-blue">
-                <i class="fas fa-bolt"></i>
-              </div>
-              <div class="stat-value">58</div>
-              <div class="stat-label">线路条数</div>
+              <div class="stat-label">混合模式</div>
+              <div class="stat-value">2</div>
+
             </div>
           </div>
         </div>
@@ -51,30 +88,41 @@
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-clipboard-list"></i>
-            事件统计
+            设备事件
           </div>
           <div class="event-stats">
             <div class="event-metrics">
               <div class="event-item">
-                <div class="stat-icon icon-blue">
-                  <i class="fas fa-exclamation-triangle"></i>
+                <div class="stat-icon icon-gray">
+                  <i class="fas fa-tasks"></i>
                 </div>
-                <div class="event-value">28</div>
-                <div class="event-label">FTU故障</div>
+                <div class="event-label">FTU掉电</div>
+                <div class="event-value">0</div>
               </div>
               <div class="event-item">
-                <div class="stat-icon icon-green">
-                  <i class="fas fa-wifi"></i>
+                <div class="stat-icon icon-orange">
+                  <i class="fas fa-line-chart" />
                 </div>
-                <div class="event-value">45</div>
-                <div class="event-label">通信掉线</div>
+
+                <div class="event-label">FTU故障</div>
+                <div class="event-value">0</div>
               </div>
+              <div class="event-item">
+                <div class="stat-icon icon-red">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="event-label">掉线</div>
+                <div class="event-value">0</div>
+
+              </div>
+
               <div class="event-item">
                 <div class="stat-icon icon-purple">
                   <i class="fas fa-sliders-h"></i>
                 </div>
-                <div class="event-value">63</div>
-                <div class="event-label">设备操作</div>
+                <div class="event-label">其它</div>
+                <div class="event-value">0</div>
+
               </div>
             </div>
           </div>
@@ -82,6 +130,7 @@
       </div>
       <!-- 中央地图区 -->
       <div class="map-container">
+
 
         <div class="map-footer">
           <div class="status-item">
@@ -113,10 +162,10 @@
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-exchange-alt"></i>
-            实时数据传输
+            实时数据
           </div>
 
-          <div class="data-table-container">
+          <div class="data-table-container" ref="realTimeTableContainer">
             <table class="real-time-table">
               <thead>
               <tr>
@@ -129,41 +178,66 @@
               </tr>
               </thead>
               <tbody>
-              <tr>
-                <td>FTU-01</td>
-                <td>226</td>
-                <td>28.6</td>
-                <td>5.8</td>
-                <td>0.92</td>
-                <td><span class="channel-badge bg-green">电鸿</span></td>
-              </tr>
-              <tr>
-                <td>FTU-02</td>
-                <td>230</td>
-                <td>24.8</td>
-                <td>4.9</td>
-                <td>0.88</td>
-                <td><span class="channel-badge bg-blue">北斗</span></td>
-              </tr>
-              <tr>
-                <td>FTU-03</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td><span class="channel-badge bg-gray">离线</span></td>
-              </tr>
-              <tr>
-                <td>FTU-03</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td>0</td>
-                <td><span class="channel-badge bg-gray">离线</span></td>
-              </tr>
 
               </tbody>
             </table>
+            <vue3ScrollSeamless
+              style="margin: 0 auto; overflow: hidden;max-height: 100%;position: absolute"
+              :hover="true"
+              :wheel="true"
+              :isWatch="true"
+              :classOptions="classOptions"
+              :dataList="list"
+            >
+              <table class="real-time-table">
+                <thead>
+                <tr class="head">
+
+                </tr>
+                <tr>
+                  <td>FTU-01</td>
+                  <td>226</td>
+                  <td>28.6</td>
+                  <td>5.8</td>
+                  <td>0.92</td>
+                  <td><span class="channel-badge bg-green">电鸿</span></td>
+                </tr>
+                <tr>
+                  <td>FTU-02</td>
+                  <td>230</td>
+                  <td>24.8</td>
+                  <td>4.9</td>
+                  <td>0.88</td>
+                  <td><span class="channel-badge bg-blue">北斗</span></td>
+                </tr>
+                <tr>
+                  <td>FTU-02</td>
+                  <td>230</td>
+                  <td>24.8</td>
+                  <td>4.9</td>
+                  <td>0.88</td>
+                  <td><span class="channel-badge bg-blue">北斗</span></td>
+                </tr>
+                <tr>
+                  <td>FTU-03</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td><span class="channel-badge bg-gray">离线</span></td>
+                </tr>
+                <tr>
+                  <td>FTU-03</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td><span class="channel-badge bg-gray">离线</span></td>
+                </tr>
+                </thead>
+              </table>
+
+            </vue3ScrollSeamless>
           </div>
         </div>
         <!-- 控制功能 -->
@@ -221,7 +295,7 @@
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-exchange-alt"></i>
-            系统通知
+            告警通知
           </div>
 
           <table class="data-table">
@@ -233,27 +307,48 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>告警通知</td>
-              <td>某某设备离线</td>
-              <td>2025-06-24 11:35:56</td>
-            </tr>
-            <tr>
-              <td>实时数据</td>
-              <td>某某设备上传一条数据</td>
-              <td>2025-06-24 11:35:56</td>
-            </tr>
-            <tr>
-              <td>其他通知</td>
-              <td>10kV西三Ⅳ回线</td>
-              <td>2025-06-24 11:35:56</td>
-            </tr>
             </tbody>
           </table>
+          <vue3ScrollSeamless
+            style="margin: 0 auto; overflow: hidden;max-height: 100%;position: absolute"
+            :hover="true"
+            :wheel="true"
+            :isWatch="true"
+            :classOptions="classOptions"
+          >
+            <table class="data-table">
+              <thead>
+              <tr></tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>告警通知</td>
+                <td>XXX线路XX设备参数异常</td>
+                <td>2025-06-24 11:35:56</td>
+              </tr>
+              <tr>
+                <td>实时数据</td>
+                <td>某某设备上传一条数据改为，XXX线路XX设备定时召测完成</td>
+                <td>2025-06-24 11:35:56</td>
+              </tr>
+              <tr>
+                <td>主站指令</td>
+                <td>XXX线路XX设备遥控分闸</td>
+                <td>2025-06-24 11:35:56</td>
+              </tr>
+              </tbody>
+            </table>
+          </vue3ScrollSeamless>
         </div>
 
       </div>
+
+      <el-dialog  v-model="state.dialogVisible" draggable style="margin-top: 1%">
+        <div id="main" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
+        <div id="stat" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
+      </el-dialog>
     </div>
+
   </div>
 </template>
 
@@ -261,24 +356,215 @@
 import screenfull from "screenfull";
 import { useAppStore } from '@/store/modules/app';
 const appStore = useAppStore();
-import { onMounted, watchEffect } from "vue";
+import { onMounted, reactive, watchEffect, ref } from "vue";
 import { useMenuSetting } from "/@/hooks/setting/useMenuSetting";
-const { getShowMenu, setMenuSetting } = useMenuSetting();
+const {  setMenuSetting } = useMenuSetting();
 import AMapLoader from "@amap/amap-jsapi-loader";
-import "@fortawesome/fontawesome-free/css/all.min.css";
+import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
+import {vue3ScrollSeamless} from "vue3-scroll-seamless";
 import * as echarts from 'echarts';
+import { Button } from "@/components/Button";
+import ElectricParametersChart from "@/views/index/componets/ElectricParametersChart.vue";
 window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
 };
+
+const feederTableContainer = ref(null);
+const realTimeTableContainer = ref(null);
+
+const state =reactive({
+  show:true,
+  dialogVisible:false,
+  myChart:null,
+  stat:null,
+})
+
+let list = reactive([
+  {
+    'device': '城西变10kV西建Ⅰ回线市医院2012断路器FTU',
+    'line': '10kV西建Ⅰ回线',
+  },
+  {
+    'device': '杉树林变10kV杉东Ⅱ回线柏阳坡1号开关箱DTU',
+    'line': '10kV杉东Ⅱ回线',
+  },
+  {
+    'device': '城西变10kV西三Ⅳ回线康乐北路西开关箱DTU',
+    'line': '10kV西三Ⅳ回线',
+  },
+  {
+    'device': '明湖变10kV明明Ⅰ回线师院公租房G032断路器FTU',
+    'line': '10kV明明Ⅰ回线',
+  },
+  {
+    'device': '城中变10kV中川Ⅱ回线中川Ⅱ回-荷川1820断路器FTU',
+    'line': '10kV中川Ⅱ回线',
+  },
+  {
+    'device': '小屯变10kV屯八Ⅰ回线赛德公司5015断路器FTU',
+    'line': '10kV屯八Ⅰ回线',
+  },
+  {
+    'device': '四格变10kV四坡线13+1号杆海子头SG011断路器FTU',
+    'line': '10kV四坡线',
+  },
+  {
+    'device': '河湾变10kV南环Ⅱ回线万博4号开关箱DTU',
+    'line': '10kV南环Ⅱ回线',
+  },
+  {
+    'device': '龙场变10kV河尾巴线徐家桥3012断路器FTU',
+    'line': '10kV河尾巴线',
+  }
+]);
+const classOptions = {
+  limitMoveNum: 6,
+  step: 0.1
+};
+
+function test(v){
+  state.dialogVisible = true
+  setTimeout(function(){
+    var chartDom = document.getElementById('main');
+    var stat = document.getElementById('stat');
+    var myChart = echarts.init(chartDom);
+    var statZhu = echarts.init(stat);
+    var option;
+    var statOption
+    option = {
+      textStyle:{
+        color:'#ffffff'
+      },
+      title: {
+        text: v.title,
+        textStyle:{
+          color:'#ffffff'
+        }
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        data: ['电压 (V)', '电流 (A)', '有功功率 (kW)', '功率因数'],
+        textStyle:{
+          color:'#ffffff'
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      toolbox: {
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        textStyle:{
+          color:'#ffffff'
+        }
+      },
+      yAxis: {
+        type: 'value',
+
+      },
+      series: [
+
+        {
+          name: '电压 (V)',
+          type: 'line',
+          stack: 'Total',
+          data: [120, 132, 101, 134, 90, 230, 210],
+        },
+        {
+          name: '电流 (A)',
+          type: 'line',
+          stack: 'Total',
+          data: [220, 182, 191, 234, 290, 330, 310]
+        },
+        {
+          name: '有功功率 (kW)',
+          type: 'line',
+          stack: 'Total',
+          data: [150, 232, 201, 154, 190, 330, 410]
+        },
+        {
+          name: '功率因数',
+          type: 'line',
+          stack: 'Total',
+          data: [320, 332, 301, 334, 390, 330, 320]
+        },
+      ]
+    };
+
+    statOption = {
+      textStyle:{
+        color:'#ffffff'
+      },
+      xAxis: {
+        type: 'category',
+        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      },
+      legend: {
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          data: [120, 200, 150, 80, 70, 110, 130],
+          type: 'bar'
+        }
+      ]
+    };
+
+    option && myChart.setOption(option);
+    statOption && statZhu.setOption(statOption);
+    window.addEventListener('resize', resizeChart);
+  },300)
+
+
+}
+
+function resizeChart(myChart,statZhu) {
+  myChart.resize();
+  statZhu.resize()
+}
+
+function exit(v){
+  if(v){
+    state.show = false
+    screenfull.request();
+    setMenuSetting({ show: false });
+    appStore.setLayoutHideHeader(true);
+    appStore.setLayoutHideSider(true);
+    appStore.setLayoutHideMultiTabs(true);
+  }else{
+    state.show = true
+
+    setMenuSetting({ show: true });
+    appStore.setLayoutHideHeader(false);
+    appStore.setLayoutHideMultiTabs(false);
+    appStore.setLayoutHideSider(false);
+  }
+
+}
 
 watchEffect(() => {
   if (screenfull.isEnabled) {
     screenfull.on("change", () => {
       if (screenfull.isFullscreen) {
+        state.show = false
         // 全屏时隐藏菜单
         setMenuSetting({ show: false });
       } else {
+        state.show = true
         // 退出全屏时显示菜单
         setMenuSetting({ show: true });
         appStore.setLayoutHideHeader(false);
@@ -294,13 +580,34 @@ onBeforeRouteLeave(()=>{
   appStore.setLayoutHideMultiTabs(false);
   appStore.setLayoutHideSider(false);
 })
+
+const startAutoScroll = (container) => {
+  if (!container) return;
+  const table = container.querySelector('table');
+  const rows = table.querySelectorAll('tbody tr');
+  if (rows.length <= 5) return; // 当行数小于等于5时，不滚动
+  const rowHeight = rows[0].offsetHeight;
+  let scrollTop = 0;
+  const intervalId = setInterval(() => {
+    scrollTop += rowHeight;
+    if (scrollTop >= table.offsetHeight - container.offsetHeight) {
+      scrollTop = 0;
+    }
+    container.scrollTop = scrollTop;
+  }, 3000); // 每3秒滚动一次
+  return intervalId;
+};
+
 onMounted(() => {
-  if (screenfull.isEnabled && !screenfull.isFullscreen) {
-    screenfull.request();
-  }
-  appStore.setLayoutHideSider(true);
-  appStore.setLayoutHideHeader(true);
-  appStore.setLayoutHideMultiTabs(true);
+  document.addEventListener('keydown', function(event) {
+    if (event.keyCode === 27) { // 27是ESC键的keyCode
+      setMenuSetting({ show: true });
+      appStore.setLayoutHideHeader(false);
+      appStore.setLayoutHideMultiTabs(false);
+      appStore.setLayoutHideSider(false);
+      state.show = true
+    }
+  });
   // 初始化地图 - 使用真实地理位置展示
   AMapLoader.load({
     key: "e28af433d6fabd84d33509eca1a3efa3",
@@ -324,15 +631,15 @@ onMounted(() => {
 
     // 添加模拟标记点
     const positions = [
-      { position: [104.813738,26.616164], title: "主变电站", status: "active" },
-      { position: [104.823738,26.56164], title: "电鸿终端01", status: "active" },
-      { position: [104.830389,26.592528], title: "北斗终端04", status: "warning" },
-      { position: [104.83789,26.56528], title: "配电中心", status: "active" },
-      { position: [104.70389,26.582528], title: "FTU终端23", status: "offline" },
-      { position: [104.69,26.692528], title: "FTU终端45", status: "error" },
-      { position: [104.810389,26.692528], title: "电鸿终端09", status: "active" }
+      { position: [104.813738,26.616164], title: "城西变10kV西建Ⅰ回线市医院2012断路器FTU", status: "active" },
+      { position: [104.823738,26.56164], title: "杉树林变10kV杉东Ⅱ回线柏阳坡1号开关箱DTU", status: "active" },
+      { position: [104.830389,26.592528], title: "城西变10kV西三Ⅳ回线康乐北路西开关箱DTU", status: "warning" },
+      { position: [104.83789,26.56528], title: "明湖变10kV明明Ⅰ回线师院公租房G032断路器FTU", status: "active" },
+      { position: [104.70389,26.582528], title: "小屯变10kV屯八Ⅰ回线赛德公司5015断路器FTU", status: "offline" },
+      { position: [104.69,26.692528], title: "城中变10kV中川Ⅱ回线中川Ⅱ回-荷川1820断路器FTU", status: "error" },
+      { position: [104.810389,26.692528], title: "四格变10kV四坡线13+1号杆海子头SG011断路器FTU", status: "active" }
     ];
-
+    let infoWindow
     // 根据状态添加不同颜色的标记
     positions.forEach(point => {
       const color =
@@ -340,7 +647,7 @@ onMounted(() => {
           point.status === "warning" ? "#F39C12" :
             point.status === "error" ? "#E74C3C" : "#95A5A6";
 
-      new AMap.Marker({
+      let marker = new AMap.Marker({
         position: point.position,
         map: map,
         content: `<div style="
@@ -351,7 +658,53 @@ onMounted(() => {
           border-radius: 50%;
           box-shadow: 0 0 5px rgba(0,0,0,0.3);
         "></div>`,
-        offset: new AMap.Pixel(-5, -5)
+        offset: new AMap.Pixel(-10, -20)
+      });
+
+      marker.setLabel({
+        direction: "bottom-center",
+        offset: new AMap.Pixel(0, 0),  //设置文本标注偏移量
+        // content: `<div style="background: ${color};font-size: 16px">${point.title}</div>` //设置文本标注内容
+      });
+
+      marker.on("click",(e)=>{
+        var info = [];
+        info.push(`<div style="background: black"><div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 210px;width: 420px;background-repeat: no-repeat;background-size: cover">
+      <div style="width: 100%;text-align: right;color: white;font-weight: bold">${point.title}</div>
+      <div style="height: 84%;width: 100%;display: flex">
+        <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
+          <div style="height: 18%;margin-top: 4%;margin-left: 2%">线路名称：10kV米仲线</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备名称：XXXXX线路通信终端</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：SNXXXXXXXX</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：北斗在线</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">历史数据：<span style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
+        </div>
+        <div style="width: 40%;height: 96%;margin-top:4%">
+          <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
+        </div>
+      </div>
+    </div></div>`)
+        infoWindow = new AMap.InfoWindow({
+          offset: new AMap.Pixel(0, -15),
+          content: info.join("")  //使用默认信息窗体框样式，显示信息内容
+        });
+        infoWindow.open(map, marker.getPosition());
+        const infoWindowContent = document.querySelector('.amap-info-content');
+        if (infoWindowContent) {
+          const viewButton = infoWindowContent.querySelector('div[style="color: #0a8fe9;cursor: pointer"]');
+          if (viewButton) {
+            viewButton.addEventListener('click', () => {
+              test(point);
+            });
+          }
+        }
+      })
+
+      map.on("click", (e) => {
+        // 判断点击目标是否为 Marker
+        if (!(e.target instanceof AMap.Marker)) {
+          infoWindow.close();
+        }
       });
     });
 
@@ -359,123 +712,20 @@ onMounted(() => {
     console.error("地图加载失败:", e);
   });
 
-  init()
+  // 实现表格自动轮播
+  if (feederTableContainer.value) {
+    startAutoScroll(feederTableContainer.value);
+  }
+  if (realTimeTableContainer.value) {
+    startAutoScroll(realTimeTableContainer.value);
+  }
+  setMenuSetting({ show: true });
+  appStore.setLayoutHideHeader(true);
+  appStore.setLayoutHideMultiTabs(true);
+  appStore.setLayoutHideSider(true);
+  state.show = true
+  // exit(true)
 });
-
-function init(){
-
-  var chartDom = document.getElementById('main');
-  var myChart = echarts.init(chartDom);
-  var option;
-
-  option = {
-    textStyle: {
-      fontFamily: 'Microsoft YaHei' // 全局字体设置为微软雅黑
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      },
-      textStyle: {
-        color: '#fff' // 提示框文字颜色
-      }
-    },
-    legend: {
-      textStyle: {
-        color: '#fff' // 图例文字颜色
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      splitLine: {
-        show: false // 隐藏X轴网格线（垂直竖线）
-      },
-      axisLabel: {
-        color: '#fff' // X轴标签文字颜色
-      },
-      axisLine: {
-        lineStyle: {
-          color: '#fff' // X轴轴线颜色
-        }
-      },
-      axisTick: {
-        lineStyle: {
-          color: '#fff' // X轴刻度颜色
-        }
-      }
-    },
-    yAxis: {
-      type: 'category',
-      data: ['FTU/DTU', '电鸿', '北斗'],
-      show: true, // 显示Y轴
-      axisLine: {
-        show: true, // 显示Y轴轴线
-        lineStyle: {
-          color: '#fff' // Y轴轴线颜色
-        }
-      },
-      axisTick: {
-        show: true, // 显示Y轴刻度
-        lineStyle: {
-          color: '#000' // Y轴刻度颜色
-        }
-      },
-      axisLabel: {
-        show: true, // 显示Y轴标签
-        color: '#fff' // Y轴标签颜色（补充缺失的颜色设置）
-      }
-    },
-    series: [
-      {
-        name: '正常',
-        type: 'bar',
-        stack: 'total',
-        label: {
-          show: true,
-          color: '#fff' // 数据标签文字颜色
-        },
-        emphasis: {
-          focus: 'series'
-        },
-        barWidth: 20,
-        barCategoryGap: '10%',
-        itemStyle: {
-          borderRadius: [0, 0, 0, 0],
-          color: '#00F0FF' // 正常数据系列颜色改为蓝色
-        },
-        data: [26, 0, 8]
-      },
-      {
-        name: '异常',
-        type: 'bar',
-        stack: 'total',
-        label: {
-          show: true,
-          color: '#fff' // 数据标签文字颜色
-        },
-        emphasis: {
-          focus: 'series'
-        },
-        barWidth: 20,
-        barCategoryGap: '10%',
-        itemStyle: {
-          borderRadius: [0, 10, 10, 0],
-          color: '#FFD700' // 异常数据系列颜色改为黄色
-        },
-        data: [2, 28, 20]
-      }
-    ]
-  };
-
-  option && myChart.setOption(option);
-}
-
 </script>
 
 <style lang="less" scoped>
@@ -488,9 +738,10 @@ function init(){
   background-image: none
 }
 
-.amap-marker-label {
-  background: none;
-  border: none;
+::v-deep .amap-marker-label {
+  padding: 0;
+  background: red;
+  border: 3px solid white;
 }
 
 ::v-deep .amap-logo {
@@ -498,50 +749,35 @@ function init(){
   opacity: 0 !important;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
-}
 
-:root {
-  --dark-bg: #0A0F16;
-  --panel-bg: rgba(15, 26, 37, 0.7);
-  --panel-border: rgba(30, 145, 255, 0.3);
-  --text-primary: #FFFFFF;
-  --text-secondary: #9BA3A9;
-  --electric-blue: #2F89FC;
-  --tele-green: #41C23C;
-  --warning-yellow: #FFC600;
-  --danger-red: #FF3636;
-  --accent-color: #00F0FF;
-  --panel-spacing: 5px;
-}
+
 
 body {
   color: white;
-  overflow-x: hidden;
+  overflow: auto;
   min-height: 100vh;
   width: 100vw;
 }
 
 .dashboard-container {
-background: rgba(7,19,31);
-  //background-size: cover;
-
+  //background: rgb(3,52,71);
+  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/bg_ftu.png");
+  background-size: cover;
+  position: relative;
+  z-index: 200;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 10px;
-  gap: var(--panel-spacing);
+  //padding: 10px;
+  gap: 5px;
 }
 
 /* 头部样式 */
 .header-panel {
-  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu_bg.png");
+  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/xtmc.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain; /* 修改为contain，确保背景图片适应容器 */
+  background-position: center; /* 背景图片居中显示 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -578,7 +814,7 @@ background: rgba(7,19,31);
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--panel-spacing);
+  //gap: var(--panel-spacing);
 }
 
 .left-stats,
@@ -594,7 +830,7 @@ background: rgba(7,19,31);
 .left-stats .stat-card,
 .right-stats .stat-card {
   flex: 1; /* 每个模块占main-panel高度的33% */
-  min-height: 0;
+  min-height: 300px;
 }
 
 .map-container {
@@ -608,7 +844,7 @@ background: rgba(7,19,31);
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  //box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .map-container::before {
@@ -621,8 +857,10 @@ background: rgba(7,19,31);
 }
 
 .map-container-title {
+  //background-color: rgba(0, 0, 0, 0.2);
   z-index: 100;
-  font-size: 1.8rem;
+  //background: rgba(25, 35, 51, 0.8);
+  font-size: 2rem;
   color: white;
   font-weight: bold;
   text-align: center;
@@ -683,7 +921,7 @@ background: rgba(7,19,31);
 
 /* 重新设计的卡片样式 */
 .stat-card {
-  background: rgba(15, 26, 37, 0.95);
+  background: rgba(14, 38, 59, 0.9);
   border-radius: 12px;
   padding: 10px;
   position: relative;
@@ -694,7 +932,7 @@ background: rgba(7,19,31);
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 240, 255,1);
+  box-shadow: 0 10px 25px rgb(0, 119, 255);
 }
 
 .stat-card::before {
@@ -704,7 +942,7 @@ background: rgba(7,19,31);
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #00F0FF, transparent);
+  background: linear-gradient(90deg, #0080ff, transparent);
 }
 
 /* 设备统计样式 */
@@ -733,6 +971,19 @@ background: rgba(7,19,31);
   color: white;
 }
 
+.qp {
+  float: right;
+  cursor: pointer;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px auto;
+  border-radius: 10px;
+  font-size: 1.3rem;
+}
+
 .stat-icon {
   width: 80px;
   height: 80px;
@@ -744,14 +995,29 @@ background: rgba(7,19,31);
   font-size: 1.3rem;
 }
 
+.icon-white {
+  background: rgba(47, 137, 252, 0);
+  color: #ffffff;
+}
+
 .icon-blue {
   background: rgba(47, 137, 252, 0.2);
   color: #2F89FC;
 }
 
+.icon-red {
+  background: rgba(252, 47, 47, 0.2);
+  color: #fd2828;
+}
+
 .icon-green {
   background: rgba(65, 194, 60, 0.2);
   color: #41C23C;
+}
+
+.icon-gray {
+  background: rgba(128, 128, 128, 0.2);
+  color: #808080;
 }
 
 .icon-purple {
@@ -786,16 +1052,18 @@ background: rgba(7,19,31);
 }
 
 .event-value {
-  font-size: 1.8rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin: 10px 0;
   color: #00F0FF;
 }
 
 .event-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color:white;
 }
+
+
 
 /* 表格样式 */
 .real-time-table {
@@ -1269,4 +1537,21 @@ background: rgba(7,19,31);
     font-size: 1.7rem;
   }
 }
+
+::v-deep .amap-info-content{
+  padding: 0;
+}
+
+::v-deep .el-dialog__header{
+  background: rgba(14, 38, 59, 0.9);
+}
+
+::v-deep .el-dialog{
+  background: rgba(14, 38, 59, 0.9);
+}
+
+::v-deep .amap-info-close{
+  display: none;
+}
+
 </style>
