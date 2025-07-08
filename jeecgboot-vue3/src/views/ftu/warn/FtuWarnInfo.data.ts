@@ -13,7 +13,7 @@ export const columns: BasicColumn[] = [
    {
     title: '告警类别',
     align:"center",
-    dataIndex: 'deviceType_dictText'
+    dataIndex: 'deviceType'
    },
    {
     title: '设备id',

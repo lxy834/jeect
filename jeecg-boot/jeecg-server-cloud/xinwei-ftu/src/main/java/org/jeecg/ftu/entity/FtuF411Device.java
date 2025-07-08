@@ -86,4 +86,7 @@ public class FtuF411Device implements Serializable {
 	@Excel(name = "设备名称", width = 15)
     @Schema(description = "设备名称")
     private java.lang.String deviceName;
+
+    @Schema(description = "设备编号")
+    private java.lang.String deviceCode;
 }

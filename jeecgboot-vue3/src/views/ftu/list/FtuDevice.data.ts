@@ -285,7 +285,10 @@ export const ftuF411DeviceFormSchema: FormSchema[] = [
   {
     label: '通信模式',
     field: 'communicationMode',
-    component: 'InputNumber',
+    component: 'JDictSelectTag',
+    componentProps:{
+      dictCode:"comm_model"
+    },
     dynamicRules: ({model,schema}) => {
           return [
                  { required: true, message: '请输入通信模式!'},
@@ -428,6 +431,39 @@ export const ftuWarnInfoColumns: JVxeColumn[] = [
       placeholder: '请输入${title}',
       defaultValue:'',
     },
+  {
+    title: '设备名称',
+    key: 'deviceName',
+    type: JVxeTypes.input,
+    width:"200px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    validateRules: [
+      { required: true, message: '${title}不能为空' },
+    ],
+  },
+  {
+    title: '安装点位',
+    key: 'insLocation',
+    type: JVxeTypes.input,
+    width:"200px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    validateRules: [
+      { required: true, message: '${title}不能为空' },
+    ],
+  },
+  {
+    title: '线路名称',
+    key: 'lineLocation',
+    type: JVxeTypes.input,
+    width:"200px",
+    placeholder: '请输入${title}',
+    defaultValue:'',
+    validateRules: [
+      { required: true, message: '${title}不能为空' },
+    ],
+  },
   ]
 
 

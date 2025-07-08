@@ -1,5 +1,7 @@
 package org.jeecg.ftu.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import org.jeecg.common.util.RestUtil;
 import org.jeecg.ftu.entity.FtuDevice;
 import org.jeecg.ftu.entity.FtuF411Device;
 import org.jeecg.ftu.entity.FtuElectlVolume;
@@ -9,10 +11,18 @@ import org.jeecg.ftu.mapper.FtuElectlVolumeMapper;
 import org.jeecg.ftu.mapper.FtuWarnInfoMapper;
 import org.jeecg.ftu.mapper.FtuDeviceMapper;
 import org.jeecg.ftu.service.IFtuDeviceService;
+import org.jeecg.ftu.vo.FtuElectlVolumeVO;
+import org.jeecg.ftu.vo.IotDevice;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Collection;
@@ -35,6 +45,39 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
 	@Autowired
 	private FtuWarnInfoMapper ftuWarnInfoMapper;
 
+
+	public static HttpHeaders getHeaders(String token) {
+		HttpHeaders headers = new HttpHeaders();
+		String mediaType = MediaType.APPLICATION_JSON_VALUE;
+		headers.setContentType(MediaType.parseMediaType(mediaType));
+		headers.set("Accept", mediaType);
+		headers.set("X-Token", token);
+		return headers;
+	}
+
+	public static void savaIot(FtuF411Device device,String ip){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("username","ftuAppUser");
+		jsonObject.put("password", "qwer1234Q@");
+		JSONObject post = RestUtil.post("http://192.168.1.204:8848/base/api/login",jsonObject);
+		HttpHeaders headers = getHeaders(post.getJSONObject("data").getString("token"));
+		JSONObject deviceJson = new JSONObject();
+		deviceJson.put("deviceName",device.getDeviceName());
+		deviceJson.put("deviceSn",device.getDeviceCode());
+		deviceJson.put("ipAddr",ip);
+		deviceJson.put("deviceType","direct");
+		deviceJson.put("blgProductId",3);
+		deviceJson.put("online","n");
+		deviceJson.put("onlineBool",true);
+		deviceJson.put("allowAutomatic","n");
+		deviceJson.put("allowAutomaticBool",false);
+		deviceJson.put("blgProductName","F411");
+		deviceJson.put("categoryCode","1");
+		deviceJson.put("enable","y");
+		deviceJson.put("useScenario","ftu");
+		RestUtil.request("http://192.168.1.204:8848/device/createBaseDevice", HttpMethod.POST, headers, null, deviceJson, JSONObject.class);
+	}
+
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void saveMain(FtuDevice ftuDevice, List<FtuF411Device> ftuF411DeviceList,List<FtuElectlVolume> ftuElectlVolumeList,List<FtuWarnInfo> ftuWarnInfoList) {
@@ -43,6 +86,8 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
 			for(FtuF411Device entity:ftuF411DeviceList) {
 				//外键设置
 				entity.setFtuId(ftuDevice.getId());
+				entity.setDeviceCode("FTU"+ftuDevice.getIp().replace(".",""));
+				savaIot(entity,ftuDevice.getIp());
 				ftuF411DeviceMapper.insert(entity);
 			}
 		}
@@ -77,6 +122,7 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
 			for(FtuF411Device entity:ftuF411DeviceList) {
 				//外键设置
 				entity.setFtuId(ftuDevice.getId());
+//				savaIot(entity,ftuDevice.getIp());
 				ftuF411DeviceMapper.insert(entity);
 			}
 		}
@@ -114,6 +160,11 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
 			ftuWarnInfoMapper.deleteByMainId(id.toString());
 			ftuDeviceMapper.deleteById(id);
 		}
+	}
+
+	@Override
+	public List<FtuElectlVolumeVO> queryFtuElectlVolumeList() {
+		return baseMapper.queryFtuElectlVolumeList();
 	}
 
 }

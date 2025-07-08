@@ -5,8 +5,9 @@ const { createConfirm } = useMessage();
 
 enum Api {
   list = '/ftu/ftuDevice/list',
-  save='/ftu/ftuDevice/add',
-  edit='/ftu/ftuDevice/edit',
+  volume = '/ftu/ftuDevice/volume',
+  save ='/ftu/ftuDevice/add',
+  edit ='/ftu/ftuDevice/edit',
   deleteOne = '/ftu/ftuDevice/delete',
   deleteBatch = '/ftu/ftuDevice/deleteBatch',
   importExcel = '/ftu/ftuDevice/importExcel',
@@ -20,6 +21,8 @@ enum Api {
  * @param params
  */
 export const getExportUrl = Api.exportXls;
+
+export const volume = Api.volume;
 
 /**
  * 导入api

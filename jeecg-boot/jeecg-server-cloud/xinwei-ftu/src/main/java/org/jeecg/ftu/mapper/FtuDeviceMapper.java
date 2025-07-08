@@ -5,6 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.ftu.entity.FtuDevice;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.jeecg.ftu.entity.FtuElectlVolume;
+import org.jeecg.ftu.vo.FtuElectlVolumeVO;
 
 /**
  * @Description: FTU终端
@@ -13,5 +15,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @Version: V1.0
  */
 public interface FtuDeviceMapper extends BaseMapper<FtuDevice> {
-
+    List<FtuElectlVolumeVO> queryFtuElectlVolumeList();
 }

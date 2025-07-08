@@ -13,6 +13,7 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -61,7 +62,7 @@ public class FtuF411DeviceController {
 	private IFtuF411DeviceService ftuF411DeviceService;
 	@Autowired
 	private IFtuWarnInfoService ftuWarnInfoService;
-	
+
 	/**
 	 * 分页列表查询
 	 *
@@ -87,7 +88,17 @@ public class FtuF411DeviceController {
 		IPage<FtuF411Device> pageList = ftuF411DeviceService.page(page, queryWrapper);
 		return Result.OK(pageList);
 	}
-	
+
+	@Operation(summary = "统计查询")
+	@GetMapping("/stat")
+	@RequiresPermissions("ftu:ftu_f411_device:stat")
+	public Result<List<Map<String, Object>>> stat() {
+		QueryWrapper<FtuF411Device> queryWrapper = Wrappers.query();
+		queryWrapper.select("count(1) as count", "COMMUNICATION_MODE")
+				.groupBy("COMMUNICATION_MODE");
+		return Result.ok(ftuF411DeviceService.listMaps(queryWrapper));
+	}
+
 	/**
 	 *   添加
 	 *
@@ -104,7 +115,7 @@ public class FtuF411DeviceController {
 		ftuF411DeviceService.saveMain(ftuF411Device, ftuF411DevicePage.getFtuWarnInfoList());
 		return Result.OK("添加成功！");
 	}
-	
+
 	/**
 	 *  编辑
 	 *
@@ -125,7 +136,7 @@ public class FtuF411DeviceController {
 		ftuF411DeviceService.updateMain(ftuF411Device, ftuF411DevicePage.getFtuWarnInfoList());
 		return Result.OK("编辑成功!");
 	}
-	
+
 	/**
 	 *   通过id删除
 	 *
@@ -140,7 +151,7 @@ public class FtuF411DeviceController {
 		ftuF411DeviceService.delMain(id);
 		return Result.OK("删除成功!");
 	}
-	
+
 	/**
 	 *  批量删除
 	 *
@@ -155,7 +166,7 @@ public class FtuF411DeviceController {
 		this.ftuF411DeviceService.delBatchMain(Arrays.asList(ids.split(",")));
 		return Result.OK("批量删除成功！");
 	}
-	
+
 	/**
 	 * 通过id查询
 	 *
@@ -173,7 +184,7 @@ public class FtuF411DeviceController {
 		return Result.OK(ftuF411Device);
 
 	}
-	
+
 	/**
 	 * 通过id查询
 	 *

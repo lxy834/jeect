@@ -175,9 +175,9 @@
             <table class="real-time-table">
               <thead>
               <tr>
-                <th>编号</th>
-                <th>电压 (V)</th>
-                <th>电流 (A)</th>
+                <th>线路</th>
+                <th>电压</th>
+                <th>电流</th>
                 <th>有功</th>
                 <th>功率因数</th>
                 <th>数据通道</th>
@@ -193,52 +193,22 @@
               :wheel="true"
               :isWatch="true"
               :classOptions="classOptions"
-              :dataList="list"
+              :dataList="state.volumeList"
             >
               <table class="real-time-table">
                 <thead>
-                <tr class="head">
+                <tr class="head"></tr>
 
-                </tr>
-                <tr>
-                  <td>FTU-01</td>
-                  <td>226</td>
-                  <td>28.6</td>
-                  <td>5.8</td>
-                  <td>0.92</td>
-                  <td><span class="channel-badge bg-green">电鸿</span></td>
-                </tr>
-                <tr>
-                  <td>FTU-02</td>
-                  <td>230</td>
-                  <td>24.8</td>
-                  <td>4.9</td>
-                  <td>0.88</td>
-                  <td><span class="channel-badge bg-blue">北斗</span></td>
-                </tr>
-                <tr>
-                  <td>FTU-02</td>
-                  <td>230</td>
-                  <td>24.8</td>
-                  <td>4.9</td>
-                  <td>0.88</td>
-                  <td><span class="channel-badge bg-blue">北斗</span></td>
-                </tr>
-                <tr>
-                  <td>FTU-03</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td><span class="channel-badge bg-gray">离线</span></td>
-                </tr>
-                <tr>
-                  <td>FTU-03</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
-                  <td><span class="channel-badge bg-gray">离线</span></td>
+                <tr v-for="(item,i) of state.volumeList" :key="i">
+                  <td>{{item.insLineName}}</td>
+                  <td>{{item.voltage}}V</td>
+                  <td>{{item.ftuCurrent}}A</td>
+                  <td>{{item.activePower}}</td>
+                  <td>{{item.factor}}</td>
+                  <td>
+                    <span class="channel-badge bg-green" v-if="item.sendMode==='电鸿'">电鸿</span>
+                    <span class="channel-badge bg-blue" v-else>北斗</span>
+                  </td>
                 </tr>
                 </thead>
               </table>
@@ -319,27 +289,16 @@
               :wheel="true"
               :isWatch="true"
               :classOptions="classOptions"
+              :dataList="state.warnList"
             >
               <table class="real-time-table">
                 <thead>
-                <tr class="head">
-
+                <tr class="head"></tr>
+                <tr v-for="(item,i) of state.warnList" :key="i">
+                  <td>{{item.deviceType}}</td>
+                  <td>{{item.warnInfo}}</td>
+                  <td>{{item.warnTime}}</td>
                 </tr>
-                <tr>
-                <td>告警通知</td>
-                <td>XXX线路XX设备参数异常</td>
-                <td>2025-06-24 11:35:56</td>
-              </tr>
-              <tr>
-                <td>实时数据</td>
-                <td>某某设备上传一条数据改为，XXX线路XX设备定时召测完成</td>
-                <td>2025-06-24 11:35:56</td>
-              </tr>
-              <tr>
-                <td>主站指令</td>
-                <td>XXX线路XX设备遥控分闸</td>
-                <td>2025-06-24 11:35:56</td>
-              </tr>
                 </thead>
               </table>
 
@@ -349,7 +308,7 @@
 
       </div>
 
-      <el-dialog  v-model="state.dialogVisible" draggable style="margin-top: 6%">
+      <el-dialog  v-model="state.dialogVisible" draggable>
         <div id="main" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
         <div id="stat" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
       </el-dialog>
@@ -360,18 +319,21 @@
 
 <script setup>
 import screenfull from "screenfull";
-import { useAppStore } from '@/store/modules/app';
-const appStore = useAppStore();
-import { onMounted, reactive, watchEffect, ref } from "vue";
+import { useAppStore } from "@/store/modules/app";
+import { onMounted, reactive, ref, watchEffect } from "vue";
 import { useMenuSetting } from "/@/hooks/setting/useMenuSetting";
-const {  setMenuSetting } = useMenuSetting();
 import AMapLoader from "@amap/amap-jsapi-loader";
 import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
-import {vue3ScrollSeamless} from "vue3-scroll-seamless";
-import * as echarts from 'echarts';
-import {list} from '@/views/ftu/list/FtuDevice.api.ts';
-import ElectricParametersChart from "@/views/index/componets/ElectricParametersChart.vue";
+import { vue3ScrollSeamless } from "vue3-scroll-seamless";
+import * as echarts from "echarts";
+import { ftuF411DeviceList, list, volume } from "@/views/ftu/list/FtuDevice.api.ts";
+import { defHttp } from "@/utils/http/axios";
+import { getWarnList } from "@/views/ftu/warn/FtuWarnInfo.api";
+import { getStat } from "@/views/ftu/f411/FtuF411Device.api.ts";
+import { useGo } from '/@/hooks/web/usePage';
+const appStore = useAppStore();
+const {  setMenuSetting } = useMenuSetting();
 window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
 };
@@ -385,9 +347,11 @@ const state =reactive({
   myChart:null,
   stat:null,
   ftuDeviceList:[],
+  volumeList:[],
   bdCount:0,
   dhCount:0,
-  hhCount:0
+  hhCount:0,
+  warnList:[]
 })
 
 async function getList() {
@@ -400,7 +364,31 @@ async function getList() {
     state.ftuDeviceList = res.records
     initMap()
   })
+  state.volumeList = await defHttp.get({ url: volume })
 
+  let warn = {
+    order: 'desc',
+    pageNo: 1,
+    pageSize: 10,
+  }
+  await getWarnList(warn).then(res =>{
+    state.warnList = res.records
+  })
+
+  const data = await defHttp.get({url: getStat});
+  for (let i = 0; i < data.length; i++) {
+    switch (data[i].COMMUNICATION_MODE){
+      case 0:
+        state.bdCount=state.bdCount+1
+        break;
+      case 1:
+        state.dhCount=state.dhCount+1
+        break
+      case 2:
+        state.hhCount=state.hhCount+1
+        break;
+    }
+  }
 }
 
 function initMap(){
@@ -424,8 +412,6 @@ function initMap(){
       zoom: 11,
       mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719" // 使用清新灰色风格地图
     });
-
-
     // 添加模拟标记点
     let positions = [];
     for (let i = 0; i < state.ftuDeviceList.length; i++) {
@@ -434,17 +420,16 @@ function initMap(){
         position:[state.ftuDeviceList[i].lng,state.ftuDeviceList[i].lat],
         deviceName:state.ftuDeviceList[i].deviceName,
         insLineName:state.ftuDeviceList[i].insLineName,
+        id:state.ftuDeviceList[i].id
       }
       switch (state.ftuDeviceList[i].status){
         case 0:
           position.status = "bd_active"
           position.commStatus = "北斗在线"
-          state.bdCount=state.bdCount+1
           break
         case 1:
           position.status = "dh_active"
           position.commStatus = "电鸿在线"
-          state.dhCount=state.dhCount+1
           break
         case 2:
           position.status = "f411_offline"
@@ -453,24 +438,18 @@ function initMap(){
         case 3:
           position.status = "ftu_warning"
           position.commStatus = "电鸿在线"
-          state.dhCount=state.dhCount+1
           break;
         case 4:
           position.status = "error"
           position.commStatus = "电鸿在线"
-          state.dhCount=state.dhCount+1
           break
         case 5:
           position.status = "hh_comm"
           position.commStatus = "混合模式"
-          state.hhCount=state.hhCount+1
           break
       }
       positions.push(position)
     }
-
-    console.log(positions)
-
     let infoWindow
     // 根据状态添加不同颜色的标记
     positions.forEach(point => {
@@ -502,7 +481,11 @@ function initMap(){
         // content: `<div style="background: ${color};font-size: 16px">${point.title}</div>` //设置文本标注内容
       });
 
-      marker.on("click",(e)=>{
+      marker.on("click",async (e) => {
+        let params = {
+          id:point.id
+        }
+        const data = await defHttp.get({url: ftuF411DeviceList,params});
         var info = [];
         info.push(`<div style="background: black"><div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
       <div style="width: 100%;text-align: right;color: white;font-weight: bold">${point.deviceName}</div>
@@ -510,7 +493,7 @@ function initMap(){
         <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
           <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${point.deviceName}</div>
           <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${point.insLineName}</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：SNXXXXXXX</div>
+          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0].deviceCode}</div>
           <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：${point.commStatus}</div>
           <div style="height: 12%;margin-top: 2%;margin-left: 2%">历史数据：<span  class="info-content" style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
         </div>
@@ -526,13 +509,9 @@ function initMap(){
         infoWindow.open(map, marker.getPosition());
         const infoWindowContent = document.querySelector('.info-content');
         if (infoWindowContent) {
-
-          // if (viewButton) {
-
           infoWindowContent.addEventListener('click', () => {
-              test(point);
-            });
-          // }
+            test(point);
+          });
         }
       })
 
@@ -543,59 +522,22 @@ function initMap(){
         }
       });
     });
-
   }).catch((e) => {
     console.error("地图加载失败:", e);
   });
 
 }
 
-let lists = reactive([
-  {
-    'device': '城西变10kV西建Ⅰ回线市医院2012断路器FTU',
-    'line': '10kV西建Ⅰ回线',
-  },
-  {
-    'device': '杉树林变10kV杉东Ⅱ回线柏阳坡1号开关箱DTU',
-    'line': '10kV杉东Ⅱ回线',
-  },
-  {
-    'device': '城西变10kV西三Ⅳ回线康乐北路西开关箱DTU',
-    'line': '10kV西三Ⅳ回线',
-  },
-  {
-    'device': '明湖变10kV明明Ⅰ回线师院公租房G032断路器FTU',
-    'line': '10kV明明Ⅰ回线',
-  },
-  {
-    'device': '城中变10kV中川Ⅱ回线中川Ⅱ回-荷川1820断路器FTU',
-    'line': '10kV中川Ⅱ回线',
-  },
-  {
-    'device': '小屯变10kV屯八Ⅰ回线赛德公司5015断路器FTU',
-    'line': '10kV屯八Ⅰ回线',
-  },
-  {
-    'device': '四格变10kV四坡线13+1号杆海子头SG011断路器FTU',
-    'line': '10kV四坡线',
-  },
-  {
-    'device': '河湾变10kV南环Ⅱ回线万博4号开关箱DTU',
-    'line': '10kV南环Ⅱ回线',
-  },
-  {
-    'device': '龙场变10kV河尾巴线徐家桥3012断路器FTU',
-    'line': '10kV河尾巴线',
-  }
-]);
 const classOptions = {
   limitMoveNum: 3,
   step: 0.1
 };
-
+const go = useGo();
 function test(v){
-  console.log(v)
-  state.dialogVisible = true
+
+  go('/index/componets');
+
+  // state.dialogVisible = true
   setTimeout(function(){
     var chartDom = document.getElementById('main');
     var stat = document.getElementById('stat');
@@ -779,7 +721,6 @@ onMounted(() => {
       state.show = true
     }
   });
-
   getList()
   // 实现表格自动轮播
   if (feederTableContainer.value) {
@@ -793,7 +734,6 @@ onMounted(() => {
   appStore.setLayoutHideMultiTabs(true);
   appStore.setLayoutHideSider(true);
   state.show = true
-
 
 });
 </script>
@@ -818,9 +758,6 @@ onMounted(() => {
   display: none;
   opacity: 0 !important;
 }
-
-
-
 
 body {
   color: white;

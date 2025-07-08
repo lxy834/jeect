@@ -13,6 +13,9 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
+import org.jeecg.common.util.RestUtil;
+import org.jeecg.ftu.vo.FtuElectlVolumeVO;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -149,6 +152,12 @@ public class FtuDeviceController {
 	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
 		ftuDeviceService.delMain(id);
 		return Result.OK("删除成功!");
+	}
+
+	@Operation(summary = "电气量数据")
+	@GetMapping("/volume")
+	public Result<List<FtuElectlVolumeVO>> queryFtuElectlVolumeList() {
+		return Result.ok(ftuDeviceService.queryFtuElectlVolumeList());
 	}
 
 	/**

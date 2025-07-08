@@ -6,6 +6,7 @@ const { createConfirm } = useMessage();
 enum Api {
   list = '/ftu/ftuF411Device/list',
   save='/ftu/ftuF411Device/add',
+  stat = '/ftu/ftuF411Device/stat',
   edit='/ftu/ftuF411Device/edit',
   deleteOne = '/ftu/ftuF411Device/delete',
   deleteBatch = '/ftu/ftuF411Device/deleteBatch',
@@ -13,6 +14,9 @@ enum Api {
   exportXls = '/ftu/ftuF411Device/exportXls',
   ftuWarnInfoList = '/ftu/ftuF411Device/queryFtuWarnInfoByMainId',
 }
+
+export const getStat = Api.stat;
+
 /**
  * 导出api
  * @param params

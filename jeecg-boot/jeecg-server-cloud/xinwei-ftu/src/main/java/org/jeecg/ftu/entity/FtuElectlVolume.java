@@ -70,6 +70,9 @@ public class FtuElectlVolume implements Serializable {
 	@Excel(name = "电流", width = 15)
     @Schema(description = "电流")
     private java.lang.Double ftuCurrent;
+
+    private String sendMode;
+
 	/**关联的FTU*/
     @Schema(description = "关联的FTU")
     private java.lang.String ftuId;

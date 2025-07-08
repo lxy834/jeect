@@ -5,6 +5,8 @@ import org.jeecg.ftu.entity.FtuElectlVolume;
 import org.jeecg.ftu.entity.FtuWarnInfo;
 import org.jeecg.ftu.entity.FtuDevice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.ftu.vo.FtuElectlVolumeVO;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +28,7 @@ public interface IFtuDeviceService extends IService<FtuDevice> {
 	 * @param ftuWarnInfoList
 	 */
 	public void saveMain(FtuDevice ftuDevice,List<FtuF411Device> ftuF411DeviceList,List<FtuElectlVolume> ftuElectlVolumeList,List<FtuWarnInfo> ftuWarnInfoList) ;
-	
+
 	/**
 	 * 修改一对多
 	 *
@@ -36,19 +38,22 @@ public interface IFtuDeviceService extends IService<FtuDevice> {
    * @param ftuWarnInfoList
 	 */
 	public void updateMain(FtuDevice ftuDevice,List<FtuF411Device> ftuF411DeviceList,List<FtuElectlVolume> ftuElectlVolumeList,List<FtuWarnInfo> ftuWarnInfoList);
-	
+
 	/**
 	 * 删除一对多
 	 *
 	 * @param id
 	 */
 	public void delMain (String id);
-	
+
 	/**
 	 * 批量删除一对多
 	 *
 	 * @param idList
 	 */
 	public void delBatchMain (Collection<? extends Serializable> idList);
-	
+
+	List<FtuElectlVolumeVO> queryFtuElectlVolumeList();
+
+
 }

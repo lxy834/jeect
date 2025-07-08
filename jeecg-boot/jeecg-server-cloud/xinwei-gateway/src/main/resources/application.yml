@@ -43,7 +43,8 @@ spring:
               "_genkey_6": "/drag/**",
               "_genkey_7": "/actuator/**",
               "_genkey_8": "/airag/**",
-              "_genkey_9": "/openapi/**"
+              "_genkey_9": "/openapi/**",
+              "_genkey_10": "/websocket/**"
             }
           } ],
           "filters": [ ],

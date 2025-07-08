@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ServerEndpoint("/websocket/{userId}")
 public class WebSocket {
-    
+
     /**线程安全Map*/
     private static ConcurrentHashMap<String, Session> sessionPool = new ConcurrentHashMap<>();
 
@@ -45,7 +45,7 @@ public class WebSocket {
     public void onOpen(Session session, @PathParam(value = "userId") String userId) {
         try {
             sessionPool.put(userId, session);
-            log.debug("【系统 WebSocket】有新的连接，总数为:" + sessionPool.size());
+            log.info("【系统 WebSocket】有新的连接，总数为:" + sessionPool.size());
         } catch (Exception e) {
         }
     }
@@ -118,7 +118,7 @@ public class WebSocket {
             this.sendMessage(userId, "ping");
             //update-end---author:wangshuai---date:2024-05-07---for:【issues/1161】前端websocket因心跳导致监听不起作用---
         }
-        
+
 //        //------------------------------------------------------------------------------
 //        JSONObject obj = new JSONObject();
 //        //业务类型
@@ -141,7 +141,7 @@ public class WebSocket {
         t.printStackTrace();
     }
     //==========【系统 WebSocket接受、推送消息等方法 —— 具体服务节点推送ws消息】========================================================================================
-    
+
 
     //==========【采用redis发布订阅模式——推送消息】========================================================================================
     /**
@@ -182,5 +182,5 @@ public class WebSocket {
         }
     }
     //=======【采用redis发布订阅模式——推送消息】==========================================================================================
-    
+
 }

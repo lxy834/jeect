@@ -17,6 +17,9 @@ enum Api {
  * @param params
  */
 export const getExportUrl = Api.exportXls;
+
+export const getWarnList = (params) =>
+  defHttp.get({url: Api.list, params});
 /**
  * 导入api
  */
