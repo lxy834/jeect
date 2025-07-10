@@ -4,48 +4,23 @@ import { useMessage } from "/@/hooks/web/useMessage";
 const { createConfirm } = useMessage();
 
 enum Api {
-  list = '/ftu/ftuDevice/list',
-  volume = '/ftu/ftuDevice/volume',
-  getVolumeById = '/ftu/ftuDevice/getVolumeById',
-  save ='/ftu/ftuDevice/add',
-  edit ='/ftu/ftuDevice/edit',
-  deleteOne = '/ftu/ftuDevice/delete',
-  deleteBatch = '/ftu/ftuDevice/deleteBatch',
-  importExcel = '/ftu/ftuDevice/importExcel',
-  exportXls = '/ftu/ftuDevice/exportXls',
-  ftuF411DeviceList = '/ftu/ftuDevice/queryFtuF411DeviceByMainId',
-  ftuElectlVolumeList = '/ftu/ftuDevice/queryFtuElectlVolumeByMainId',
-  ftuWarnInfoList = '/ftu/ftuDevice/queryFtuWarnInfoByMainId',
+  list = '/sys/sysServerInfo/list',
+  save='/sys/sysServerInfo/add',
+  edit='/sys/sysServerInfo/edit',
+  deleteOne = '/sys/sysServerInfo/delete',
+  deleteBatch = '/sys/sysServerInfo/deleteBatch',
+  importExcel = '/sys/sysServerInfo/importExcel',
+  exportXls = '/sys/sysServerInfo/exportXls',
 }
 /**
  * 导出api
  * @param params
  */
 export const getExportUrl = Api.exportXls;
-
-export const volume = Api.volume;
-
-export const getVolumeById = Api.getVolumeById;
-
 /**
  * 导入api
  */
 export const getImportUrl = Api.importExcel;
-/**
- * 查询子表数据
- * @param params
- */
-export const ftuF411DeviceList = Api.ftuF411DeviceList;
-/**
- * 查询子表数据
- * @param params
- */
-export const ftuElectlVolumeList = Api.ftuElectlVolumeList;
-/**
- * 查询子表数据
- * @param params
- */
-export const ftuWarnInfoList = Api.ftuWarnInfoList;
 /**
  * 列表接口
  * @param params

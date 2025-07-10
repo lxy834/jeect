@@ -156,9 +156,17 @@ public class FtuDeviceController {
 
 	@Operation(summary = "电气量数据")
 	@GetMapping("/volume")
+	@RequiresPermissions("ftu:ftu_device:volume")
 	public Result<List<FtuElectlVolumeVO>> queryFtuElectlVolumeList() {
 		return Result.ok(ftuDeviceService.queryFtuElectlVolumeList());
 	}
+
+	 @Operation(summary = "电气量数据")
+	 @GetMapping("/getVolumeById")
+	 @RequiresPermissions("ftu:ftu_device:getVolumeById")
+	 public Result<Map<String,Object>> getVolumeStatByFtuId(@RequestParam(name="ftuId",required=false) String ftuId) {
+		 return Result.ok(ftuDeviceService.getVolumeStatByFtuId(ftuId));
+	 }
 
 	/**
 	 *  批量删除

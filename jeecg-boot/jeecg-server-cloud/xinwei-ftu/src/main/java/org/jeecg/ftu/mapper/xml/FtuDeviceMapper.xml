@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.ftu.mapper.FtuDeviceMapper">
 
-    <select id="queryFtuElectlVolumeList" resultType="org.jeecg.ftu.vo.FtuElectlVolumeVO">
+    <select id="queryFtuElectlVolumeList" resultType="org.jeecg.ftu.vo.FtuElectlVolumeVO" >
         SELECT v.ACTIVE_POWER,v.FACTOR,v.voltage,v.FTU_CURRENT,v.SEND_MODE,d.INS_LINE_NAME FROM FTU_ELECTL_VOLUME v LEFT JOIN FTU_DEVICE d on v.FTU_ID = d.ID
         order by V.CREATE_TIME desc limit 20
     </select>

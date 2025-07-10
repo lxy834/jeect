@@ -1,6 +1,7 @@
 package org.jeecg.ftu.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.jeecg.common.util.RestUtil;
 import org.jeecg.ftu.entity.FtuDevice;
 import org.jeecg.ftu.entity.FtuF411Device;
@@ -24,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Collection;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @Description: FTU终端
@@ -165,6 +166,45 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
 	@Override
 	public List<FtuElectlVolumeVO> queryFtuElectlVolumeList() {
 		return baseMapper.queryFtuElectlVolumeList();
+	}
+
+	@Override
+	public Map<String, Object> getVolumeStatByFtuId(String ftuId) {
+		List<FtuElectlVolume> volumeList = ftuElectlVolumeMapper.selectList(Wrappers.<FtuElectlVolume>query().lambda().eq(FtuElectlVolume::getFtuId, ftuId));
+
+		int size = volumeList.size();
+		Map<String, Object> resultMap = new HashMap<>(5);
+
+		List<String> createTimeList = new ArrayList<>(size);
+		List<Double> activePowerList = new ArrayList<>(size);
+		List<Double> factorList = new ArrayList<>(size);
+		List<Double> voltageList = new ArrayList<>(size);
+		List<Double> ftuCurrentList = new ArrayList<>(size);
+
+		// 使用ThreadLocal确保SimpleDateFormat线程安全
+		ThreadLocal<SimpleDateFormat> dateFormat = ThreadLocal.withInitial(
+				() -> new SimpleDateFormat("MM/dd HH:mm")
+		);
+
+		for (FtuElectlVolume volume : volumeList) {
+			// 格式化日期
+			Date createTime = volume.getCreateTime();
+			createTimeList.add(createTime != null ?
+					dateFormat.get().format(createTime) : null);
+
+			activePowerList.add(volume.getActivePower());
+			factorList.add(volume.getFactor());
+			voltageList.add(volume.getVoltage());
+			ftuCurrentList.add(volume.getFtuCurrent());
+		}
+
+		resultMap.put("createTimeList", createTimeList);
+		resultMap.put("activePowerList", activePowerList);
+		resultMap.put("factorList", factorList);
+		resultMap.put("voltageList", voltageList);
+		resultMap.put("ftuCurrentList", ftuCurrentList);
+
+		return resultMap;
 	}
 
 }

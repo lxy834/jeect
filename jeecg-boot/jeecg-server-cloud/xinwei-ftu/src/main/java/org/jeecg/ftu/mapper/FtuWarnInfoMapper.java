@@ -1,6 +1,8 @@
 package org.jeecg.ftu.mapper;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.ftu.entity.FtuWarnInfo;
@@ -28,4 +30,13 @@ public interface FtuWarnInfoMapper extends BaseMapper<FtuWarnInfo> {
      * @return List<FtuWarnInfo>
      */
     public List<FtuWarnInfo> selectByMainId(@Param("mainId") String mainId);
+
+    // 修改返回类型为List<Map<String, Object>>
+    List<Map<String, Object>> getDailyAlarmStatisticsGroupedByType(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("ftuId") String ftuId
+    );
+
+
 }

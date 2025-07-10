@@ -6,6 +6,8 @@ const { createConfirm } = useMessage();
 enum Api {
   list = '/ftu/ftuWarnInfo/list',
   save='/ftu/ftuWarnInfo/add',
+  getStatById = '/ftu/ftuWarnInfo/getStatById',
+  getEventById = '/ftu/ftuWarnInfo/getEventById',
   edit='/ftu/ftuWarnInfo/edit',
   deleteOne = '/ftu/ftuWarnInfo/delete',
   deleteBatch = '/ftu/ftuWarnInfo/deleteBatch',
@@ -17,6 +19,10 @@ enum Api {
  * @param params
  */
 export const getExportUrl = Api.exportXls;
+
+export const getStatById = Api.getStatById;
+
+export const getEventById = Api.getEventById;
 
 export const getWarnList = (params) =>
   defHttp.get({url: Api.list, params});

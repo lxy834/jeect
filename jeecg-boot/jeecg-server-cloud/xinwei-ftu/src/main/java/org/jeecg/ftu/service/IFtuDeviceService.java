@@ -10,6 +10,7 @@ import org.jeecg.ftu.vo.FtuElectlVolumeVO;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: FTU终端
@@ -54,6 +55,8 @@ public interface IFtuDeviceService extends IService<FtuDevice> {
 	public void delBatchMain (Collection<? extends Serializable> idList);
 
 	List<FtuElectlVolumeVO> queryFtuElectlVolumeList();
+
+	Map<String,Object> getVolumeStatByFtuId(String ftuId);
 
 
 }

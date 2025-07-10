@@ -11,5 +11,50 @@
         SELECT *
         FROM  ftu_warn_info
         WHERE
-            device_id = #{mainId} 	</select>
+            device_id = #{mainId}
+    </select>
+
+    <select id="getDailyAlarmStatisticsGroupedByType" resultType="map">
+        WITH date_range AS (
+        SELECT
+        TO_CHAR(dates.date_value, 'YYYY-MM-DD') AS create_time
+        FROM (
+        SELECT
+        TRUNC(TO_DATE(#{startDate}, 'YYYY-MM-DD') + LEVEL - 1) AS date_value
+        FROM DUAL
+        CONNECT BY LEVEL &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD') - TO_DATE(#{startDate}, 'YYYY-MM-DD') + 1
+        ) dates
+        )
+        SELECT
+        dr.create_time,
+        NVL(alarm_stats.switch_action, 0) AS switch_action,
+        NVL(alarm_stats.fault_alarm, 0) AS fault_alarm,
+        NVL(alarm_stats.communication_exception, 0) AS communication_exception
+        FROM date_range dr
+        LEFT JOIN (
+        SELECT
+        TO_CHAR(create_time, 'YYYY-MM-DD') AS create_time,
+        MAX(CASE WHEN device_type = '主站指令' THEN cnt ELSE 0 END) AS switch_action,
+        MAX(CASE WHEN device_type = '故障报警' THEN cnt ELSE 0 END) AS fault_alarm,
+        MAX(CASE WHEN device_type = '通信异常' THEN cnt ELSE 0 END) AS communication_exception
+        FROM (
+        SELECT
+        TRUNC(create_time) AS create_time,
+        device_type,
+        COUNT(*) AS cnt
+        FROM
+        ftu_warn_info
+        WHERE
+        create_time BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        AND TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        AND device_id = #{ftuId}
+        GROUP BY
+        TRUNC(create_time), device_type
+        ) subquery
+        GROUP BY
+        TO_CHAR(create_time, 'YYYY-MM-DD')
+        ) alarm_stats ON dr.create_time = alarm_stats.create_time
+        ORDER BY
+        dr.create_time ASC
+    </select>
 </mapper>

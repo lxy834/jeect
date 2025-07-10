@@ -424,11 +424,11 @@ function initMap(){
       }
       switch (state.ftuDeviceList[i].status){
         case 0:
-          position.status = "bd_active"
+          position.status = "dh_active"
           position.commStatus = "北斗在线"
           break
         case 1:
-          position.status = "dh_active"
+          position.status = "bd_active"
           position.commStatus = "电鸿在线"
           break
         case 2:
@@ -510,7 +510,7 @@ function initMap(){
         const infoWindowContent = document.querySelector('.info-content');
         if (infoWindowContent) {
           infoWindowContent.addEventListener('click', () => {
-            test(point);
+            goData(point);
           });
         }
       })
@@ -533,121 +533,16 @@ const classOptions = {
   step: 0.1
 };
 const go = useGo();
-function test(v){
+function goData(v){
 
-  go('/index/componets');
+  go({
+    path:'/index/componets',
+    query:{
+      ftu:v.id,
+      device:v.deviceName
+    }
+  });
 
-  // state.dialogVisible = true
-  setTimeout(function(){
-    var chartDom = document.getElementById('main');
-    var stat = document.getElementById('stat');
-    var myChart = echarts.init(chartDom);
-    var statZhu = echarts.init(stat);
-    var option;
-    var statOption
-    option = {
-      textStyle:{
-        color:'#ffffff'
-      },
-      title: {
-        text: v.title,
-        textStyle:{
-          color:'#ffffff'
-        }
-      },
-      tooltip: {
-        trigger: 'axis'
-      },
-      legend: {
-        data: ['电压 (V)', '电流 (A)', '有功功率 (kW)', '功率因数'],
-        textStyle:{
-          color:'#ffffff'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      toolbox: {
-        feature: {
-          saveAsImage: {}
-        }
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        textStyle:{
-          color:'#ffffff'
-        }
-      },
-      yAxis: {
-        type: 'value',
-
-      },
-      series: [
-
-        {
-          name: '电压 (V)',
-          type: 'line',
-          stack: 'Total',
-          data: [120, 132, 101, 134, 90, 230, 210],
-        },
-        {
-          name: '电流 (A)',
-          type: 'line',
-          stack: 'Total',
-          data: [220, 182, 191, 234, 290, 330, 310]
-        },
-        {
-          name: '有功功率 (kW)',
-          type: 'line',
-          stack: 'Total',
-          data: [150, 232, 201, 154, 190, 330, 410]
-        },
-        {
-          name: '功率因数',
-          type: 'line',
-          stack: 'Total',
-          data: [320, 332, 301, 334, 390, 330, 320]
-        },
-      ]
-    };
-
-    statOption = {
-      textStyle:{
-        color:'#ffffff'
-      },
-      xAxis: {
-        type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      },
-      legend: {
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-        {
-          data: [120, 200, 150, 80, 70, 110, 130],
-          type: 'bar'
-        }
-      ]
-    };
-
-    option && myChart.setOption(option);
-    statOption && statZhu.setOption(statOption);
-    window.addEventListener('resize', resizeChart);
-  },300)
-
-
-}
-
-function resizeChart(myChart,statZhu) {
-  myChart.resize();
-  statZhu.resize()
 }
 
 function exit(v){

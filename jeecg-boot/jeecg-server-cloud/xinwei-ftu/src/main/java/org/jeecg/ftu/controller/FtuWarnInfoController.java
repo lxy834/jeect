@@ -81,6 +81,24 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 		return Result.OK(pageList);
 	}
 
+	@Operation(summary = "根据设备查询事件统计")
+	@GetMapping(value = "/getStatById")
+	@RequiresPermissions("ftu:ftu_warn_info:eventStat")
+	public Result<Map<String, Object>> getStatById(@RequestParam(name = "ftuId") String ftuId) {
+		return Result.ok(ftuWarnInfoService.getStatById(ftuId));
+	}
+
+	@Operation(summary = "根据ftuId查询日范围事件")
+	@RequiresPermissions("ftu:ftu_warn_info:getEventById")
+	@GetMapping(value = "/getEventById")
+	public Result<IPage<FtuWarnInfo>> getEventById(@RequestParam(name = "ftuId") String ftuId,
+													@RequestParam(name = "Date") String date,
+													@RequestParam(name = "event") String event,
+													@RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
+													@RequestParam(name="pageSize", defaultValue="10") Integer pageSize) {
+		return Result.ok(ftuWarnInfoService.getEventById(ftuId, date,event,pageNo,pageSize));
+	}
+
 	/**
 	 *   添加
 	 *
