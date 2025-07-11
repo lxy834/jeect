@@ -26,12 +26,10 @@ public interface IFtuWarnInfoService extends IService<FtuWarnInfo> {
     public List<FtuWarnInfo> selectByMainId(String mainId);
 
 
-    Map<String, Object> getStatById(@RequestParam(name = "ftuId") String ftuId);
+    Map<String, Object> getStatById(String ftuId);
 
-    IPage<FtuWarnInfo> getEventById(@RequestParam(name = "ftuId") String ftuId,
-                                     @RequestParam(name = "Date") String date,
-                                    String event,
-                                     @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-                                     @RequestParam(name="pageSize", defaultValue="10") Integer pageSize);
+    IPage<FtuWarnInfo> getEventById(String ftuId,String date,String event, Integer pageNo, Integer pageSize);
+
+    Map<String,Object> eventStat();
 
 }

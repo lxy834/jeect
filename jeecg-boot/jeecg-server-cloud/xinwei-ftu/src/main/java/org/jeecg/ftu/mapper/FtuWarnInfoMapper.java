@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.ftu.entity.FtuWarnInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.jeecg.ftu.vo.WarnInfoStatVO;
 
 /**
  * @Description: 告警记录
@@ -21,7 +22,7 @@ public interface FtuWarnInfoMapper extends BaseMapper<FtuWarnInfo> {
      * @param mainId 主表id
      * @return boolean
      */
-    public boolean deleteByMainId(@Param("mainId") String mainId);
+    boolean deleteByMainId(@Param("mainId") String mainId);
 
     /**
      * 通过主表id查询子表数据
@@ -29,14 +30,15 @@ public interface FtuWarnInfoMapper extends BaseMapper<FtuWarnInfo> {
      * @param mainId 主表id
      * @return List<FtuWarnInfo>
      */
-    public List<FtuWarnInfo> selectByMainId(@Param("mainId") String mainId);
+    List<FtuWarnInfo> selectByMainId(@Param("mainId") String mainId);
 
-    // 修改返回类型为List<Map<String, Object>>
     List<Map<String, Object>> getDailyAlarmStatisticsGroupedByType(
             @Param("startDate") String startDate,
             @Param("endDate") String endDate,
             @Param("ftuId") String ftuId
     );
+
+    List<WarnInfoStatVO> eventStat();
 
 
 }

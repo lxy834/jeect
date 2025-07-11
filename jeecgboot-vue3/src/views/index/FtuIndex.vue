@@ -5,14 +5,13 @@
         <div class="qp icon-white">
           <i class="fas fa-expand"  v-show="state.show" @click="exit(true)"/>
           <i class="fa fa-compress" v-show="!state.show" @click="exit(false)"/>
-          <!--          <i class="fas fa-compress-wide" />-->
         </div>
       </div>
     </div>
     <!-- 主内容区 -->
     <div class="main-panel" id="map">
       <div class="left-stats">
-
+        <!-- 馈线信息 -->
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-exchange-alt"></i>
@@ -21,8 +20,8 @@
           <table class="real-time-table">
             <thead>
             <tr class="head">
-              <th >终端名称</th>
-              <th >馈线名称</th>
+              <th>终端名称</th>
+              <th>馈线名称</th>
             </tr>
             </thead>
           </table>
@@ -37,20 +36,16 @@
             >
               <table class="real-time-table">
                 <thead>
-                <tr class="head">
-
-                </tr>
+                <tr class="head"></tr>
                 <tr v-for="(item,i) of state.ftuDeviceList" :key="i">
                   <td>{{item.deviceName}}</td>
                   <td>{{item.insLineName}}</td>
                 </tr>
                 </thead>
               </table>
-
             </vue3ScrollSeamless>
           </div>
         </div>
-
         <!-- 信道信息 -->
         <div class="stat-card">
           <div class="card-title">
@@ -64,7 +59,6 @@
               </div>
               <div class="stat-label">北斗模式</div>
               <div class="stat-value">{{state.bdCount}}</div>
-
             </div>
             <div class="stat-item">
               <div class="stat-icon icon-green">
@@ -72,7 +66,6 @@
               </div>
               <div class="stat-label">电鸿模式</div>
               <div class="stat-value">{{state.dhCount}}</div>
-
             </div>
             <div class="stat-item">
               <div class="stat-icon icon-purple">
@@ -80,11 +73,10 @@
               </div>
               <div class="stat-label">混合模式</div>
               <div class="stat-value">{{state.hhCount}}</div>
-
             </div>
           </div>
         </div>
-
+        <!-- 设备事件 -->
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-clipboard-list"></i>
@@ -97,32 +89,28 @@
                   <i class="fas fa-tasks"></i>
                 </div>
                 <div class="event-label">FTU掉电</div>
-                <div class="event-value">0</div>
+                <div class="event-value">{{state.statForm.powerDown}}</div>
               </div>
               <div class="event-item">
                 <div class="stat-icon icon-orange">
                   <i class="fas fa-line-chart" />
                 </div>
-
                 <div class="event-label">FTU故障</div>
-                <div class="event-value">0</div>
+                <div class="event-value">{{state.statForm.fault}}</div>
               </div>
               <div class="event-item">
                 <div class="stat-icon icon-red">
                   <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div class="event-label">掉线</div>
-                <div class="event-value">0</div>
-
+                <div class="event-value">{{state.statForm.disconnect}}</div>
               </div>
-
               <div class="event-item">
                 <div class="stat-icon icon-purple">
                   <i class="fas fa-sliders-h"></i>
                 </div>
                 <div class="event-label">其它</div>
-                <div class="event-value">0</div>
-
+                <div class="event-value">{{state.statForm.otherEvent}}</div>
               </div>
             </div>
           </div>
@@ -130,8 +118,6 @@
       </div>
       <!-- 中央地图区 -->
       <div class="map-container">
-
-
         <div class="map-footer">
           <div class="status-item">
             <span class="status-dot tele-green-bg"></span>
@@ -153,15 +139,12 @@
             <span class="status-dot danger-bg"></span>
             <span>FTU告警</span>
           </div>
-
-           <div class="status-item">
+          <div class="status-item">
             <span class="status-dot hh-bg"></span>
             <span>混合通信模式</span>
           </div>
-
         </div>
       </div>
-
       <!-- 右侧数据卡片 - 重新设计 -->
       <div class="right-stats">
         <!-- 实时数据传输 -->
@@ -170,7 +153,6 @@
             <i class="fas fa-exchange-alt"></i>
             实时数据
           </div>
-
           <div class="data-table-container" ref="realTimeTableContainer">
             <table class="real-time-table">
               <thead>
@@ -183,9 +165,7 @@
                 <th>数据通道</th>
               </tr>
               </thead>
-              <tbody>
-
-              </tbody>
+              <tbody></tbody>
             </table>
             <vue3ScrollSeamless
               style="margin: 0 auto; overflow: hidden;max-height: 100%;position: absolute"
@@ -198,7 +178,6 @@
               <table class="real-time-table">
                 <thead>
                 <tr class="head"></tr>
-
                 <tr v-for="(item,i) of state.volumeList" :key="i">
                   <td>{{item.insLineName}}</td>
                   <td>{{item.voltage}}V</td>
@@ -212,7 +191,6 @@
                 </tr>
                 </thead>
               </table>
-
             </vue3ScrollSeamless>
           </div>
         </div>
@@ -222,7 +200,6 @@
             <i class="fas fa-sliders-h"></i>
             终端信息
           </div>
-
           <div class="control-grid">
             <div class="control-item">
               <div class="control-label">设备状态</div>
@@ -236,7 +213,6 @@
                 </button>
               </div>
             </div>
-
             <div class="control-item">
               <div class="control-label">FTU对时</div>
               <div class="control-status">
@@ -247,8 +223,6 @@
                 <i class="fas fa-exchange-alt"></i> 同步对时
               </button>
             </div>
-
-
             <div class="control-item">
               <div class="control-label">电鸿状态</div>
               <div class="control-status">
@@ -256,7 +230,6 @@
                 正常
               </div>
             </div>
-
             <div class="control-item">
               <div class="control-label">北斗状态</div>
               <div class="control-status">
@@ -264,10 +237,9 @@
                 正常
               </div>
             </div>
-
           </div>
         </div>
-
+        <!-- 告警通知 -->
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-exchange-alt"></i>
@@ -276,7 +248,7 @@
           <table class="real-time-table">
             <thead>
             <tr class="head">
-             <th>类型</th>
+              <th>类型</th>
               <th>内容</th>
               <th>时间</th>
             </tr>
@@ -301,19 +273,15 @@
                 </tr>
                 </thead>
               </table>
-
             </vue3ScrollSeamless>
           </div>
         </div>
-
       </div>
-
       <el-dialog  v-model="state.dialogVisible" draggable>
         <div id="main" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
         <div id="stat" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
       </el-dialog>
     </div>
-
   </div>
 </template>
 
@@ -326,77 +294,94 @@ import AMapLoader from "@amap/amap-jsapi-loader";
 import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
 import { vue3ScrollSeamless } from "vue3-scroll-seamless";
-import * as echarts from "echarts";
 import { ftuF411DeviceList, list, volume } from "@/views/ftu/list/FtuDevice.api.ts";
 import { defHttp } from "@/utils/http/axios";
-import { getWarnList } from "@/views/ftu/warn/FtuWarnInfo.api";
+import { getWarnList, eventStat } from "@/views/ftu/warn/FtuWarnInfo.api";
 import { getStat } from "@/views/ftu/f411/FtuF411Device.api.ts";
 import { useGo } from '/@/hooks/web/usePage';
+
 const appStore = useAppStore();
 const {  setMenuSetting } = useMenuSetting();
 window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
 };
 
-const feederTableContainer = ref(null);
 const realTimeTableContainer = ref(null);
 
-const state =reactive({
-  show:true,
-  dialogVisible:false,
-  myChart:null,
-  stat:null,
-  ftuDeviceList:[],
-  volumeList:[],
-  bdCount:0,
-  dhCount:0,
-  hhCount:0,
-  warnList:[]
-})
+const state = reactive({
+  show: true,
+  dialogVisible: false,
+  ftuDeviceList: [],
+  volumeList: [],
+  bdCount: 0,
+  dhCount: 0,
+  hhCount: 0,
+  warnList: [],
+  statForm: {}
+});
 
 async function getList() {
-  let form = {
+  const pageParams = {
     order: 'desc',
     pageNo: 1,
-    pageSize: 10,
-  }
-  await list(form).then(res =>{
-    state.ftuDeviceList = res.records
-    initMap()
-  })
-  state.volumeList = await defHttp.get({ url: volume })
+    pageSize: 10
+  };
 
-  let warn = {
-    order: 'desc',
-    pageNo: 1,
-    pageSize: 10,
-  }
-  await getWarnList(warn).then(res =>{
-    state.warnList = res.records
-  })
+  // 并行处理无依赖的请求
+  const [deviceRes, volumeRes, warnRes, statRes, eventRes] = await Promise.all([
+    list(pageParams),
+    defHttp.get({ url: volume }),
+    getWarnList(pageParams),
+    defHttp.get({ url: getStat }),
+    defHttp.get({ url: eventStat })
+  ]);
 
-  const data = await defHttp.get({url: getStat});
-  for (let i = 0; i < data.length; i++) {
-    switch (data[i].COMMUNICATION_MODE){
-      case 0:
-        state.bdCount=state.bdCount+1
-        break;
-      case 1:
-        state.dhCount=state.dhCount+1
-        break
-      case 2:
-        state.hhCount=state.hhCount+1
-        break;
+  // 处理设备列表和初始化地图
+  state.ftuDeviceList = deviceRes.records;
+  initMap();
+
+  // 处理容量列表
+  state.volumeList = volumeRes;
+
+  // 处理告警列表
+  state.warnList = warnRes.records;
+
+  // 使用Map高效统计通信模式数量
+  const commModeMap = new Map([
+    [0, 'bdCount'],
+    [1, 'dhCount'],
+    [2, 'hhCount']
+  ]);
+
+  statRes.forEach(item => {
+    const countKey = commModeMap.get(item.COMMUNICATION_MODE);
+    if (countKey) {
+      state[countKey] = (state[countKey] || 0) + 1;
     }
-  }
+  });
+
+  // 处理事件统计
+  state.statForm = eventRes;
 }
 
-function initMap(){
-  // 初始化地图 - 使用真实地理位置展示
+function initMap() {
+  // 预定义状态映射和颜色映射
+  const statusMap = {
+    0: { status: "dh_active", commStatus: "北斗在线", color: "#2F89FC" },
+    1: { status: "bd_active", commStatus: "电鸿在线", color: "#41C23C" },
+    2: { status: "f411_offline", commStatus: "一体机离线", color: "#9BA3A9" },
+    3: { status: "ftu_warning", commStatus: "电鸿在线", color: "#FFC600" },
+    4: { status: "error", commStatus: "电鸿在线", color: "#FF3636" },
+    5: { status: "hh_comm", commStatus: "混合模式", color: "#6633ff" }
+  };
+
+  // 加载地图库
   AMapLoader.load({
     key: "e28af433d6fabd84d33509eca1a3efa3",
     version: "2.0",
-    plugins: ["AMap.MoveAnimation ", "AMap.DistrictSearch",
+    plugins: [
+      "AMap.MoveAnimation",
+      "AMap.DistrictSearch",
       "AMap.ToolBar",
       "AMap.Driving",
       "AMap.PolygonEditor",
@@ -407,65 +392,30 @@ function initMap(){
       "AMap.MarkerClusterer"
     ]
   }).then((AMap) => {
+    // 创建地图实例
     const map = new AMap.Map("map", {
-      center: [104.830389,26.592528], // 北京中心位置
+      center: [104.830389, 26.592528],
       zoom: 11,
-      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719" // 使用清新灰色风格地图
+      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
     });
-    // 添加模拟标记点
-    let positions = [];
-    for (let i = 0; i < state.ftuDeviceList.length; i++) {
 
-      const position = {
-        position:[state.ftuDeviceList[i].lng,state.ftuDeviceList[i].lat],
-        deviceName:state.ftuDeviceList[i].deviceName,
-        insLineName:state.ftuDeviceList[i].insLineName,
-        id:state.ftuDeviceList[i].id
-      }
-      switch (state.ftuDeviceList[i].status){
-        case 0:
-          position.status = "dh_active"
-          position.commStatus = "北斗在线"
-          break
-        case 1:
-          position.status = "bd_active"
-          position.commStatus = "电鸿在线"
-          break
-        case 2:
-          position.status = "f411_offline"
-          position.commStatus = "一体机离线"
-          break;
-        case 3:
-          position.status = "ftu_warning"
-          position.commStatus = "电鸿在线"
-          break;
-        case 4:
-          position.status = "error"
-          position.commStatus = "电鸿在线"
-          break
-        case 5:
-          position.status = "hh_comm"
-          position.commStatus = "混合模式"
-          break
-      }
-      positions.push(position)
-    }
-    let infoWindow
-    // 根据状态添加不同颜色的标记
-    positions.forEach(point => {
-      const color =
-        point.status === "bd_active" ? "#41C23C" :
-        point.status === "dh_active" ? "#2F89FC" :
-        point.status === "hh_comm" ? "#6633ff" :
-        point.status === "f411_offline" ? "#9BA3A9" :
-          point.status === "ftu_warning" ? "#FFC600" :
-            point.status === "error" ? "#FF3636" : "#95A5A6";
+    // 合并数据处理和标记创建
+    const markers = state.ftuDeviceList.map(device => {
+      const statusInfo = statusMap[device.status] || statusMap[2]; // 默认使用离线状态
 
-      let marker = new AMap.Marker({
-        position: point.position,
-        map: map,
+      const markerData = {
+        position: [device.lng, device.lat],
+        deviceName: device.deviceName,
+        insLineName: device.insLineName,
+        id: device.id,
+        ...statusInfo
+      };
+
+      // 创建标记
+      const marker = new AMap.Marker({
+        position: markerData.position,
         content: `<div style="
-          background: ${color};
+          background: ${markerData.color};
           width: 20px;
           height: 20px;
           border: 2px solid white;
@@ -475,104 +425,125 @@ function initMap(){
         offset: new AMap.Pixel(-10, -20)
       });
 
-      marker.setLabel({
-        direction: "bottom-center",
-        offset: new AMap.Pixel(0, 0),  //设置文本标注偏移量
-        // content: `<div style="background: ${color};font-size: 16px">${point.title}</div>` //设置文本标注内容
+      // 绑定点击事件
+      marker.on("click", async () => {
+        try {
+          const data = await defHttp.get({url: ftuF411DeviceList,params: { id: markerData.id }});
+
+          // 创建信息窗口内容
+          const infoWindowContent = `
+            <div style="background: black">
+              <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
+                <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.deviceName}</div>
+                <div style="height: 84%;width: 100%;display: flex">
+                  <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
+                    <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${markerData.deviceName}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${markerData.insLineName}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0]?.deviceCode || '未知'}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：${markerData.commStatus}</div>
+                    <div style="height: 12%;margin-top: 2%;margin-left: 2%">历史数据：<span class="info-content" style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
+                  </div>
+                  <div style="width: 40%;height: 96%;margin-top:4%">
+                    <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // 创建或更新信息窗口
+          let infoWindow = marker.infoWindow;
+          if (!infoWindow) {
+            infoWindow = new AMap.InfoWindow({
+              offset: new AMap.Pixel(0, -15),
+              content: infoWindowContent
+            });
+            marker.infoWindow = infoWindow; // 存储在marker上，避免重复创建
+          } else {
+            infoWindow.setContent(infoWindowContent);
+          }
+
+          infoWindow.open(map, marker.getPosition());
+
+          // 绑定历史数据点击事件
+          setTimeout(() => {
+            const infoWindowContent = document.querySelector('.info-content');
+            if (infoWindowContent) {
+              infoWindowContent.onclick = () => goData(markerData);
+            }
+          }, 0);
+
+        } catch (error) {
+          console.error('获取设备详情失败:', error);
+        }
       });
 
-      marker.on("click",async (e) => {
-        let params = {
-          id:point.id
-        }
-        const data = await defHttp.get({url: ftuF411DeviceList,params});
-        var info = [];
-        info.push(`<div style="background: black"><div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
-      <div style="width: 100%;text-align: right;color: white;font-weight: bold">${point.deviceName}</div>
-      <div style="height: 84%;width: 100%;display: flex">
-        <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
-          <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${point.deviceName}</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${point.insLineName}</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0].deviceCode}</div>
-          <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：${point.commStatus}</div>
-          <div style="height: 12%;margin-top: 2%;margin-left: 2%">历史数据：<span  class="info-content" style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
-        </div>
-        <div style="width: 40%;height: 96%;margin-top:4%">
-          <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
-        </div>
-      </div>
-    </div></div>`)
-        infoWindow = new AMap.InfoWindow({
-          offset: new AMap.Pixel(0, -15),
-          content: info.join("")  //使用默认信息窗体框样式，显示信息内容
-        });
-        infoWindow.open(map, marker.getPosition());
-        const infoWindowContent = document.querySelector('.info-content');
-        if (infoWindowContent) {
-          infoWindowContent.addEventListener('click', () => {
-            goData(point);
-          });
-        }
-      })
-
-      map.on("click", (e) => {
-        // 判断点击目标是否为 Marker
-        if (!(e.target instanceof AMap.Marker)) {
-          infoWindow.close();
-        }
-      });
+      return marker;
     });
+
+    // 添加所有标记到地图
+    map.add(markers);
+
+    // 全局点击事件处理
+    map.on("click", (e) => {
+      if (!(e.target instanceof AMap.Marker)) {
+        // 关闭所有信息窗口
+        markers.forEach(marker => {
+          if (marker.infoWindow) {
+            marker.infoWindow.close();
+          }
+        });
+      }
+    });
+
   }).catch((e) => {
     console.error("地图加载失败:", e);
   });
-
 }
 
 const classOptions = {
   limitMoveNum: 3,
   step: 0.1
 };
-const go = useGo();
-function goData(v){
 
+const go = useGo();
+
+function goData(v) {
   go({
-    path:'/index/componets',
-    query:{
-      ftu:v.id,
-      device:v.deviceName
+    path: '/index/componets',
+    query: {
+      ftu: v.id,
+      device: v.deviceName
     }
   });
-
 }
 
-function exit(v){
-  if(v){
-    state.show = false
+function exit(v) {
+  if (v) {
+    state.show = false;
     screenfull.request();
     setMenuSetting({ show: false });
     appStore.setLayoutHideHeader(true);
     appStore.setLayoutHideSider(true);
     appStore.setLayoutHideMultiTabs(true);
-  }else{
-    state.show = true
-
+  } else {
+    state.show = true;
     setMenuSetting({ show: true });
     appStore.setLayoutHideHeader(false);
     appStore.setLayoutHideMultiTabs(false);
     appStore.setLayoutHideSider(false);
   }
-
 }
 
 watchEffect(() => {
   if (screenfull.isEnabled) {
     screenfull.on("change", () => {
       if (screenfull.isFullscreen) {
-        state.show = false
+        state.show = false;
         // 全屏时隐藏菜单
         setMenuSetting({ show: false });
       } else {
-        state.show = true
+        state.show = true;
         // 退出全屏时显示菜单
         setMenuSetting({ show: true });
         appStore.setLayoutHideHeader(false);
@@ -582,29 +553,13 @@ watchEffect(() => {
     });
   }
 });
-onBeforeRouteLeave(()=>{
+
+onBeforeRouteLeave(() => {
   appStore.setLayoutHideHeader(false);
   setMenuSetting({ show: true });
   appStore.setLayoutHideMultiTabs(false);
   appStore.setLayoutHideSider(false);
-})
-
-const startAutoScroll = (container) => {
-  if (!container) return;
-  const table = container.querySelector('table');
-  const rows = table.querySelectorAll('tbody tr');
-  if (rows.length <= 5) return; // 当行数小于等于5时，不滚动
-  const rowHeight = rows[0].offsetHeight;
-  let scrollTop = 0;
-  const intervalId = setInterval(() => {
-    scrollTop += rowHeight;
-    if (scrollTop >= table.offsetHeight - container.offsetHeight) {
-      scrollTop = 0;
-    }
-    container.scrollTop = scrollTop;
-  }, 3000); // 每3秒滚动一次
-  return intervalId;
-};
+});
 
 onMounted(() => {
   document.addEventListener('keydown', function(event) {
@@ -613,34 +568,25 @@ onMounted(() => {
       appStore.setLayoutHideHeader(false);
       appStore.setLayoutHideMultiTabs(false);
       appStore.setLayoutHideSider(false);
-      state.show = true
+      state.show = true;
     }
   });
-  getList()
-  // 实现表格自动轮播
-  if (feederTableContainer.value) {
-    startAutoScroll(feederTableContainer.value);
-  }
-  if (realTimeTableContainer.value) {
-    startAutoScroll(realTimeTableContainer.value);
-  }
+  getList();
   setMenuSetting({ show: true });
   appStore.setLayoutHideHeader(true);
   appStore.setLayoutHideMultiTabs(true);
   appStore.setLayoutHideSider(true);
-  state.show = true
-
+  state.show = true;
 });
 </script>
 
 <style lang="less" scoped>
-/* 这里复制原 HTML 文件中的样式 */
 .amap-copyright {
   opacity: 0;
 }
 
 .amap-container {
-  background-image: none
+  background-image: none;
 }
 
 ::v-deep .amap-marker-label {
@@ -662,7 +608,6 @@ body {
 }
 
 .dashboard-container {
-  //background: rgb(3,52,71);
   background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/bg_ftu.png");
   background-size: cover;
   position: relative;
@@ -670,7 +615,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  //padding: 10px;
   gap: 5px;
 }
 
@@ -678,45 +622,22 @@ body {
 .header-panel {
   background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/xtmc.png");
   background-repeat: no-repeat;
-  background-size: contain; /* 修改为contain，确保背景图片适应容器 */
-  background-position: center; /* 背景图片居中显示 */
+  background-size: contain;
+  background-position: center;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   height: 60px;
-  //background: rgba(10, 20, 40, 0.5);
   border-radius: 12px;
-}
-
-.header-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  text-shadow:
-    0 0 10px rgba(47, 137, 252, 0.8),
-    0 0 20px rgba(47, 137, 252, 0.6);
-  letter-spacing: 2px;
-  text-align: center;
-}
-
-.header-title::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 25%;
-  width: 50%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #00F0FF, transparent);
 }
 
 /* 主内容区样式 */
 .main-panel {
-  flex-grow: 1; /* 占满剩余高度 */
+  flex-grow: 1;
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
-  //gap: var(--panel-spacing);
 }
 
 .left-stats,
@@ -731,7 +652,7 @@ body {
 
 .left-stats .stat-card,
 .right-stats .stat-card {
-  flex: 1; /* 每个模块占main-panel高度的33% */
+  flex: 1;
   min-height: 300px;
 }
 
@@ -746,7 +667,6 @@ body {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  //box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .map-container::before {
@@ -756,17 +676,6 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-}
-
-.map-container-title {
-  //background-color: rgba(0, 0, 0, 0.2);
-  z-index: 100;
-  //background: rgba(25, 35, 51, 0.8);
-  font-size: 2rem;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  letter-spacing: 1px;
 }
 
 #map {
@@ -966,10 +875,8 @@ body {
 
 .event-label {
   font-size: 1rem;
-  color:white;
+  color: white;
 }
-
-
 
 /* 表格样式 */
 .real-time-table {
@@ -1017,7 +924,6 @@ body {
   width: 40px;
 }
 
-
 .card-title {
   display: flex;
   align-items: center;
@@ -1039,111 +945,6 @@ body {
   background: rgba(0, 240, 255, 0.15);
 }
 
-/* 重新设计的指标卡片 */
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.metric-item {
-  background: rgba(20, 33, 51, 0.6);
-  border-radius: 10px;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(47, 137, 252, 0.1);
-}
-
-.metric-item:hover {
-  border-color: var(--electric-blue);
-  background: rgba(25, 45, 70, 0.6);
-}
-
-.metric-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.metric-icon {
-  font-size: 1.2rem;
-  margin-right: 10px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(47, 137, 252, 0.2), transparent);
-}
-
-.metric-name {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.metric-value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #FFFFFF;
-  margin: 5px 0;
-}
-
-.metric-status {
-  font-size: 0.85rem;
-  padding: 4px 10px;
-  border-radius: 20px;
-  text-align: center;
-  align-self: flex-start;
-  margin-top: 5px;
-  transition: all 0.3s ease;
-}
-
-.status-normal {
-  color: #41C23C;
-}
-
-.status-warning {
-  color: #FFC600;
-}
-
-.status-error {
-  color: #FF3636;
-}
-
-.status-info {
-  color: #2F89FC;
-}
-
-/* 进度条样式 */
-.progress-container {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  margin: 10px 0;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  border-radius: 3px;
-}
-
-.progress-normal {
-  background: var(--tele-green);
-}
-
-.progress-warning {
-  background: var(--warning-yellow);
-}
-
-.progress-danger {
-  background: var(--danger-red);
-}
-
 /* 控制功能卡片 */
 .control-grid {
   display: grid;
@@ -1160,7 +961,6 @@ body {
 
 .control-label {
   font-size: 0.95rem;
-  //color: #9BA3A9;
   color: white;
 }
 
@@ -1193,158 +993,6 @@ body {
   color: white;
 }
 
-/* 故障信息区 */
-.fault-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--panel-spacing);
-}
-
-.fault-card {
-  background:rgba(15, 26, 37, 0.7);
-  border: 1px solid  rgba(30, 145, 255, 0.3);
-  border-radius: 12px;
-  padding: 20px;
-  flex: 1;
-  min-width: 400px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-
-.fault-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #00F0FF, transparent);
-}
-
-.fault-title {
-  font-size: 1.1rem;
-  color: #00F0FF;
-  margin-bottom: 15px;
-}
-
-.fault-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  flex-grow: 1;
-  align-items: center;
-}
-
-.fault-stat {
-  min-width: 180px;
-}
-
-.fault-label {
-  font-size: 0.9rem;
-  color: #9BA3A9;
-}
-
-.fault-value {
-  font-size: 1.2rem;
-  color: white;
-  margin-top: 5px;
-}
-
-.normal {
-  color: #41C23C;
-}
-
-.divider {
-  width: 1px;
-  background: rgba(47, 137, 252, 0.2);
-  margin: 0 20px;
-}
-
-/* 数据表格区 */
-.data-panel {
-  width: 30%;
-  color: white;
-  background: rgba(15, 26, 37, 0.7);
-  border: 1px solid rgba(30, 145, 255, 0.3);
-  border-radius: 12px;
-  padding: 10px;
-  position: relative;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.data-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #00F0FF, transparent);
-}
-
-.data-title {
-  font-size: 1.2rem;
-  color: #00F0FF;
-  margin-bottom: 5px;
-}
-
-.data-subtitle {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-}
-
-/* 设置滚动条整体样式 */
-::-webkit-scrollbar {
-  width: 20px;
-  height: 20px;
-}
-
-/* 设置滚动条轨道为透明 */
-::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
-/* 设置滚动条滑块为透明 */
-::-webkit-scrollbar-thumb {
-  background-color: transparent;
-}
-
-/* 鼠标悬停时滑块略微可见 */
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.data-table th {
-  background: rgba(25, 35, 51, 0.8);
-  padding: 12px 15px;
-  text-align: left;
-  color: #00F0FF;
-  font-weight: normal;
-  position: sticky;
-  top: 0;
-}
-
-.data-table td {
-  text-align: left;
-  padding: 10px 15px;
-  color: white;
-  border-bottom: 1px solid rgba(0, 240, 255, 0.1);
-}
-
-.data-table tr:hover {
-  background: rgba(30, 60, 100, 0.4);
-}
-
 .channel-badge {
   padding: 3px 8px;
   border-radius: 4px;
@@ -1362,32 +1010,16 @@ body {
   background: rgba(47, 137, 252, 0.7);
 }
 
-.bg-gray {
-  background: rgba(155, 163, 169, 0.7);
+.status-normal {
+  color: #41C23C;
 }
 
-.bg-red {
-  background: rgba(255, 54, 54, 0.7);
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.status-info {
+  color: #2F89FC;
 }
 
 /* 响应式设计 */
 @media (max-width: 1400px) {
-  .fault-stat {
-    min-width: 150px;
-  }
-
-  .fault-card {
-    min-width: 300px;
-  }
-}
-
-@media (max-width: 1200px) {
   .left-stats,
   .right-stats {
     min-width: 250px;
@@ -1397,11 +1029,6 @@ body {
     min-width: 400px;
   }
 
-  .fault-card {
-    min-width: 250px;
-  }
-
-  .metric-grid,
   .control-grid {
     grid-template-columns: 1fr;
   }
@@ -1416,14 +1043,6 @@ body {
     min-width: 100%;
     height: 240px;
   }
-
-  .fault-stat {
-    min-width: 120px;
-  }
-
-  .header-title {
-    font-size: 2rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -1431,34 +1050,21 @@ body {
     flex-direction: column;
     align-items: center;
   }
-
-  .fault-stats {
-    gap: 15px;
-  }
-
-  .fault-stat {
-    min-width: 100px;
-  }
-
-  .header-title {
-    font-size: 1.7rem;
-  }
 }
 
-::v-deep .amap-info-content{
+::v-deep .amap-info-content {
   padding: 0;
 }
 
-::v-deep .el-dialog__header{
+::v-deep .el-dialog__header {
   background: rgba(14, 38, 59, 0.9);
 }
 
-::v-deep .el-dialog{
+::v-deep .el-dialog {
   background: rgba(14, 38, 59, 0.9);
 }
 
-::v-deep .amap-info-close{
+::v-deep .amap-info-close {
   display: none;
 }
-
 </style>

@@ -61,9 +61,9 @@ public class FtuWarnInfo implements Serializable {
     @Schema(description = "告警信息")
     private java.lang.String warnInfo;
 	/**告警类别*/
-	@Excel(name = "告警类别", width = 15, dicCode = "device_type")
+	@Excel(name = "展示类别", width = 15, dicCode = "device_type")
 	@Dict(dicCode = "device_type")
-    @Schema(description = "告警类别")
+    @Schema(description = "展示类别")
     private java.lang.String deviceType;
 	/**设备id*/
 	@Excel(name = "设备id", width = 15)
@@ -87,4 +87,8 @@ public class FtuWarnInfo implements Serializable {
 	@Excel(name = "线路位置", width = 15)
     @Schema(description = "线路位置")
     private java.lang.String lineLocation;
+
+    @Schema(description = "统计类型")
+    private String warnType;
+
 }

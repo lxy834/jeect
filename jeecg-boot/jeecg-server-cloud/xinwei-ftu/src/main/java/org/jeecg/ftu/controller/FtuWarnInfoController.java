@@ -99,6 +99,14 @@ public class FtuWarnInfoController extends JeecgController<FtuWarnInfo, IFtuWarn
 		return Result.ok(ftuWarnInfoService.getEventById(ftuId, date,event,pageNo,pageSize));
 	}
 
+	@Operation(summary = "事件统计查询")
+	@RequiresPermissions("ftu:ftu_warn_info:eventStat")
+	@GetMapping(value = "/eventStat")
+	public Result<Map<String,Object>> eventStat() {
+		return Result.ok(ftuWarnInfoService.eventStat());
+	}
+
+
 	/**
 	 *   添加
 	 *

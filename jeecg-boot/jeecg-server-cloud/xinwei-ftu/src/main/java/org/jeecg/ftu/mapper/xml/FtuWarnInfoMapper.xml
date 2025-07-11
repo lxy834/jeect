@@ -57,4 +57,7 @@
         ORDER BY
         dr.create_time ASC
     </select>
+    <select id="eventStat" resultType="org.jeecg.ftu.vo.WarnInfoStatVO">
+        SELECT COUNT(1) AS warnCount,WARN_TYPE FROM FTU_WARN_INFO GROUP BY WARN_TYPE
+    </select>
 </mapper>

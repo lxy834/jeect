@@ -91,7 +91,7 @@
       <el-dialog  v-model="state.dialogVisible" :title="state.legendName" draggable>
         <el-table :header-cell-style="{background:'rgba(14, 38, 59, 0.95)',color:'#66ffff'}"
                   :cell-style="{background:'rgba(14, 38, 59, 0.95)',color:'#ffffff'}" :data="state.tableData" height="200" stripe style="width: 100%">
-          <el-table-column prop="deviceType" label="事件类型" show-overflow-tooltip/>
+          <el-table-column prop="deviceType" label="事件类型"/>
           <el-table-column prop="warnInfo" label="事件详情" show-overflow-tooltip/>
           <el-table-column prop="lineLocation" label="线路名称" show-overflow-tooltip/>
           <el-table-column prop="warnTime" label="触发时间" show-overflow-tooltip/>

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.jeecg.ftu.entity.FtuWarnInfo;
 import org.jeecg.ftu.mapper.FtuWarnInfoMapper;
 import org.jeecg.ftu.service.IFtuWarnInfoService;
+import org.jeecg.ftu.vo.WarnInfoStatVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,10 +61,39 @@ public class FtuWarnInfoServiceImpl extends ServiceImpl<FtuWarnInfoMapper, FtuWa
                 .eq(FtuWarnInfo::getDeviceType,event).eq(FtuWarnInfo::getDeviceId,ftuId).likeRight(FtuWarnInfo::getCreateTime,date));
     }
 
-    private Map<String, Object> convertToChartData(
-            List<Map<String, Object>> sqlResults,
-            LocalDate startDate,
-            LocalDate endDate) {
+    @Override
+    public Map<String, Object> eventStat() {
+        // 预先定义好所有可能的告警类型及其对应键名
+        Map<String, String> warnTypeMapping = Map.of(
+                "故障", "fault",
+                "其它", "otherEvent",
+                "掉线", "disconnect",
+                "掉电", "powerDown"
+        );
+
+        // 查询所有告警类型的统计数据
+        List<WarnInfoStatVO> warnInfoStatVOS = ftuWarnInfoMapper.eventStat();
+
+        // 提前计算Map初始容量，避免后续扩容开销
+        Map<String, Object> resultMap = new HashMap<>(warnInfoStatVOS.size());
+
+        // 初始化所有可能的告警类型计数为0
+        for (String key : warnTypeMapping.values()) {
+            resultMap.put(key, 0);
+        }
+
+        // 处理查询结果，直接通过映射关系设置值
+        for (WarnInfoStatVO vo : warnInfoStatVOS) {
+            String targetKey = warnTypeMapping.get(vo.getWarnType());
+            if (targetKey != null) {
+                resultMap.put(targetKey, vo.getWarnCount());
+            }
+        }
+
+        return resultMap;
+    }
+
+    private Map<String, Object> convertToChartData(List<Map<String, Object>> sqlResults, LocalDate startDate, LocalDate endDate) {
 
         // 预分配足够大小的Map以减少扩容开销
         Map<String, Map<String, Integer>> typeGroupedStats = new LinkedHashMap<>((int) ((int) (endDate.toEpochDay() - startDate.toEpochDay() + 1) * 1.5));

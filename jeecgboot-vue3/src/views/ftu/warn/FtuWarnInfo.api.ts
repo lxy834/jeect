@@ -7,6 +7,7 @@ enum Api {
   list = '/ftu/ftuWarnInfo/list',
   save='/ftu/ftuWarnInfo/add',
   getStatById = '/ftu/ftuWarnInfo/getStatById',
+  eventStat = '/ftu/ftuWarnInfo/eventStat',
   getEventById = '/ftu/ftuWarnInfo/getEventById',
   edit='/ftu/ftuWarnInfo/edit',
   deleteOne = '/ftu/ftuWarnInfo/delete',
@@ -21,6 +22,8 @@ enum Api {
 export const getExportUrl = Api.exportXls;
 
 export const getStatById = Api.getStatById;
+
+export const eventStat = Api.eventStat;
 
 export const getEventById = Api.getEventById;
 
