@@ -329,11 +329,13 @@ async function getList() {
 
   // 并行处理无依赖的请求
   const [deviceRes, volumeRes, warnRes, statRes, eventRes] = await Promise.all([
+
     list(pageParams),
     defHttp.get({ url: volume }),
     getWarnList(pageParams),
     defHttp.get({ url: getStat }),
-    defHttp.get({ url: eventStat })
+    defHttp.get({ url: eventStat }),
+
   ]);
 
   // 处理设备列表和初始化地图

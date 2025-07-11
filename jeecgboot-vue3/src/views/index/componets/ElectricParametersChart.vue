@@ -46,7 +46,7 @@
                 线路图
               </div>
               <div style="height:86%;width:95%;background-image:url('https://pic1.zhimg.com/0aacef55810d4949d28f3f7a1147aad0_r.jpg');
-              background-size:100% 100%;min-height:280px;margin-left:3%;margin-top: 4px;background-repeat: no-repeat"></div>
+              background-size:100% 100%;min-height:180px;margin-left:3%;margin-top: 4px;background-repeat: no-repeat"></div>
             </dv-border-box-9>
           </div>
         </div>
