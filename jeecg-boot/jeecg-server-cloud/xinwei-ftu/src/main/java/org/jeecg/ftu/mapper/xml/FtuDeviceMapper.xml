@@ -1,9 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.ftu.mapper.FtuDeviceMapper">
+    <update id="updateLngLat">
+        update ftu_device
+        set lng    = #{lng},
+            lat    = #{lat},
+            status = #{status}
+        where id = #{id}
+    </update>
 
-    <select id="queryFtuElectlVolumeList" resultType="org.jeecg.ftu.vo.FtuElectlVolumeVO" >
-        SELECT v.ACTIVE_POWER,v.FACTOR,v.voltage,v.FTU_CURRENT,v.SEND_MODE,d.INS_LINE_NAME FROM FTU_ELECTL_VOLUME v LEFT JOIN FTU_DEVICE d on v.FTU_ID = d.ID
+    <select id="queryFtuElectlVolumeList" resultType="org.jeecg.ftu.vo.FtuElectlVolumeVO">
+        SELECT v.ACTIVE_POWER, v.FACTOR, v.voltage, v.FTU_CURRENT, v.SEND_MODE, d.INS_LINE_NAME
+        FROM FTU_ELECTL_VOLUME v
+                 LEFT JOIN FTU_DEVICE d on v.FTU_ID = d.ID
         order by V.CREATE_TIME desc limit 20
+    </select>
+    <select id="dataById" resultType="org.jeecg.ftu.entity.FtuDevice">
+        select *
+        from ftu_device
+        where id = #{id}
+    </select>
+    <select id="getIndexList" resultType="org.jeecg.ftu.vo.FtuDeviceMapVO">
+        SELECT D.INS_LINE_NAME,
+               D.STATUS,
+               D.LNG,
+               D.LAT,
+               D.DEVICE_NAME,
+               F.COMMUNICATION_MODE,
+               D.ID,
+               D.IP,
+               D.STATION,
+               F.ONLINE_STATUS
+        FROM FTU_DEVICE D
+                 LEFT JOIN FTU_F411_DEVICE F ON D.ID = F.FTU_ID
     </select>
 </mapper>

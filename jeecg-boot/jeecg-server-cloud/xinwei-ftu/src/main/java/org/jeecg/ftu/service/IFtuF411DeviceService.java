@@ -47,4 +47,8 @@ public interface IFtuF411DeviceService extends IService<FtuF411Device> {
 	 */
 	public void delBatchMain (Collection<? extends Serializable> idList);
 
+	FtuF411Device get411Device(String card);
+
+	boolean updateMode(Integer mode,String id);
+
 }

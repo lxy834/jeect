@@ -5,6 +5,7 @@ const { createConfirm } = useMessage();
 
 enum Api {
   list = '/ftu/ftuDevice/list',
+  getIndexList = '/ftu/ftuDevice/getIndexList',
   volume = '/ftu/ftuDevice/volume',
   getVolumeById = '/ftu/ftuDevice/getVolumeById',
   save ='/ftu/ftuDevice/add',
@@ -24,6 +25,8 @@ enum Api {
 export const getExportUrl = Api.exportXls;
 
 export const volume = Api.volume;
+
+export const getIndexList = Api.getIndexList;
 
 export const getVolumeById = Api.getVolumeById;
 

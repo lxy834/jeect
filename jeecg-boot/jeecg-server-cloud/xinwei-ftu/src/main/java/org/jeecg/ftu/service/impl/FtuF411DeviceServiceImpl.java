@@ -79,4 +79,14 @@ public class FtuF411DeviceServiceImpl extends ServiceImpl<FtuF411DeviceMapper, F
 		}
 	}
 
+	@Override
+	public FtuF411Device get411Device(String card) {
+		return baseMapper.get411Device(card);
+	}
+
+	@Override
+	public boolean updateMode(Integer mode, String id) {
+		return baseMapper.updateMode(mode,id);
+	}
+
 }

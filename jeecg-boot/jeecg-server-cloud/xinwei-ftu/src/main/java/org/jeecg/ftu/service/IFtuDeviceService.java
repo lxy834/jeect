@@ -5,6 +5,7 @@ import org.jeecg.ftu.entity.FtuElectlVolume;
 import org.jeecg.ftu.entity.FtuWarnInfo;
 import org.jeecg.ftu.entity.FtuDevice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.ftu.vo.FtuDeviceMapVO;
 import org.jeecg.ftu.vo.FtuElectlVolumeVO;
 
 import java.io.Serializable;
@@ -58,5 +59,10 @@ public interface IFtuDeviceService extends IService<FtuDevice> {
 
 	Map<String,Object> getVolumeStatByFtuId(String ftuId);
 
+	FtuDevice dataById(String id);
+
+	boolean updateLngLat(double lng, double lat,Integer status, String id);
+
+	List<FtuDeviceMapVO> getIndexList();
 
 }

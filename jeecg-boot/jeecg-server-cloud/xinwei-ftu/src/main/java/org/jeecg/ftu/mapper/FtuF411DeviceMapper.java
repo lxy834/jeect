@@ -2,6 +2,7 @@ package org.jeecg.ftu.mapper;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.ftu.entity.FtuF411Device;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -29,4 +30,11 @@ public interface FtuF411DeviceMapper extends BaseMapper<FtuF411Device> {
      * @return List<FtuF411Device>
      */
     public List<FtuF411Device> selectByMainId(@Param("mainId") String mainId);
+
+    @InterceptorIgnore(tenantLine = "true")
+    FtuF411Device get411Device(@Param("card") String card);
+
+    @InterceptorIgnore(tenantLine = "true")
+    boolean updateMode(@Param("mode") Integer mode,@Param("id") String id);
+
 }

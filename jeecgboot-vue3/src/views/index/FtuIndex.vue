@@ -1,5 +1,70 @@
 <template>
   <div class="dashboard-container">
+
+    <!-- 悬浮按钮容器 -->
+    <div class="floating-button-container">
+      <!-- 主悬浮按钮 -->
+      <button
+        class="floating-button"
+        @click="toggleMenu"
+        @mouseenter="showTooltip('mainTooltip')"
+        @mouseleave="hideTooltip('mainTooltip')"
+      >
+        <i class="fas" :class="state.isOpen ? 'fa-times' : 'fa-plus'"></i>
+      </button>
+      <div
+        class="tooltip"
+        :class="{ 'tooltip-visible': state.tooltips.mainTooltip }"
+        ref="mainTooltip"
+      >
+        快捷导航
+      </div>
+      <!-- 展开的子按钮 (可选) -->
+      <!-- 展开的子按钮 -->
+      <div
+        class="floating-menu"
+        :class="{ 'menu-open': state.isOpen }"
+      >
+        <!-- 第一个子按钮 -->
+        <div class="tooltip-container">
+          <button
+            class="floating-menu-item"
+            @mouseenter="showTooltip('listTooltip')"
+            @mouseleave="hideTooltip('listTooltip')"
+            @click="state.dialog = false,state.dialogVisible = true,state.title='馈线负荷一览表'"
+          >
+            <i class="fa fa-line-chart" />
+          </button>
+          <div
+            class="tooltip"
+            :class="{ 'tooltip-visible': state.tooltips.listTooltip }"
+            ref="listTooltip"
+          >
+            馈线负荷一览表
+          </div>
+        </div>
+
+        <!-- 第二个子按钮 -->
+        <div class="tooltip-container">
+          <button
+            class="floating-menu-item"
+            @mouseenter="showTooltip('fontTooltip')"
+            @mouseleave="hideTooltip('fontTooltip')"
+            @click="state.dialogVisible = false,state.dialog = true,state.title='FTU在线一览表'"
+          >
+            <i class="fas fa-clipboard-list"></i>
+          </button>
+          <div
+            class="tooltip"
+            :class="{ 'tooltip-visible': state.tooltips.fontTooltip }"
+            ref="fontTooltip"
+          >
+            FTU在线一览表
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="header-panel">
       <div style="text-align: right;width: 100%">
         <div class="qp icon-white">
@@ -143,6 +208,26 @@
             <span class="status-dot hh-bg"></span>
             <span>混合通信模式</span>
           </div>
+
+          <div class="status-item">
+            <span class="status-dot overload-small"></span>
+            <span>电流负荷小</span>
+          </div>
+
+          <div class="status-item">
+            <span class="status-dot overload-big"></span>
+            <span>电流负荷大</span>
+          </div>
+
+          <div class="status-item">
+            <span class="status-dot overload"></span>
+            <span>负荷过载</span>
+          </div>
+
+          <div class="status-item">
+            <span class="status-dot small"></span>
+            <span>通信质量差</span>
+          </div>
         </div>
       </div>
       <!-- 右侧数据卡片 - 重新设计 -->
@@ -277,11 +362,65 @@
           </div>
         </div>
       </div>
-      <el-dialog  v-model="state.dialogVisible" draggable>
-        <div id="main" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
-        <div id="stat" style="height: 400px;width: 100%;  background: rgba(14, 38, 59, 0.9);color: white"></div>
-      </el-dialog>
     </div>
+    <el-dialog
+      v-model="state.dialogVisible"
+      :title="state.title"
+      draggable
+      width="65%"
+      max-height="80vh"
+    >
+      <el-table :header-cell-style="{background:'rgba(14, 38, 59, 1)',color:'#66ffff'}"
+                :cell-style="{background:'rgba(14, 38, 59, 0.95)',color:'#ffffff'}" :data="state.tableData"  stripe style="width: 100%;border: 1px solid #66ffff">
+        <el-table-column prop="deviceName"  label="名称" align="center"/>
+        <el-table-column prop="maxCurrent" label="允许电流" align="center"/>
+        <el-table-column prop="dayMax"  label="当日最大" align="center"/>
+        <el-table-column prop="nowCurrent" label="实时电流" align="center"/>
+        <el-table-column label="负载率" align="center">
+          <template #default="scope">
+            <div v-if="scope.row.maxCurrent > 0">
+              <div class="flex items-center gap-2">
+                <!-- 进度条 -->
+                <el-progress
+                  :percentage="loadRate(scope.row)"
+                  :stroke-width="8"
+                  :color="loadRateColor(scope.row)"
+                style="flex: 1"
+                />
+              </div>
+            </div>
+            <div v-else>--</div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination style="margin-top: 5px" size="small" layout="->,prev, pager, next" :total="state.total" :background="true"/>
+    </el-dialog>
+
+    <el-dialog
+      v-model="state.dialog"
+      :title="state.title"
+      draggable
+      width="65%"
+      max-height="80vh"
+    >
+      <el-table :header-cell-style="{background:'rgba(14, 38, 59, 1)',color:'#66ffff'}"
+                :cell-style="{background:'rgba(14, 38, 59, 0.95)',color:'#ffffff'}" :data="state.ftuOnlineList"  stripe style="width: 100%;border: 1px solid #66ffff">
+        <el-table-column prop="station" label="站名" align="center"/>
+        <el-table-column prop="insLineName"  label="线路名" align="center"/>
+        <el-table-column prop="deviceName" label="名称" align="center" show-overflow-tooltip/>
+        <el-table-column label="状态" align="center" width="100">
+          <template #default="scope">
+            <!-- 状态为0时显示绿色闪烁圆圈 -->
+            <div v-if="scope.row.onlineStatus === 0" class="status-circle green-blink"></div>
+            <!-- 状态为1时显示红色闪烁圆圈 -->
+            <div v-if="scope.row.onlineStatus === 1" class="status-circle red-blink"></div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="ip"  label="IP地址" align="center"/>
+        <el-table-column prop="commStatus"  label="通信模式" align="center"/>
+      </el-table>
+      <el-pagination style="margin-top: 5px" size="small" layout="->,prev, pager, next" :total="state.total" :background="true"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -294,7 +433,7 @@ import AMapLoader from "@amap/amap-jsapi-loader";
 import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
 import { vue3ScrollSeamless } from "vue3-scroll-seamless";
-import { ftuF411DeviceList, list, volume } from "@/views/ftu/list/FtuDevice.api.ts";
+import { ftuF411DeviceList, getIndexList, volume } from "@/views/ftu/list/FtuDevice.api.ts";
 import { defHttp } from "@/utils/http/axios";
 import { getWarnList, eventStat } from "@/views/ftu/warn/FtuWarnInfo.api";
 import { getStat } from "@/views/ftu/f411/FtuF411Device.api.ts";
@@ -311,15 +450,70 @@ const realTimeTableContainer = ref(null);
 const state = reactive({
   show: true,
   dialogVisible: false,
+  dialog:false,
   ftuDeviceList: [],
+  ftuOnlineList:[],
   volumeList: [],
   bdCount: 0,
   dhCount: 0,
   hhCount: 0,
   warnList: [],
-  statForm: {}
+  statForm: {},
+  tableData:[{
+    deviceName:"梭嘎变10kV湾河Ⅰ回线",
+    maxCurrent:400,
+    dayMax:381,
+    nowCurrent:297,
+  },{
+    deviceName:"梭嘎变10kV湾河Ⅰ回线",
+    maxCurrent:400,
+    dayMax:381,
+    nowCurrent:30,
+  },{
+    deviceName:"梭嘎变10kV湾河Ⅰ回线",
+    maxCurrent:400,
+    dayMax:381,
+    nowCurrent:440,
+  },{
+    deviceName:"梭嘎变10kV湾河Ⅰ回线",
+    maxCurrent:400,
+    dayMax:381,
+    nowCurrent:350,
+  }],
+  over:0,
+  total:0,
+  isOpen:false,
+  title:"",
+  tooltips: {
+    mainTooltip: false,
+    listTooltip: false,
+    fontTooltip: false,
+    helpTooltip: false
+  }
 });
 
+
+
+// 计算负载率，返回数值用于计算颜色
+function getLoadRateValue(row) {
+  if (!row.nowCurrent || !row.maxCurrent) return 0;
+  return (row.nowCurrent / row.maxCurrent) * 100;
+}
+
+// 计算负载率百分比，返回字符串用于显示
+function loadRate(row) {
+  return getLoadRateValue(row).toFixed(1);
+}
+
+// 基于当前行的负载率计算颜色
+function loadRateColor(row){
+  const rate = getLoadRateValue(row); // 使用当前行的实际负载率
+  console.log('当前行负载率:', rate);
+  if (rate > 100) return '#FF00FF';
+  if (rate > 80) return '#00fbff';
+  if (rate < 30) return '#87CEFA';
+  return '#4CD964'; // 30-80之间的默认颜色
+}
 async function getList() {
   const pageParams = {
     order: 'desc',
@@ -330,7 +524,7 @@ async function getList() {
   // 并行处理无依赖的请求
   const [deviceRes, volumeRes, warnRes, statRes, eventRes] = await Promise.all([
 
-    list(pageParams),
+    defHttp.get({url:getIndexList}),
     defHttp.get({ url: volume }),
     getWarnList(pageParams),
     defHttp.get({ url: getStat }),
@@ -339,7 +533,8 @@ async function getList() {
   ]);
 
   // 处理设备列表和初始化地图
-  state.ftuDeviceList = deviceRes.records;
+  state.ftuDeviceList = deviceRes;
+  console.log(deviceRes);
   initMap();
 
   // 处理容量列表
@@ -354,11 +549,10 @@ async function getList() {
     [1, 'dhCount'],
     [2, 'hhCount']
   ]);
-
   statRes.forEach(item => {
     const countKey = commModeMap.get(item.COMMUNICATION_MODE);
     if (countKey) {
-      state[countKey] = (state[countKey] || 0) + 1;
+      state[countKey] = item.count;
     }
   });
 
@@ -367,17 +561,76 @@ async function getList() {
 }
 
 function initMap() {
-  // 预定义状态映射和颜色映射
   const statusMap = {
-    0: { status: "dh_active", commStatus: "北斗在线", color: "#2F89FC" },
-    1: { status: "bd_active", commStatus: "电鸿在线", color: "#41C23C" },
-    2: { status: "f411_offline", commStatus: "一体机离线", color: "#9BA3A9" },
-    3: { status: "ftu_warning", commStatus: "电鸿在线", color: "#FFC600" },
-    4: { status: "error", commStatus: "电鸿在线", color: "#FF3636" },
-    5: { status: "hh_comm", commStatus: "混合模式", color: "#6633ff" }
+    0: { status: "bd_active", deviceStatus: "北斗在线", color: "#2F89FC" },
+    1: { status: "dh_active", deviceStatus: "电鸿在线", color: "#41C23C" },
+    2: { status: "f411_offline", deviceStatus: "一体机离线", color: "#9BA3A9" },
+    3: { status: "ftu_warning", deviceStatus: "FTU故障", color: "#FFC600" },
+    4: { status: "error", deviceStatus: "FTU告警", color: "#FF3636" },
+    5: { status: "hh_comm", deviceStatus: "混合模式", color: "#6633ff" },
+    6: { status: "overload-small", deviceStatus: "电流负荷小", color: "#87CEFA" },
+    7: { status: "overload-big", deviceStatus: "电流负荷大", color: "#00fbff" },
+    8: { status: "overload", deviceStatus: "负荷过载", color: "#FF00FF" },
+    9: { status: "small", deviceStatus: "通信质量差", color: "#6633ff" },
   };
 
-  // 加载地图库
+  const commMap = {
+    0: { communicationMode: 0, commStatus: "北斗在线"},
+    1: { communicationMode: 1, commStatus: "电鸿在线"},
+    2: { communicationMode: 2, commStatus: "混合模式"},
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    /* 电流负荷小 - 缓慢闪烁 */
+    @keyframes smallLoadBlink {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    .small-load-blink {
+      animation: smallLoadBlink 3s infinite;
+    }
+
+    /* 电流负荷大 - 中等速度闪烁 */
+    @keyframes bigLoadBlink {
+      0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .big-load-blink {
+      animation: bigLoadBlink 2s infinite;
+    }
+
+    /* 负荷过载 - 快速闪烁（警告效果） */
+    @keyframes overloadBlink {
+      0% { opacity: 0; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+    .overload-blink {
+      animation: overloadBlink 1s infinite;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    }
+
+    /* 通信质量差 - 不稳定闪烁 */
+    @keyframes poorSignalBlink {
+      0% { opacity: 0.4; }
+      30% { opacity: 1; }
+      50% { opacity: 0.6; }
+      70% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    .poor-signal-blink {
+      animation: poorSignalBlink 2.5s infinite;
+    }
+
+    .blink-container {
+      position: relative;
+    }
+  `;
+  document.head.appendChild(style);
+
   AMapLoader.load({
     key: "e28af433d6fabd84d33509eca1a3efa3",
     version: "2.0",
@@ -394,56 +647,113 @@ function initMap() {
       "AMap.MarkerClusterer"
     ]
   }).then((AMap) => {
-    // 创建地图实例
     const map = new AMap.Map("map", {
       center: [104.830389, 26.592528],
       zoom: 11,
       mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
     });
 
-    // 合并数据处理和标记创建
     const markers = state.ftuDeviceList.map(device => {
       const statusInfo = statusMap[device.status] || statusMap[2]; // 默认使用离线状态
+      const commStatus = commMap[device.communicationMode]; // 默认使用离线状态
+      const status = device.status;
+      // 判断设备状态类型
+      const isSmallLoad = status === 6;
+      const isBigLoad = status === 7;
+      const isOverload = status === 8;
+      const isPoorSignal = status === 9;
 
       const markerData = {
         position: [device.lng, device.lat],
         deviceName: device.deviceName,
         insLineName: device.insLineName,
+        onlineStatus:device.onlineStatus,
+        ip:device.ip,
+        station:device.station,
         id: device.id,
+        ...commStatus,
         ...statusInfo
       };
 
-      // 创建标记
+      state.ftuOnlineList.push(markerData)
+
+      let markerContent;
+      if (isSmallLoad) {
+        markerContent = `
+          <div class="small-load-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
+      } else if (isBigLoad) {
+        markerContent = `
+          <div class="big-load-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
+      } else if (isOverload) {
+        markerContent = `
+          <div class="overload-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+          "></div>
+        `;
+      } else if (isPoorSignal) {
+        markerContent = `
+          <div class="poor-signal-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
+      } else {
+        markerContent = `
+          <div style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
+      }
+
       const marker = new AMap.Marker({
         position: markerData.position,
-        content: `<div style="
-          background: ${markerData.color};
-          width: 20px;
-          height: 20px;
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        "></div>`,
+        content: markerContent,
         offset: new AMap.Pixel(-10, -20)
       });
-
-      // 绑定点击事件
       marker.on("click", async () => {
         try {
           const data = await defHttp.get({url: ftuF411DeviceList,params: { id: markerData.id }});
 
-          // 创建信息窗口内容
           const infoWindowContent = `
             <div style="background: black">
-              <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
-                <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.deviceName}</div>
+              <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/18.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
+                <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.commStatus}--${markerData.deviceName}</div>
                 <div style="height: 84%;width: 100%;display: flex">
-                  <div style="width: 60%;height: 100%;color: rgba(99, 242, 255, 1)">
+                  <div style="width: 60%;height: 100%;color: #ffffff">
                     <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${markerData.deviceName}</div>
                     <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${markerData.insLineName}</div>
                     <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0]?.deviceCode || '未知'}</div>
-                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">通信状态：${markerData.commStatus}</div>
-                    <div style="height: 12%;margin-top: 2%;margin-left: 2%">历史数据：<span class="info-content" style="cursor: pointer;text-decoration: underline;color: white;font-weight: bold">查看</span></div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">当前状态：${markerData.deviceStatus}</div>
+                    <div style="margin-top: 2%;margin-left: 2%">历史数据：<span class="info-content" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">查看</span></div>
                   </div>
                   <div style="width: 40%;height: 96%;margin-top:4%">
                     <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
@@ -453,14 +763,13 @@ function initMap() {
             </div>
           `;
 
-          // 创建或更新信息窗口
           let infoWindow = marker.infoWindow;
           if (!infoWindow) {
             infoWindow = new AMap.InfoWindow({
               offset: new AMap.Pixel(0, -15),
               content: infoWindowContent
             });
-            marker.infoWindow = infoWindow; // 存储在marker上，避免重复创建
+            marker.infoWindow = infoWindow;
           } else {
             infoWindow.setContent(infoWindowContent);
           }
@@ -482,11 +791,7 @@ function initMap() {
 
       return marker;
     });
-
-    // 添加所有标记到地图
     map.add(markers);
-
-    // 全局点击事件处理
     map.on("click", (e) => {
       if (!(e.target instanceof AMap.Marker)) {
         // 关闭所有信息窗口
@@ -562,6 +867,18 @@ onBeforeRouteLeave(() => {
   appStore.setLayoutHideMultiTabs(false);
   appStore.setLayoutHideSider(false);
 });
+
+function toggleMenu() {
+  state.isOpen = !state.isOpen;
+}
+
+function showTooltip(tooltipName) {
+  state.tooltips[tooltipName] = true;
+}
+
+function hideTooltip(tooltipName) {
+  state.tooltips[tooltipName] = false;
+}
 
 onMounted(() => {
   document.addEventListener('keydown', function(event) {
@@ -667,6 +984,7 @@ body {
   padding: 15px;
   display: flex;
   flex-direction: column;
+  min-height: 500px;
   position: relative;
   overflow: hidden;
 }
@@ -689,12 +1007,12 @@ body {
   z-index: 100;
   display: flex;
   justify-content: center;
+  position: absolute;
   gap: 15px;
   border: 1px;
-  height: 40px;
   font-weight: bold;
   background-color: rgba(0, 0, 0, 0.75);
-  margin-top: 100%;
+  bottom: 0;
   flex-wrap: wrap;
 }
 
@@ -732,6 +1050,22 @@ body {
   background: #6633ff;
 }
 
+.small{
+  background: #FF7D00;
+}
+
+.overload{
+  background: #FF00FF;
+}
+
+.overload-small{
+  background: #87CEFA ;
+}
+
+.overload-big{
+  background: #00fbff;
+}
+
 .offline-bg {
   background: #9BA3A9;
 }
@@ -759,7 +1093,7 @@ body {
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #0080ff, transparent);
+  background:linear-gradient(90deg, rgba(14, 208, 242, 1)0%,rgba(255, 255, 255, 0) 100%);
 }
 
 /* 设备统计样式 */
@@ -1058,15 +1392,192 @@ body {
   padding: 0;
 }
 
-::v-deep .el-dialog__header {
-  background: rgba(14, 38, 59, 0.9);
+::v-deep .el-dialog__title{
+  color: #66ffff;
 }
 
-::v-deep .el-dialog {
+::v-deep .el-dialog__headerbtn{
+  display: none;
+}
+
+::v-deep .el-dialog{
+  border: 2px solid transparent;
+  border-top-color: #66ffff;
   background: rgba(14, 38, 59, 0.9);
 }
 
 ::v-deep .amap-info-close {
   display: none;
 }
+
+/* 悬浮按钮容器 - 固定在右侧中间 */
+.floating-button-container {
+  position: fixed;
+  right: 20px;
+  top: calc(50% + 30px);
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 提示框容器 */
+.tooltip-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* 主悬浮按钮样式 - 暗黑色风格 */
+.floating-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #1a1f2c;
+  border: 2px solid #2d3748;
+  color: #38bdf8;
+  box-shadow: 0 4px 20px #38bdf8;
+  font-size: 26px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-button:hover {
+  background-color: #2d3748;
+  color: #7dd3fc;
+  transform: scale(1.08);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* 子菜单容器 */
+.floating-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  transform: translateX(20px);
+}
+
+/* 子菜单展开状态 */
+.menu-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* 子按钮样式 */
+.floating-menu-item {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #1a1f2c;
+  border: 1px solid #2d3748;
+  color: #38bdf8;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.9);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-menu-item:hover {
+  background-color: #2d3748;
+  color: #7dd3fc;
+  transform: scale(1.05);
+}
+
+/* 提示框样式 */
+.tooltip {
+  position: absolute;
+  right: 100%;
+  white-space: nowrap;
+  margin-right: 15px;
+  margin-top: 15px;
+  padding: 6px 12px;
+  background-color: rgba(17, 24, 39, 0.9);
+  color: #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 10000;
+}
+
+/* 提示框显示状态 */
+.tooltip-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 提示框小三角 */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent rgba(17, 24, 39, 0.9);
+}
+
+::v-deep .el-progress__text { // 修改进度条文字提示颜色
+  color: #ffffff;
+}
+
+::v-deep .el-scrollbar__wrap{
+  background:rgba(14, 38, 59, 0.95)
+}
+
+::v-deep.el-table th {
+  border: 1px solid #66ffff !important;
+  border-right: none !important;
+  //border-left: none !important;
+  border-bottom: none !important;
+}
+
+::v-deep.el-table td {
+  border: 1px solid #66ffff !important;
+  border-right: none !important;
+  //border-left: none !important;
+}
+
+.status-circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+/* 绿色闪烁动画 */
+.green-blink {
+  background-color: #00ff00;
+  animation: blink 1.5s infinite;
+}
+
+/* 红色闪烁动画 */
+.red-blink {
+  background-color: #ff0000;
+  animation: blink 1.5s infinite;
+}
+
+/* 闪烁动画定义 */
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
 </style>

@@ -81,6 +81,8 @@ public class MybatisPlusSaasConfig {
             //ftu
             TENANT_TABLE.add("ftu_f411_device");
             TENANT_TABLE.add("ftu_device");
+            TENANT_TABLE.add("ftu_electl_volume");
+            TENANT_TABLE.add("ftu_warn_info");
         }
 
         //2.示例测试

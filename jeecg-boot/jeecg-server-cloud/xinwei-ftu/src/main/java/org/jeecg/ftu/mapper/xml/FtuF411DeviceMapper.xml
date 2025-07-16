@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.ftu.mapper.FtuF411DeviceMapper">
+    <update id="updateMode">
+        update ftu_f411_device set  COMMUNICATION_MODE = #{mode} where id = #{id}
+    </update>
 
     <delete id="deleteByMainId" parameterType="java.lang.String">
         DELETE
@@ -13,4 +16,7 @@
         FROM  ftu_f411_device
         WHERE
             ftu_id = #{mainId} 	</select>
+    <select id="get411Device" resultType="org.jeecg.ftu.entity.FtuF411Device">
+        select * from ftu_f411_device where bd_card = #{card}
+    </select>
 </mapper>
