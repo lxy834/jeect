@@ -1,16 +1,16 @@
 package org.jeecg.ftu.mapper;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.ftu.entity.FtuF411Device;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
 
 /**
  * @Description: 通信终端
  * @Author: jeecg-boot
- * @Date:   2025-06-23
+ * @Date: 2025-06-23
  * @Version: V1.0
  */
 public interface FtuF411DeviceMapper extends BaseMapper<FtuF411Device> {
@@ -35,6 +35,9 @@ public interface FtuF411DeviceMapper extends BaseMapper<FtuF411Device> {
     FtuF411Device get411Device(@Param("card") String card);
 
     @InterceptorIgnore(tenantLine = "true")
-    boolean updateMode(@Param("mode") Integer mode,@Param("id") String id);
+    boolean updateMode(@Param("mode") Integer mode, @Param("id") String id);
+
+    @InterceptorIgnore(tenantLine = "true")
+    boolean updateFtuIdBoolean(@Param("id") String id);
 
 }

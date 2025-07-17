@@ -33,6 +33,66 @@
     </BasicTable>
     <!-- 表单区域 -->
     <FtuDeviceModal @register="registerModal" @success="handleSuccess"></FtuDeviceModal>
+
+    <el-dialog
+      v-model="state.dialog"
+      title="设备绑定"
+      width="500"
+      center
+      draggable
+    >
+      <div style="padding:10px">
+        <el-button type="primary" size="mini" @click="addNewColumn">添加列</el-button>
+        <!-- 列配置区域 -->
+        <el-select
+          v-model="state.newColumnType"
+          placeholder="选择列类型"
+          style="width: 180px; margin-left: 10px"
+        >
+          <el-option label="文本" value="text"></el-option>
+          <el-option label="数字" value="number"></el-option>
+          <el-option label="日期" value="date"></el-option>
+        </el-select>
+        <el-input
+          v-model="state.newColumnName"
+          placeholder="输入列标题"
+          style="width: 180px; margin-left: 10px"
+        ></el-input>
+      </div>
+
+      <el-table :data="state.tableData" border style="margin:10px" ref="tb">
+        <!-- 动态生成列 -->
+        <el-table-column
+          v-for="(col, index) in state.columns"
+          :key="index"
+          :prop="col.prop"
+          :label="col.label"
+          :width="col.width || 120"
+        >
+          <!-- 不同类型列的渲染 -->
+          <template #default="scope">
+            <template v-if="col.type === 'date'">
+              {{ scope.row[col.prop] ? formatDate(scope.row[col.prop]) : '' }}
+            </template>
+            <template v-else>
+              {{ scope.row[col.prop] }}
+            </template>
+          </template>
+        </el-table-column>
+        <!-- 操作列 -->
+        <el-table-column label="操作" width="100">
+          <template #default="scope">
+            <el-button
+              size="mini"
+              type="danger"
+              @click="deleteRow(scope.$index)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -92,6 +152,69 @@
 
   // 高级查询配置
   const superQueryConfig = reactive(superQuerySchema);
+
+  const state = reactive({
+    dialog:false,
+    tableData:[],
+    columns: [], // 动态列配置
+    newColumnType: 'text', // 新列类型
+    newColumnName: '', // 新列标题
+    propCounter: 1, // 属性计数器，用于生成唯一prop
+  })
+
+  /**
+   * 添加新列
+   */
+  function addNewColumn() {
+    if (!state.newColumnName.trim()) {
+      ElMessage.warning('请输入列标题');
+      return;
+    }
+
+    // 生成唯一prop（避免重复）
+    const newProp = `custom_col_${state.propCounter++}`;
+
+    // 添加列配置
+    state.columns.push({
+      label: state.newColumnName,
+      prop: newProp,
+      type: state.newColumnType,
+    });
+
+    // 为现有数据添加新列默认值
+    state.tableData.forEach(row => {
+      switch(state.newColumnType) {
+        case 'text':
+          row[newProp] = '';
+          break;
+        case 'number':
+          row[newProp] = 0;
+          break;
+        case 'date':
+          row[newProp] = new Date();
+          break;
+      }
+    });
+
+    // 清空输入
+    state.newColumnName = '';
+  }
+
+  /**
+   * 删除行数据
+   */
+  function deleteRow(index: number) {
+    state.tableData.splice(index, 1);
+  }
+
+  /**
+   * 日期格式化
+   */
+  function formatDate(date: Date | string) {
+    if (typeof date === 'string') date = new Date(date);
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  }
+
 
   /**
    * 高级查询事件
@@ -163,6 +286,9 @@
        ]
    }
 
+   function test(){
+     state.dialog = true
+   }
 
   /**
    * 下拉操作栏
@@ -173,6 +299,10 @@
         label: '详情',
         onClick: handleDetail.bind(null, record),
       }, {
+        label: '测试',
+        onClick: test,
+      }
+      , {
         label: '删除',
         popConfirm: {
           title: '是否确认删除',

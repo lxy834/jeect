@@ -22,9 +22,7 @@ import org.jeecg.ftu.service.IFtuDeviceService;
 import org.jeecg.ftu.service.IFtuElectlVolumeService;
 import org.jeecg.ftu.service.IFtuF411DeviceService;
 import org.jeecg.ftu.service.IFtuWarnInfoService;
-import org.jeecg.ftu.vo.FtuDeviceMapVO;
-import org.jeecg.ftu.vo.FtuDevicePage;
-import org.jeecg.ftu.vo.FtuElectlVolumeVO;
+import org.jeecg.ftu.vo.*;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -96,6 +94,21 @@ public class FtuDeviceController {
     @GetMapping("/getIndexList")
     public Result<List<FtuDeviceMapVO>> getIndexList() {
         return Result.OK(ftuDeviceService.getIndexList());
+    }
+
+    @Operation(summary = "查询没有绑定411的FTU")
+    @GetMapping("/bind")
+    public Result<List<BindVO>> bind() {
+        return Result.OK(ftuDeviceService.bind());
+    }
+
+    @Operation(summary = "绑定FTU设备")
+    @PostMapping("/submit/bind")
+    @RequiresPermissions("ftu:ftu_device:bind")
+    public Result<Boolean> submitBind(@RequestBody SubmitBindVO bindVO) {
+        FtuF411Device device = ftuF411DeviceService.getById(bindVO.getId());
+        device.setFtuId(bindVO.getFtuId());
+        return Result.OK(ftuF411DeviceService.updateById(device));
     }
 
     /**

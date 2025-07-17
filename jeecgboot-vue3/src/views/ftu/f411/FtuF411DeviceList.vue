@@ -25,7 +25,8 @@
       </template>
        <!--操作栏-->
       <template #action="{ record }">
-        <TableAction :actions="getTableAction(record)" :dropDownActions="getDropDownAction(record)"/>
+        <TableAction :actions="getTableAction(record)" :dropDownActions="getDropDownAction(record)"></TableAction>
+        <a-button v-show="record.ftuId===null || record.ftuId===''" type="link" size="small" @click="getFTU(record)">绑定</a-button>
       </template>
       <!--字段回显插槽-->
       <template v-slot:bodyCell="{ column, record, index, text }">
@@ -33,6 +34,36 @@
     </BasicTable>
     <!-- 表单区域 -->
     <FtuF411DeviceModal @register="registerModal" @success="handleSuccess"></FtuF411DeviceModal>
+
+
+    <el-dialog
+      v-model="state.dialog"
+      title="设备绑定"
+      width="500"
+      center
+      draggable
+    >
+      <el-select
+        v-model="state.submit.ftuId"
+        filterable
+        placeholder="选择或搜索FTU"
+      >
+        <el-option
+          v-for="item in state.tableData"
+          :key="item.deviceName"
+          :label="item.deviceName"
+          :value="item.id"
+        />
+      </el-select>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="state.dialog = false">取消</el-button>
+          <el-button v-auth="'ftu:ftu_device:bind'" type="primary" @click="save">
+            提交
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -44,11 +75,23 @@
   import FtuF411DeviceModal from './components/FtuF411DeviceModal.vue'
   import {columns, searchFormSchema, superQuerySchema} from './FtuF411Device.data';
   import {list, deleteOne, batchDelete, getImportUrl,getExportUrl} from './FtuF411Device.api';
+  import { defHttp } from "@/utils/http/axios";
+  import { bind,submitBind } from "@/views/ftu/list/FtuDevice.api.ts";
   import {downloadFile} from '/@/utils/common/renderUtils';
+  const { createMessage, createConfirm } = useMessage();
   import { useUserStore } from '/@/store/modules/user';
+  import { useMessage } from "@/hooks/web/useMessage";
   const queryParam = reactive<any>({});
   const checkedKeys = ref<Array<string | number>>([]);
   const userStore = useUserStore();
+  const state = reactive({
+    dialog:false,
+    tableData:[],
+    submit:{
+      ftuId:'',
+      id:''
+    }
+  })
   //注册model
   const [registerModal, {openModal}] = useModal();
    //注册table数据
@@ -91,6 +134,23 @@
 
   // 高级查询配置
   const superQueryConfig = reactive(superQuerySchema);
+
+  function getFTU(v){
+    defHttp.get({url:bind}).then(res =>{
+      state.tableData = res
+      state.submit.id = v.id
+      state.dialog = true
+    })
+  }
+
+  function save(){
+    let params = state.submit
+    defHttp.post({url: submitBind, params}).then(res =>{
+      createMessage.success('绑定成功');
+      state.dialog = false
+      reload()
+    });
+  }
 
   /**
    * 高级查询事件
@@ -171,7 +231,8 @@
       {
         label: '详情',
         onClick: handleDetail.bind(null, record),
-      }, {
+      }
+      , {
         label: '删除',
         popConfirm: {
           title: '是否确认删除',

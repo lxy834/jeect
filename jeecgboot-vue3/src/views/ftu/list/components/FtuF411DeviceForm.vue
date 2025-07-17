@@ -38,15 +38,26 @@
            /**
             *获取表单数据
             */
-            function getFormData(){
-               let formData = getFieldsValue();
-               Object.keys(formData).map(k=>{
-                    if(formData[k] instanceof Array){
-                        formData[k] = formData[k].join(',')
-                    }
-               });
-               return [formData];
-            }
+           function getFormData(){
+             let formData = getFieldsValue();
+
+             // 处理数组字段
+             Object.keys(formData).map(k=>{
+               if(formData[k] instanceof Array){
+                 formData[k] = formData[k].join(',')
+               }
+             });
+
+             // 检查表单数据是否为空对象
+             const isEmpty = Object.keys(formData).every(key =>
+               formData[key] === undefined ||
+               formData[key] === null ||
+               formData[key] === ''
+             );
+
+             // 如果为空则返回空数组，否则返回包含数据的数组
+             return isEmpty ? [] : [formData];
+           }
             /**
             *表单校验
             */

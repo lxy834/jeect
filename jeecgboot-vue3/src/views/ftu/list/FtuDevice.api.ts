@@ -7,6 +7,8 @@ enum Api {
   list = '/ftu/ftuDevice/list',
   getIndexList = '/ftu/ftuDevice/getIndexList',
   volume = '/ftu/ftuDevice/volume',
+  bind = '/ftu/ftuDevice/bind',
+  submitBind = '/ftu/ftuDevice/submit/bind',
   getVolumeById = '/ftu/ftuDevice/getVolumeById',
   save ='/ftu/ftuDevice/add',
   edit ='/ftu/ftuDevice/edit',
@@ -25,6 +27,10 @@ enum Api {
 export const getExportUrl = Api.exportXls;
 
 export const volume = Api.volume;
+
+export const bind = Api.bind;
+
+export const submitBind = Api.submitBind;
 
 export const getIndexList = Api.getIndexList;
 

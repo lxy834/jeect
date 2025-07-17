@@ -70,34 +70,11 @@ export const searchFormSchema: FormSchema[] = [
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
-  // {
-  //   label: '通信模式',
-  //   field: 'communicationMode',
-  //   component: 'InputNumber',
-  //   dynamicRules: ({model,schema}) => {
-  //         return [
-  //                { required: true, message: '请输入通信模式!'},
-  //         ];
-  //    },
-  // },
   {
     label: '安装位置',
     field: 'insLocation',
     component: 'Input',
   },
-  // {
-  //   label: '在线状态',
-  //   field: 'onlineStatus',
-  //   component: 'JDictSelectTag',
-  //   componentProps:{
-  //       dictCode:"online_status"
-  //    },
-  //   dynamicRules: ({model,schema}) => {
-  //         return [
-  //                { required: true, message: '请输入在线状态!'},
-  //         ];
-  //    },
-  // },
   {
     label: '北斗卡号',
     field: 'bdCard',

@@ -2,21 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.ftu.mapper.FtuF411DeviceMapper">
     <update id="updateMode">
-        update ftu_f411_device set  COMMUNICATION_MODE = #{mode} where id = #{id}
+        update ftu_f411_device
+        set COMMUNICATION_MODE = #{mode}
+        where id = #{id}
+    </update>
+    <update id="updateFtuIdBoolean">
+        update ftu_f411_device
+        set ftu_id = ''
+        where ftu_id = #{id}
     </update>
 
     <delete id="deleteByMainId" parameterType="java.lang.String">
         DELETE
-        FROM  ftu_f411_device
-        WHERE
-            ftu_id = #{mainId} 	</delete>
+        FROM ftu_f411_device
+        WHERE ftu_id = #{mainId}    </delete>
 
     <select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.ftu.entity.FtuF411Device">
         SELECT *
-        FROM  ftu_f411_device
-        WHERE
-            ftu_id = #{mainId} 	</select>
+        FROM ftu_f411_device
+        WHERE ftu_id = #{mainId}    </select>
     <select id="get411Device" resultType="org.jeecg.ftu.entity.FtuF411Device">
-        select * from ftu_f411_device where bd_card = #{card}
+        select *
+        from ftu_f411_device
+        where bd_card = #{card}
     </select>
+
 </mapper>

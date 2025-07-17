@@ -13,6 +13,7 @@ import org.jeecg.ftu.mapper.FtuElectlVolumeMapper;
 import org.jeecg.ftu.mapper.FtuF411DeviceMapper;
 import org.jeecg.ftu.mapper.FtuWarnInfoMapper;
 import org.jeecg.ftu.service.IFtuDeviceService;
+import org.jeecg.ftu.vo.BindVO;
 import org.jeecg.ftu.vo.FtuDeviceMapVO;
 import org.jeecg.ftu.vo.FtuElectlVolumeVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,12 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
     }
 
     @Override
+    public List<BindVO> bind() {
+        return baseMapper.ids();
+    }
+
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateMain(FtuDevice ftuDevice, List<FtuF411Device> ftuF411DeviceList, List<FtuElectlVolume> ftuElectlVolumeList, List<FtuWarnInfo> ftuWarnInfoList) {
         ftuDeviceMapper.updateById(ftuDevice);
@@ -144,9 +151,10 @@ public class FtuDeviceServiceImpl extends ServiceImpl<FtuDeviceMapper, FtuDevice
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delMain(String id) {
-        ftuF411DeviceMapper.deleteByMainId(id);
-        ftuElectlVolumeMapper.deleteByMainId(id);
-        ftuWarnInfoMapper.deleteByMainId(id);
+//        ftuF411DeviceMapper.deleteByMainId(id);
+//        ftuElectlVolumeMapper.deleteByMainId(id);
+//        ftuWarnInfoMapper.deleteByMainId(id);
+        ftuF411DeviceMapper.updateFtuIdBoolean(id);
         ftuDeviceMapper.deleteById(id);
     }
 

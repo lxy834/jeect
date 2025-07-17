@@ -34,4 +34,9 @@
         FROM FTU_DEVICE D
                  LEFT JOIN FTU_F411_DEVICE F ON D.ID = F.FTU_ID
     </select>
+    <select id="ids" resultType="org.jeecg.ftu.vo.BindVO">
+        SELECT ID, DEVICE_NAME
+        FROM FTU_DEVICE
+        WHERE ID NOT IN (SELECT FTU_ID FROM FTU_F411_DEVICE WHERE FTU_ID!='')
+    </select>
 </mapper>

@@ -1,6 +1,6 @@
 <template>
   <BasicModal v-bind="$attrs" @register="registerModal" destroyOnClose :title="title" :width="896" @ok="handleSubmit">
-    <BasicForm @register="registerForm" ref="formRef" name="FtuDeviceForm"/>
+    <BasicForm @register="registerForm" ref="formRef" name="FtuDeviceForm"></BasicForm>
     <!-- 子表单区域 -->
     <a-tabs v-model:activeKey="activeKey" animated @change="handleChangeTabs">
       <a-tab-pane tab="通信终端" key="ftuF411Device" :forceRender="true">

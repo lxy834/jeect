@@ -1,10 +1,8 @@
 import {BasicColumn} from '/@/components/Table';
 import {FormSchema} from '/@/components/Table';
-import { rules} from '/@/utils/helper/validator';
-import { render } from '/@/utils/common/renderUtils';
 import {JVxeTypes,JVxeColumn} from '/@/components/jeecg/JVxeTable/types'
-import { getWeekMonthQuarterYear } from '/@/utils';
 //列表数据
+
 export const columns: BasicColumn[] = [
    {
     title: 'CPU状态',
@@ -282,37 +280,12 @@ export const formSchema: FormSchema[] = [
 ];
 //子表单数据
 export const ftuF411DeviceFormSchema: FormSchema[] = [
-  // {
-  //   label: '通信模式',
-  //   field: 'communicationMode',
-  //   component: 'JDictSelectTag',
-  //   componentProps:{
-  //     dictCode:"comm_model"
-  //   },
-  //   dynamicRules: ({model,schema}) => {
-  //         return [
-  //                { required: true, message: '请输入通信模式!'},
-  //         ];
-  //    },
-  // },
+
   {
     label: '安装位置',
     field: 'insLocation',
     component: 'Input',
   },
-  // {
-  //   label: '在线状态',
-  //   field: 'onlineStatus',
-  //   component: 'JDictSelectTag',
-  //   componentProps:{
-  //       dictCode:"online_status"
-  //    },
-  //   dynamicRules: ({model,schema}) => {
-  //         return [
-  //                { required: true, message: '请输入在线状态!'},
-  //         ];
-  //    },
-  // },
   {
     label: '北斗卡号',
     field: 'bdCard',
@@ -327,11 +300,6 @@ export const ftuF411DeviceFormSchema: FormSchema[] = [
     label: '设备名称',
     field: 'deviceName',
     component: 'Input',
-    dynamicRules: ({model,schema}) => {
-          return [
-                 { required: true, message: '请输入设备名称!'},
-          ];
-     },
   },
 	{
 	  label: '',
