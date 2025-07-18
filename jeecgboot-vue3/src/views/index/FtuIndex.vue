@@ -48,7 +48,6 @@
             馈线负荷一览表
           </div>
         </div>
-
         <!-- 第二个子按钮 -->
         <div class="tooltip-container">
           <button
@@ -284,7 +283,7 @@
             </vue3ScrollSeamless>
           </div>
         </div>
-        <!-- 控制功能 -->
+        <!-- 运行指标 -->
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-sliders-h"></i>
@@ -296,6 +295,7 @@
               <el-progress
                 :percentage="85"
                 :stroke-width="8"
+                color="#4CD964"
                 style="flex: 1;margin-left: 10px"
               />
             </div>
@@ -306,6 +306,7 @@
               <el-progress
                 :percentage="85"
                 :stroke-width="8"
+                color="#4CD964"
                 style="flex: 1;margin-left: 10px"
               />
             </div>
@@ -316,6 +317,7 @@
               <el-progress
                 :percentage="85"
                 :stroke-width="8"
+                color="#4CD964"
                 style="flex: 1;margin-left: 10px"
               />
             </div>
@@ -325,6 +327,7 @@
               <div style="color: #FFFFFF;font-size: 1rem">遥控成功率</div>
               <el-progress
                 :percentage="85"
+                color="#4CD964"
                 :stroke-width="8"
                 style="flex: 1;margin-left: 10px"
               />
@@ -453,7 +456,6 @@ window._AMapSecurityConfig = {
 };
 
 const realTimeTableContainer = ref(null);
-
 const state = reactive({
   show: true,
   dialogVisible: false,
@@ -491,6 +493,7 @@ const state = reactive({
   total:0,
   isOpen:false,
   title:"",
+  clusterShow:true,
   tooltips: {
     mainTooltip: false,
     listTooltip: false,
@@ -590,7 +593,6 @@ function loadRate(row) {
 // 基于当前行的负载率计算颜色
 function loadRateColor(row){
   const rate = getLoadRateValue(row); // 使用当前行的实际负载率
-  console.log('当前行负载率:', rate);
   if (rate > 100) return '#FF00FF';
   if (rate > 80) return '#00fbff';
   if (rate < 30) return '#87CEFA';
@@ -617,7 +619,6 @@ async function getList() {
   // 处理设备列表和初始化地图
   state.ftuDeviceList = deviceRes;
   initMap();
-
   // 处理容量列表
   state.volumeList = volumeRes;
 
@@ -710,7 +711,6 @@ function initMap() {
 
     //非聚合点样式
     var _renderMarker = function(context) {
-      console.log(context);
       // 避免重复添加样式
       if (!document.getElementById('marker-styles')) {
         const style = document.createElement('style');
@@ -897,6 +897,36 @@ function initMap() {
         e.stopPropagation();
       });
     };
+    var count = points.length;
+    var _renderClusterMarker = function (context) {
+      var factor = Math.pow(context.count / count, 1 / 18);
+      var div = document.createElement('div');
+      var Hue = 180 - factor * 180;
+      var bgColor = 'hsla(' + Hue + ',100%,40%,0.7)';
+      var fontColor = 'hsla(' + Hue + ',100%,90%,1)';
+      var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
+      var shadowColor = 'hsla(' + Hue + ',100%,90%,1)';
+      div.style.backgroundColor = bgColor;
+      var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
+      div.style.width = div.style.height = size + 'px';
+      div.style.border = 'solid 1px ' + borderColor;
+      div.style.borderRadius = size / 2 + 'px';
+      div.style.boxShadow = '0 0 5px ' + shadowColor;
+      div.innerHTML = context.count;
+      div.style.lineHeight = size + 'px';
+      div.style.color = fontColor;
+      div.style.fontSize = '14px';
+      div.style.textAlign = 'center';
+      context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
+      context.marker.on('click', function(e) {
+        var curZoom = map.getZoom();
+        if(curZoom < 20){
+          curZoom += 2;
+        }
+        map.setZoomAndCenter(curZoom, e.lnglat);
+      });
+      context.marker.setContent(div)
+    };
 
 // 在地图初始化后添加点击事件监听
     map.on('click', function() {
@@ -914,6 +944,7 @@ function initMap() {
       {
         gridSize: 60, //数据聚合计算时网格的像素大小
         renderMarker: _renderMarker,
+        renderClusterMarker:_renderClusterMarker
       }
     );
     map.setFitView(markers)
@@ -1053,6 +1084,7 @@ body {
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1071,7 +1103,7 @@ body {
 
 .left-stats,
 .right-stats {
-  z-index: 100;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
   flex: 1;

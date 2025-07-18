@@ -34,8 +34,6 @@
     </BasicTable>
     <!-- 表单区域 -->
     <FtuF411DeviceModal @register="registerModal" @success="handleSuccess"></FtuF411DeviceModal>
-
-
     <el-dialog
       v-model="state.dialog"
       title="设备绑定"
@@ -148,6 +146,8 @@
     defHttp.post({url: submitBind, params}).then(res =>{
       createMessage.success('绑定成功');
       state.dialog = false
+      state.submit.id = ''
+      state.submit.ftuId = ''
       reload()
     });
   }
