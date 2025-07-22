@@ -4,12 +4,21 @@
     <update id="updateMode">
         update ftu_f411_device
         set COMMUNICATION_MODE = #{mode}
-        where id = #{id}
+        where bd_card = #{card}
     </update>
+
     <update id="updateFtuIdBoolean">
         update ftu_f411_device
         set ftu_id = ''
         where ftu_id = #{id}
+    </update>
+
+    <update id="updateDeviceSignal">
+        update ftu_f411_device
+        set SIGNAL_FOR5G = #{signalFor5G},
+            set SIGNAL_FOR_BD = #{signalForBd},
+            set STATUS_FOR_FTU = #{statusForFtu}
+        where bd_card = #{card}
     </update>
 
     <delete id="deleteByMainId" parameterType="java.lang.String">

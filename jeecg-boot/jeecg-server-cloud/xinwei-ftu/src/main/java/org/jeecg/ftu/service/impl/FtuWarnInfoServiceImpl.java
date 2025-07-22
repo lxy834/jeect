@@ -3,6 +3,7 @@ package org.jeecg.ftu.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.ftu.entity.FtuWarnInfo;
 import org.jeecg.ftu.mapper.FtuWarnInfoMapper;
 import org.jeecg.ftu.service.IFtuWarnInfoService;
@@ -10,19 +11,15 @@ import org.jeecg.ftu.vo.WarnInfoStatVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description: 告警记录
  * @Author: jeecg-boot
- * @Date:   2025-06-30
+ * @Date: 2025-06-30
  * @Version: V1.0
  */
 @Service
@@ -55,10 +52,10 @@ public class FtuWarnInfoServiceImpl extends ServiceImpl<FtuWarnInfoMapper, FtuWa
     }
 
     @Override
-    public IPage<FtuWarnInfo> getEventById(String ftuId, String date, String event,Integer pageNo, Integer pageSize) {
+    public IPage<FtuWarnInfo> getEventById(String ftuId, String date, String event, Integer pageNo, Integer pageSize) {
         Page<FtuWarnInfo> page = new Page<>(pageNo, pageSize);
         return baseMapper.selectPage(page, Wrappers.<FtuWarnInfo>query().lambda()
-                .eq(FtuWarnInfo::getDeviceType,event).eq(FtuWarnInfo::getDeviceId,ftuId).likeRight(FtuWarnInfo::getCreateTime,date));
+                .eq(FtuWarnInfo::getDeviceType, event).eq(FtuWarnInfo::getDeviceId, ftuId).likeRight(FtuWarnInfo::getCreateTime, date));
     }
 
     @Override
@@ -101,10 +98,21 @@ public class FtuWarnInfoServiceImpl extends ServiceImpl<FtuWarnInfoMapper, FtuWa
         // 直接处理SQL结果，避免Stream开销
         for (Map<String, Object> row : sqlResults) {
             String date = (String) row.get("create_time");
+
+            // 先获取值并处理null情况
+            Object switchActionObj = row.get("switch_action");
+            int switchAction = switchActionObj != null ? ((Number) switchActionObj).intValue() : 0;
+
+            Object faultAlarmObj = row.get("fault_alarm");
+            int faultAlarm = faultAlarmObj != null ? ((Number) faultAlarmObj).intValue() : 0;
+
+            Object commExceptionObj = row.get("communication_exception");
+            int commException = commExceptionObj != null ? ((Number) commExceptionObj).intValue() : 0;
+
             typeGroupedStats.put(date, Map.of(
-                    "switch_action", ((Number) row.get("switch_action")).intValue(),
-                    "fault_alarm", ((Number) row.get("fault_alarm")).intValue(),
-                    "communication_exception", ((Number) row.get("communication_exception")).intValue()
+                    "switch_action", switchAction,
+                    "fault_alarm", faultAlarm,
+                    "communication_exception", commException
             ));
         }
 
@@ -139,6 +147,7 @@ public class FtuWarnInfoServiceImpl extends ServiceImpl<FtuWarnInfoMapper, FtuWa
         result.put("seriesData", seriesData);
         return result;
     }
+
     private Map<String, Object> createEmptyChartData() {
         // 创建空图表数据，用于参数无效或无数据的情况
         Map<String, Object> result = new HashMap<>();

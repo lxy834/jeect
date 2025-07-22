@@ -51,6 +51,8 @@ public interface IFtuF411DeviceService extends IService<FtuF411Device> {
 
     FtuF411Device get411Device(String card);
 
-    boolean updateMode(Integer mode, String id);
+    void updateMode(Integer mode, String card);
+
+    void updateDeviceSignal(Integer signalFor5G, Integer signalForBd, Integer statusForFtu, String card);
 
 }

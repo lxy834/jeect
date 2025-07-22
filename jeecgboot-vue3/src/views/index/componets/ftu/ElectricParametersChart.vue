@@ -106,7 +106,7 @@
 import screenfull from "screenfull";
 import { useAppStore } from "@/store/modules/app";
 import {  onMounted, reactive, watchEffect } from "vue";
-import { useMenuSetting } from "/@/hooks/setting/useMenuSetting";
+import { useMenuSetting } from "/src/hooks/setting/useMenuSetting";
 import "@fortawesome/fontawesome-free/css/all.css";
 import { onBeforeRouteLeave } from "vue-router";
 import { useRoute } from 'vue-router';

@@ -30,9 +30,9 @@ spring:
           slow-sql-millis: 5000
       datasource:
         master:
-          url: jdbc:dm://140.143.85.108:5236/FXTD
-          username: FXTD
-          password: qwer1234Q
+          url: jdbc:dm://162.14.66.67:5236/FXTD_DEV
+          username: FXTD_DEV
+          password: Vrj3.nkF]8p+2M/jha]t
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
     database: 1
@@ -126,7 +126,7 @@ jeecg:
       table: embeddings
 logging:
   level:
-    org.jeecg.modules.system.mapper : info
+    org.jeecg.modules.system.mapper: info
 cas:
   prefixUrl: http://localhost:8888/cas
 knife4j:

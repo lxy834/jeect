@@ -1,6 +1,13 @@
 <template>
   <div class="fdq_container">
-    <div class="header-panel"></div>
+    <div class="header-panel">
+      <div style="text-align: right;width: 100%">
+        <div class="qp icon-white">
+          <i class="fas fa-expand"  v-show="state.show" @click="exit(true)"/>
+          <i class="fa fa-compress" v-show="!state.show" @click="exit(false)"/>
+        </div>
+      </div>
+    </div>
     <div class="fdq_main-panel" id="fdq_map">
       <div class="left-stats">
         <!-- 1. 任务清单 -->
@@ -13,19 +20,17 @@
           <div
             class="task-list-container"
             id="taskListContainer"
-            @mouseenter="stopAutoScroll"
-            @mouseleave="startAutoScroll"
           >
             <div
-              v-for="(task, index) in tasks"
+              v-for="(task, index) in state.orderList"
               :key="task.id"
               :ref="(el) => taskRefs[index] = el"
               class="task-item"
               :class="{ 'active-task': activeTaskIndex === index }"
               @click="selectTask(index)"
             >
-            <div class="task-vehicle">{{ task.vehicleInfo }}</div>
-            <div class="task-name">{{ task.name }}</div>
+            <div class="task-vehicle">{{ task.plateNumber }}</div>
+            <div class="task-name">{{ task.orderType }}</div>
             <div class="task-user">{{ task.targetUser }}</div>
           </div>
         </div>
@@ -43,10 +48,10 @@
               :active="currentStep"
               class="vertical-steps"
             >
-              <el-step title="工单下发" :description="steps[0].desc" :status="steps[0].status"></el-step>
-              <el-step title="前往现场" :description="steps[1].desc" :status="steps[1].status"></el-step>
-              <el-step title="开始发电" :description="steps[2].desc" :status="steps[2].status"></el-step>
-              <el-step title="归还设备" :description="steps[3].desc" :status="steps[3].status"></el-step>
+              <el-step :title="steps[0].stepInfo" :description="steps[0].stepTime" :status="steps[0].status"></el-step>
+              <el-step :title="steps[1].stepInfo" :description="steps[1].stepTime" :status="steps[1].status"></el-step>
+              <el-step :title="steps[2].stepInfo" :description="steps[2].stepTime" :status="steps[2].status"></el-step>
+              <el-step :title="steps[3].stepInfo" :description="steps[3].stepTime" :status="steps[3].status"></el-step>
             </el-steps>
           </div>
         </div>
@@ -55,7 +60,7 @@
         <div class="stat-card">
           <div class="card-title">
             <i class="fa fa-bolt" />
-            实时发电
+            实时数据
           </div>
           <div class="realtime-grid">
             <div class="realtime-item">
@@ -84,19 +89,19 @@
             </div>
             <div class="realtime-item">
               <div class="realtime-label">频率转速</div>
-              <div class="realtime-value">{{ realtimeData.power }}</div>
+              <div class="realtime-value">{{ realtimeData.rpm }}</div>
             </div>
             <div class="realtime-item">
               <div class="realtime-label">频率</div>
-              <div class="realtime-value">{{ realtimeData.frequency }}Hz</div>
+              <div class="realtime-value">{{ realtimeData.freqHz }}Hz</div>
             </div>
             <div class="realtime-item">
-              <div class="realtime-label">温度</div>
-              <div class="realtime-value">{{ realtimeData.temperature }}°C</div>
+              <div class="realtime-label">水温</div>
+              <div class="realtime-value">{{ realtimeData.waterTemperature }}°C</div>
             </div>
             <div class="realtime-item">
               <div class="realtime-label">电池电压</div>
-              <div class="realtime-value">{{ realtimeData.batteryVoltage }}V</div>
+              <div class="realtime-value">{{ realtimeData.battery }}V</div>
             </div>
           </div>
         </div>
@@ -123,7 +128,7 @@
           </div>
           <div class="card-title">
             <i class="fas fa-exclamation-triangle"></i>
-            告警信息
+            系统通知
           </div>
           <div class="alarm-list">
             <div class="alarm-wrapper">
@@ -133,14 +138,15 @@
                 :wheel="true"
                 :isWatch="true"
                 :classOptions="classOptions"
-                :dataList="alarms"
+                :dataList="state.heartList"
               >
                 <table class="real-time-table">
                   <thead>
-                  <tr class="head"></tr>
-                  <tr v-for="(item,i) of alarms" :key="i">
-                    <td class="alarm-time">{{item.time}}</td>
-                    <td class="alarm-content">{{item.content}}</td>
+                  <tr class="head">
+                  </tr>
+                  <tr v-for="(item,i) of state.heartList" :key="i">
+                    <td class="alarm-time">{{item.plateNumber}}</td>
+                    <td class="alarm-content">开机运行{{(item.runningTime/1000/60/60).toFixed(2)}}分钟，当前通信质量{{item.signalQuality}}，内部电压{{item.internalBattery}}V,当前设备固件版本V{{item.appVersion}}</td>
                   </tr>
                   </thead>
                 </table>
@@ -158,34 +164,34 @@
           </div>
           <div class="maintenance-grid">
             <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.totalPower }}</div>
+              <div class="maintenance-value">{{ state.stat.totalPower }}</div>
               <div class="maintenance-label">总发电量(kWh)</div>
             </div>
+<!--            <div class="maintenance-item">-->
+<!--              <div class="maintenance-value">{{ maintenanceData.remainingTime }}</div>-->
+<!--              <div class="maintenance-label">剩余维护时间(天)</div>-->
+<!--            </div>-->
             <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.remainingTime }}</div>
-              <div class="maintenance-label">剩余维护时间(天)</div>
+              <div class="maintenance-value">38520</div>
+              <div class="maintenance-label">总运行里程(km)</div>
             </div>
             <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.mileage }}</div>
-              <div class="maintenance-label">运行里程(km)</div>
-            </div>
-            <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.yearlyTasks }}</div>
+              <div class="maintenance-value">{{  state.stat.yearlyTasks }}</div>
               <div class="maintenance-label">年度作业次数</div>
             </div>
             <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.maintenanceCount }}</div>
+              <div class="maintenance-value">{{ state.stat.maintenanceCount }}</div>
               <div class="maintenance-label">维护次数</div>
             </div>
-            <div class="maintenance-item">
-              <div class="maintenance-value">{{ maintenanceData.startupCount }}</div>
-              <div class="maintenance-label">启动次数</div>
-            </div>
+<!--            <div class="maintenance-item">-->
+<!--              <div class="maintenance-value">{{ maintenanceData.startupCount }}</div>-->
+<!--              <div class="maintenance-label">启动次数</div>-->
+<!--            </div>-->
           </div>
         </div>
 
         <!-- 5. 发电统计 -->
-        <div class="stat-card" style="max-height: 500px">
+        <div class="stat-card" >
           <div class="card-title">
             <i class="fas fa-sliders-h"></i>
             发电统计
@@ -195,14 +201,14 @@
               <div class="statistic-icon">
                 <i class="fas fa-gas-pump"></i>
               </div>
-              <div class="statistic-value">{{ statisticsData.totalFuel }}</div>
+              <div class="statistic-value">{{ state.stat.totalFuel }}</div>
               <div class="statistic-label">总油耗(L)</div>
             </div>
             <div class="statistic-item" style="width: 50%">
               <div class="statistic-icon">
                 <i class="fas fa-fire"></i>
               </div>
-              <div class="statistic-value">{{ statisticsData.fuelPerKwh }}</div>
+              <div class="statistic-value">{{ state.stat.fuelPerKwh }}</div>
               <div class="statistic-label">平均每kWh油耗(L)</div>
             </div>
           </div>
@@ -211,14 +217,14 @@
               <div class="statistic-icon">
                 <i class="fas fa-clock" />
               </div>
-              <div class="statistic-value">{{ statisticsData.countHours }}</div>
+              <div class="statistic-value">{{ state.stat.countHours }}</div>
               <div class="statistic-label">发电总时长(H)</div>
             </div>
             <div class="statistic-item" style="width: 50%">
               <div class="statistic-icon">
                 <i class="fas fa-yen-sign" />
               </div>
-              <div class="statistic-value">{{ statisticsData.totalRevenue }}</div>
+              <div class="statistic-value">{{ state.stat.totalRevenue }}</div>
               <div class="statistic-label">发电总收益(元)</div>
             </div>
           </div>
@@ -245,146 +251,65 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, onUnmounted, watch } from "vue";
+import { onMounted, reactive, ref, onUnmounted } from "vue";
 import { useAppStore } from "@/store/modules/app";
 import { useMenuSetting } from "@/hooks/setting/useMenuSetting";
+import { list,statByPlate } from "@/views/fdq/property/FdqProperty.api";
+import { orderList,getOrderInfo,stat } from "@/views/fdq/order/FdqOrder.api";
+import { getHeartList } from "@/views/fdq/property/FdqHeartBeat.api";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { ElSteps, ElStep } from 'element-plus';
 import * as echarts from 'echarts';
 import { vue3ScrollSeamless } from "vue3-scroll-seamless";
+import { defHttp } from "@/utils/http/axios";
+import { useGo } from "@/hooks/web/usePage";
+import screenfull from "screenfull";
 const appStore = useAppStore();
 const { setMenuSetting } = useMenuSetting();
 window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
 };
 
+const state = reactive({
+  propertyList:[],
+  orderList:[],
+  steps:[],
+  heartList:[],
+  stat:{},
+  controller:{},
+  map:null,
+  show:true,
+  setFit:true
+})
+
 // 任务数据
 const tasks = ref([
   {
     id: 1,
-    vehicleInfo: "发电车-贵A12345",
-    name: "应急供电任务",
-    targetUser: "贵阳市医院",
-    step: 2,
-    steps: [
-      { status: 'success', desc: '2023-06-10 08:30' },
-      { status: 'success', desc: '2023-06-10 09:15' },
-      { status: 'process', desc: '进行中' },
-      { status: 'wait', desc: '未开始' }
-    ],
-    realtimeData: {
-      voltageA: 220.5,
-      voltageB: 219.8,
-      voltageC: 221.2,
-      currentA: 153,
-      currentB: 149,
-      currentC: 151,
-      power: 1499,
-      frequency: 50.1,
-      temperature: 42.3,
-      batteryVoltage: 13.8
-    }
-  },
-  {
-    id: 2,
-    vehicleInfo: "发电车-贵B67890",
-    name: "常规供电保障",
-    targetUser: "遵义会议中心",
+    plateNumber: "",
+    name: "",
+    targetUser: "",
     step: 1,
     steps: [
-      { status: 'success', desc: '2023-06-10 07:00' },
-      { status: 'process', desc: '进行中' },
-      { status: 'wait', desc: '未开始' },
-      { status: 'wait', desc: '未开始' }
+      { status: 'process', stepInfo: '暂无任务' },
+      { status: 'wait', stepInfo: '暂无任务' },
+      { status: 'wait', stepInfo: '暂无任务' },
+      { status: 'wait', stepInfo: '暂无任务' }
     ],
     realtimeData: {
-      voltageA: 0,
+      voltageA:0,
       voltageB: 0,
       voltageC: 0,
       currentA: 0,
       currentB: 0,
       currentC: 0,
-      power: 0,
+      rpm: 0,
       frequency: 0,
-      temperature: 35.1,
-      batteryVoltage: 13.6
+      temperature: 0,
+      batteryVoltage: 0
     }
   },
-  {
-    id: 3,
-    vehicleInfo: "发电车-贵C54321",
-    name: "紧急救援供电",
-    targetUser: "六盘水灾区",
-    step: 3,
-    steps: [
-      { status: 'success', desc: '2023-06-09 18:00' },
-      { status: 'success', desc: '2023-06-09 20:30' },
-      { status: 'success', desc: '2023-06-09 21:15' },
-      { status: 'process', desc: '准备中' }
-    ],
-    realtimeData: {
-      voltageA: 222.1,
-      voltageB: 220.9,
-      voltageC: 221.5,
-      currentA: 21.4,
-      currentB: 20.8,
-      currentC: 21.2,
-      power: 48.3,
-      frequency: 49.9,
-      temperature: 45.6,
-      batteryVoltage: 13.9
-    }
-  },
-  {
-    id: 4,
-    vehicleInfo: "发电车-贵C54321",
-    name: "紧急救援供电",
-    targetUser: "六盘水灾区",
-    step: 3,
-    steps: [
-      { status: 'success', desc: '2023-06-09 18:00' },
-      { status: 'success', desc: '2023-06-09 20:30' },
-      { status: 'success', desc: '2023-06-09 21:15' },
-      { status: 'process', desc: '准备中' }
-    ],
-    realtimeData: {
-      voltageA: 222.1,
-      voltageB: 220.9,
-      voltageC: 221.5,
-      currentA: 21.4,
-      currentB: 20.8,
-      currentC: 21.2,
-      power: 48.3,
-      frequency: 49.9,
-      temperature: 45.6,
-      batteryVoltage: 13.9
-    }
-  },
-  {
-    id: 5,
-    vehicleInfo: "发电车-贵C54321",
-    name: "紧急救援供电",
-    targetUser: "六盘水灾区",
-    step: 3,
-    steps: [
-      { status: 'success', desc: '2023-06-09 18:00' },
-      { status: 'success', desc: '2023-06-09 20:30' },
-      { status: 'success', desc: '2023-06-09 21:15' },
-      { status: 'process', desc: '准备中' }
-    ],
-    realtimeData: {
-      voltageA: 222.1,
-      voltageB: 220.9,
-      voltageC: 221.5,
-      currentA: 21.4,
-      currentB: 20.8,
-      currentC: 21.2,
-      power: 48.3,
-      frequency: 49.9,
-      temperature: 45.6,
-      batteryVoltage: 13.9
-    }
-  }
+
 ]);
 
 const taskRefs = ref<(HTMLElement | null)[]>([]);
@@ -400,21 +325,47 @@ const steps = ref(tasks.value[0].steps);
 const realtimeData = ref(tasks.value[0].realtimeData);
 // 任务自动滚动定时器
 let taskInterval: NodeJS.Timeout | null = null;
+let mapInterval: NodeJS.Timeout | null = null;
+
+function exit(v) {
+  if (v) {
+    state.show = false;
+    screenfull.request();
+    setMenuSetting({ show: false });
+    appStore.setLayoutHideHeader(true);
+    appStore.setLayoutHideSider(true);
+    appStore.setLayoutHideMultiTabs(true);
+  } else {
+    state.show = true;
+    setMenuSetting({ show: true });
+    appStore.setLayoutHideHeader(false);
+    appStore.setLayoutHideMultiTabs(false);
+    appStore.setLayoutHideSider(false);
+  }
+}
 
 // 切换任务
-const selectTask = (index: number) => {
+const selectTask = async (index: number) => {
+  const params = {
+    id: state.orderList[index].id,
+    plateNumber: state.orderList[index].plateNumber
+  };
+  const [orderInfo] = await Promise.all([
+    getOrderInfo(params)
+  ])
   activeTaskIndex.value = index;
-  currentStep.value = tasks.value[index].step;
-  steps.value = tasks.value[index].steps;
-  realtimeData.value = tasks.value[index].realtimeData;
+  currentStep.value = orderInfo.step;
+  steps.value = orderInfo.stepList;
+  realtimeData.value = orderInfo.controller;
 
   // 滚动到选中项
   scrollToActiveTask(index);
 };
+
 const scrollToActiveTask = (index: number) => {
   const taskElement = taskRefs.value[index];
   const container = document.getElementById('taskListContainer');
-
+  // state.map.setCenter([state.propertyList[index].lastLng,state.propertyList[index].lastLat])
   if (taskElement && container) {
     // 方案1: 滚动到视图中（保持在可见区域）
     taskElement.scrollIntoView({
@@ -424,32 +375,26 @@ const scrollToActiveTask = (index: number) => {
 
   }
 };
+
 // 启动任务自动滚动
-const startTaskAutoScroll = () => {
+const startTaskAutoScroll = async () => {
+  const params = {
+    id: state.orderList[0].id,
+    plateNumber: state.orderList[0].plateNumber
+  };
+  const [orderInfo] = await Promise.all([
+    getOrderInfo(params)
+  ])
+  currentStep.value = orderInfo.step;
+  steps.value = orderInfo.stepList;
+  realtimeData.value = orderInfo.controller;
   taskInterval = setInterval(() => {
     // 计算下一个任务索引，循环切换
-    const nextIndex = (activeTaskIndex.value + 1) % tasks.value.length;
+    const nextIndex = (activeTaskIndex.value + 1) % state.orderList.length;
     selectTask(nextIndex);
   }, 5000*12); // 5秒切换一次
 };
 
-// 维护信息数据
-const maintenanceData = reactive({
-  totalPower: 125800,
-  remainingTime: 15,
-  mileage: 38520,
-  yearlyTasks: 127,
-  maintenanceCount: 23,
-  startupCount: 356
-});
-
-// 发电统计数据
-const statisticsData = reactive({
-  totalFuel: 38560,
-  fuelPerKwh: 0.28,
-  totalRevenue: 256800,
-  countHours: 25945
-});
 
 // 告警信息
 const alarms = ref([
@@ -458,10 +403,37 @@ const alarms = ref([
   { id: 3, time: '2025/07/18 08:12', content: '贵C54321 振动异常' },
   { id: 4, time: '2025/07/18 07:58', content: '贵A12345 未见工单作业' }
 ]);
+
 const classOptions = {
   limitMoveNum: 5,
   step: 0.1
 };
+
+async function getList(){
+  const pageParams = {
+    order: 'desc',
+    pageNo: 1,
+    pageSize: 100
+  };
+  const [listRes,orderRes,heartRes,statRes] = await Promise.all([
+    list(pageParams),
+    orderList(pageParams),
+    getHeartList(pageParams),
+    defHttp.get({url:stat})
+  ])
+  state.propertyList = listRes.records
+  state.orderList = orderRes.records
+  state.heartList = heartRes.records
+  state.stat = statRes
+  // 初始化地图
+  initMap();
+
+  // 初始化图表
+  initCharts();
+
+  // 启动任务自动滚动
+  startTaskAutoScroll();
+}
 
 onMounted(() => {
   // 键盘事件监听
@@ -479,68 +451,232 @@ onMounted(() => {
   appStore.setLayoutHideHeader(true);
   appStore.setLayoutHideMultiTabs(true);
   appStore.setLayoutHideSider(true);
-
-  // 初始化地图
-  initMap();
-
-  // 初始化图表
-  initCharts();
-
-  // 启动任务自动滚动
-  startTaskAutoScroll();
+  getList()
 });
 
 // 组件卸载时清除定时器
 onUnmounted(() => {
   if (taskInterval) {
     clearInterval(taskInterval);
+
   }
+  clearInterval(mapInterval);
 });
+
+const go = useGo();
+
+function goData(v) {
+  go({
+    path: '/index/Track',
+    query:{
+      plateNumber:v.plateNumber
+    }
+  });
+}
 
 // 初始化地图
 function initMap() {
+  const statusMap = {
+    0: { status: "0", deviceStatus: "正在发电", color: "#41C23C" },
+    1: { status: "1", deviceStatus: "车辆驻留", color: "#2F89FC" },
+    2: { status: "2", deviceStatus: "正在移动", color: "#FFC600" },
+    3: { status: "3", deviceStatus: "通信掉线", color: "#9BA3A9" }
+  };
+
+  // 存储当前地图上的标记点
+  let currentMarkers = [];
+
   AMapLoader.load({
     key: "e28af433d6fabd84d33509eca1a3efa3",
     version: "2.0",
-    plugins: ["AMap.DistrictSearch"]
+    plugins: [
+      "AMap.MoveAnimation",
+      "AMap.DistrictSearch",
+      "AMap.ToolBar",
+      "AMap.Driving",
+      "AMap.PolygonEditor",
+      "AMap.PolylineEditor",
+      "AMap.MouseTool",
+      "AMap.PlaceSearch",
+      "AMap.DistrictSearch",
+      "AMap.MarkerClusterer"
+    ]
   }).then((AMap) => {
-    let bounds;
-    const districtSearch = new AMap.DistrictSearch({
-      subdistrict: 0,
-      extensions: "all",
-      level: "province"
+    state.map = new AMap.Map("fdq_map", {
+      center: [105.768654, 26.539309],
+      zoom: 11,
+      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
     });
 
-    let mask = [];
-    districtSearch.search('贵州省', function(status, result) {
-      if (status === 'complete' && result.districtList.length) {
-        bounds = result.districtList[0].boundaries;
-        if (bounds) {
-          for (let i = 0; i < bounds.length; i++) {
-            mask.push([bounds[i]]);
+    // 地图点击事件：点击空白处关闭信息窗口 - 放在这里只绑定一次
+    state.map.on("click", (e) => {
+      // 判断点击的不是标记点
+      if (!(e.target instanceof AMap.Marker)) {
+        // 关闭当前所有标记点的信息窗口
+        currentMarkers.forEach(marker => {
+          if (marker.infoWindow) {
+            marker.infoWindow.close();
           }
-          const map = new AMap.Map("fdq_map", {
-            mask: mask,
-            center: [106.6172, 26.5783],
-            zoom: 7.5,
-            mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
-          });
-          const polygon = new AMap.Polygon({
-            path: bounds,
-            strokeWeight: 3,
-            strokeColor: "#00edfa",
-            fillOpacity: 0.1,
-          });
-          polygon.setMap(map);
-        }
-      } else {
-        console.error('获取贵州省边界失败:', result);
+        });
       }
     });
+
+    // 创建标记点的函数
+    const createMarkers = (devices) => {
+      // 先关闭所有信息窗口
+      currentMarkers.forEach(marker => {
+        if (marker.infoWindow) {
+          marker.infoWindow.close();
+        }
+      });
+
+      // 移除旧的标记点
+      if (currentMarkers.length > 0) {
+        state.map.remove(currentMarkers);
+        currentMarkers = [];
+      }
+
+      // 创建新的标记点
+      const markers = devices.map(device => {
+        const statusInfo = statusMap[device.lastStatus] || statusMap[3]; // 默认通信掉线
+        const markerData = {
+          plateNumber: device.plateNumber,
+          position: [device.lastLng, device.lastLat],
+          id: device.id,
+          ...statusInfo
+        };
+
+        let markerContent = `
+          <div style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
+
+        const marker = new AMap.Marker({
+          position: markerData.position,
+          content: markerContent,
+          offset: new AMap.Pixel(-10, -20)
+        });
+
+        // 绑定点击事件
+        marker.on("click", async () => {
+          try {
+            const params = {
+              plate: markerData.plateNumber
+            };
+            const [stat] = await Promise.all([
+              defHttp.get({url: statByPlate, params})
+            ]);
+            const data = stat;
+
+            const infoWindowContent = `
+              <div style="background: black">
+                <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/18.png');width: 350px;background-repeat: no-repeat;background-size: cover">
+                  <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.plateNumber}</div>
+                  <div style="height: 84%;width: 100%;display: flex">
+                    <div style="width: 50%;height: 100%;color: #ffffff">
+                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${data.KWH}kwh</div>
+                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${data.NEXT_REPAIR}小时</div>
+                    </div>
+                    <div style="width: 50%;height: 100%;color: #ffffff">
+                     <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${data.RUNNING_HOURS}小时</div>
+                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus}</div>
+                    </div>
+                  </div>
+                  <div style="margin-top: 4%;width: 100%;text-align: center;color: #ffffff">历史轨迹记录：<span class="info-track" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">查看</span></div>
+                </div>
+              </div>
+            `;
+
+            let infoWindow = marker.infoWindow;
+            if (!infoWindow) {
+              infoWindow = new AMap.InfoWindow({
+                offset: new AMap.Pixel(0, -15),
+                content: infoWindowContent
+              });
+              marker.infoWindow = infoWindow;
+            } else {
+              infoWindow.setContent(infoWindowContent);
+            }
+
+            infoWindow.open(state.map, marker.getPosition());
+
+            // 绑定历史数据点击事件
+            setTimeout(() => {
+              const track = document.querySelector('.info-track');
+              if (track) {
+                track.onclick = () => goData(markerData);
+              }
+            }, 0);
+
+          } catch (error) {
+            console.error('获取设备详情失败:', error);
+          }
+        });
+
+        return marker;
+      });
+
+      // 添加新标记点到地图
+      state.map.add(markers);
+      currentMarkers = markers;
+
+      // 调整地图视野以显示所有标记点
+      if (markers.length > 0 && state.setFit) {
+        state.map.setFitView(markers);
+      }
+    };
+
+    // 初始加载数据并创建标记点
+    const loadInitialData = async () => {
+      const pageParams = {
+        order: 'desc',
+        pageNo: 1,
+        pageSize: 100
+      };
+      const [listRes] = await Promise.all([
+        list(pageParams),
+      ]);
+      state.propertyList = listRes.records;
+      createMarkers(state.propertyList);
+    };
+
+    // 初始加载数据
+    loadInitialData();
+
+    // 定时刷新数据和标记点
+    mapInterval = setInterval(async () => {
+      try {
+        const pageParams = {
+          order: 'desc',
+          pageNo: 1,
+          pageSize: 100
+        };
+        const [listRes] = await Promise.all([
+          list(pageParams),
+        ]);
+        state.propertyList = listRes.records;
+        // 使用新数据刷新标记点
+        if(state.propertyList.length>0){
+          state.setFit = false;
+          createMarkers(state.propertyList);
+        }
+      } catch (error) {
+        console.error('刷新数据失败:', error);
+      }
+    }, 5000*6); // 每5秒刷新一次
+
+
   }).catch((e) => {
     console.error("地图加载失败:", e);
   });
 }
+
 
 // 初始化图表
 function initCharts() {
@@ -1094,7 +1230,7 @@ body {
 .maintenance-item {
   background: rgba(20, 33, 51, 0.3);
   border-radius: 8px;
-  padding: 10px;
+  padding: 20px;
   text-align: center;
 }
 
@@ -1116,7 +1252,7 @@ body {
   display: flex;
   grid-template-columns: repeat(1, 1fr);
   gap: 10px;
-  padding: 5px 0;
+  //padding: 5px 0;
   overflow-y: auto;
 }
 
@@ -1283,5 +1419,23 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0);
+}
+
+.icon-white {
+  background: rgba(47, 137, 252, 0);
+  color: #ffffff;
+}
+
+.qp {
+  float: right;
+  cursor: pointer;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px auto;
+  border-radius: 10px;
+  font-size: 1.3rem;
 }
 </style>

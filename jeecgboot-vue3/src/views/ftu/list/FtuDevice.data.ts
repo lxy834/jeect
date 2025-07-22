@@ -148,19 +148,19 @@ export const searchFormSchema: FormSchema[] = [
 ];
 //表单数据
 export const formSchema: FormSchema[] = [
-  // {
-  //   label: 'CPU状态',
-  //   field: 'cpuStatus',
-  //   component: 'JDictSelectTag',
-  //   componentProps:{
-  //       dictCode:"cpu_status"
-  //    },
-  //   dynamicRules: ({model,schema}) => {
-  //         return [
-  //                { required: true, message: '请输入CPU状态!'},
-  //         ];
-  //    },
-  // },
+  {
+    label: 'CPU状态',
+    field: 'cpuStatus',
+    component: 'JDictSelectTag',
+    componentProps:{
+        dictCode:"cpu_status"
+     },
+    dynamicRules: ({model,schema}) => {
+          return [
+                 { required: true, message: '请输入CPU状态!'},
+          ];
+     },
+  },
   // {
   //   label: '电源状态',
   //   field: 'psStatus',

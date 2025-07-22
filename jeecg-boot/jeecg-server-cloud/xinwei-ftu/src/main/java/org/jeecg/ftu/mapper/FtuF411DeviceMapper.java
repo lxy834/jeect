@@ -35,9 +35,13 @@ public interface FtuF411DeviceMapper extends BaseMapper<FtuF411Device> {
     FtuF411Device get411Device(@Param("card") String card);
 
     @InterceptorIgnore(tenantLine = "true")
-    boolean updateMode(@Param("mode") Integer mode, @Param("id") String id);
+    boolean updateMode(@Param("mode") Integer mode, @Param("card") String card);
 
     @InterceptorIgnore(tenantLine = "true")
     boolean updateFtuIdBoolean(@Param("id") String id);
+
+    @InterceptorIgnore(tenantLine = "true")
+    void updateDeviceSignal(@Param("signalFor5G") Integer signalFor5G, @Param("signalForBd") Integer signalForBd,
+                            @Param("statusForFtu") Integer statusForFtu, @Param("card") String card);
 
 }

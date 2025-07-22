@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.generate.mapper.FdqControllerMapper">
+
+    <delete id="deleteByMainId" parameterType="java.lang.String">
+        DELETE
+        FROM fdq_controller
+        WHERE plate_number = #{mainId}    </delete>
+
+    <select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.generate.entity.FdqController">
+        SELECT *
+        FROM fdq_controller
+        WHERE plate_number = #{mainId}
+        order by create_time desc limit 100
+    </select>
+    <select id="selectCountKwh" resultType="java.util.Map">
+        WITH max_kwh_car_data AS (SELECT PLATE_NUMBER,
+                                         RUNNING_HOURS,
+                                         KWH,
+                                         ROW_NUMBER() OVER (
+            PARTITION BY PLATE_NUMBER
+            ORDER BY KWH DESC
+        ) AS rn
+                                  FROM FDQ_CONTROLLER)
+        SELECT SUM(RUNNING_HOURS) AS RUNNING_HOURS,
+               SUM(KWH)           AS KWH
+        FROM max_kwh_car_data
+        WHERE rn = 1;
+    </select>
+    <select id="selectOrderCount" resultType="java.util.Map">
+        select count(1) as count_num, ORDER_TYPE
+        from FDQ_ORDER
+        GROUP BY ORDER_TYPE
+    </select>
+
+</mapper>

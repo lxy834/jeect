@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.ftu.mapper.FtuElectlVolumeMapper">
+    <insert id="insertVolume">
+        insert into FTU_ELECTL_VOLUME ("ID", "CREATE_BY", "CREATE_TIME", "UPDATE_BY", "UPDATE_TIME", "SYS_ORG_CODE",
+                                       "ACTIVE_POWER", "REACTIVE_POWER", "FACTOR", "VOLTAGE", "FTU_CURRENT", "FTU_ID",
+                                       "SEND_MODE", "TENANT_ID")
+        values (#{id}, 'admin', NOW(), null, null, 'A01', 0, 0.00000, 0, #{v}, #{current}, #{ftuId}, #{sendMode},
+                '1003');
+    </insert>
 
-	<delete id="deleteByMainId" parameterType="java.lang.String">
-		DELETE 
-		FROM  ftu_electl_volume 
-		WHERE
-			 ftu_id = #{mainId} 	</delete>
-	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.ftu.entity.FtuElectlVolume">
-		SELECT * 
-		FROM  ftu_electl_volume
-		WHERE
-			 ftu_id = #{mainId} 	</select>
+    <delete id="deleteByMainId" parameterType="java.lang.String">
+        DELETE
+        FROM ftu_electl_volume
+        WHERE ftu_id = #{mainId}    </delete>
+
+    <select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.ftu.entity.FtuElectlVolume">
+        SELECT *
+        FROM ftu_electl_volume
+        WHERE ftu_id = #{mainId}    </select>
 </mapper>

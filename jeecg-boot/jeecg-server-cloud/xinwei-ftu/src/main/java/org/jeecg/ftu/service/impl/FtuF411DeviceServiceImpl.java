@@ -87,8 +87,13 @@ public class FtuF411DeviceServiceImpl extends ServiceImpl<FtuF411DeviceMapper, F
     }
 
     @Override
-    public boolean updateMode(Integer mode, String id) {
-        return baseMapper.updateMode(mode, id);
+    public void updateMode(Integer mode, String card) {
+        baseMapper.updateMode(mode, card);
+    }
+
+    @Override
+    public void updateDeviceSignal(Integer signalFor5G, Integer signalForBd, Integer statusForFtu, String card) {
+        baseMapper.updateDeviceSignal(signalFor5G, signalForBd, statusForFtu, card);
     }
 
 }

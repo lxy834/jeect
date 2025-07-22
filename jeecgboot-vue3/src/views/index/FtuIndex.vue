@@ -338,7 +338,7 @@
         <div class="stat-card">
           <div class="card-title">
             <i class="fas fa-exchange-alt"></i>
-            告警通知
+            事件通知
           </div>
           <table class="real-time-table">
             <thead>
@@ -634,7 +634,7 @@ async function getList() {
   statRes.forEach(item => {
     const countKey = commModeMap.get(item.COMMUNICATION_MODE);
     if (countKey) {
-      state[countKey] = item.count;
+      state[countKey] = item.COUNT;
     }
   });
 
@@ -663,6 +663,55 @@ function initMap() {
     2: { communicationMode: 2, commStatus: "混合模式"},
   }
 
+  const style = document.createElement('style');
+  style.textContent = `
+    /* 电流负荷小 - 缓慢闪烁 */
+    @keyframes smallLoadBlink {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    .small-load-blink {
+      animation: smallLoadBlink 3s infinite;
+    }
+
+    /* 电流负荷大 - 中等速度闪烁 */
+    @keyframes bigLoadBlink {
+      0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .big-load-blink {
+      animation: bigLoadBlink 2s infinite;
+    }
+
+    /* 负荷过载 - 快速闪烁（警告效果） */
+    @keyframes overloadBlink {
+      0% { opacity: 0; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+    .overload-blink {
+      animation: overloadBlink 1s infinite;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    }
+
+    /* 通信质量差 - 不稳定闪烁 */
+    @keyframes poorSignalBlink {
+ 0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .poor-signal-blink {
+      animation: poorSignalBlink 2s infinite;
+    }
+
+    .blink-container {
+      position: relative;
+    }
+  `;
+  document.head.appendChild(style);
+
   AMapLoader.load({
     key: "e28af433d6fabd84d33509eca1a3efa3",
     version: "2.0",
@@ -684,270 +733,158 @@ function initMap() {
       zoom: 11,
       mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
     });
-    let points = []
     const markers = state.ftuDeviceList.map(device => {
       const statusInfo = statusMap[device.status] || statusMap[2]; // 默认使用离线状态
       const commStatus = commMap[device.communicationMode]; // 默认使用离线状态
-      let point = {
-        lnglat: [device.lng, device.lat],
+      const status = device.status;
+      // 判断设备状态类型
+      const isSmallLoad = status === 6;
+      const isBigLoad = status === 7;
+      const isOverload = status === 8;
+      const isPoorSignal = status === 9;
+
+      const markerData = {
+        position: [device.lng, device.lat],
         deviceName: device.deviceName,
         insLineName: device.insLineName,
-        onlineStatus: device.onlineStatus,
-        ip: device.ip,
-        status: device.status,
-        station: device.station,
+        onlineStatus:device.onlineStatus,
+        ip:device.ip,
+        station:device.station,
         id: device.id,
         ...commStatus,
         ...statusInfo
-      }
-      points.push(point)
+      };
 
-      state.ftuOnlineList.push(point)
-      return new AMap.Marker({
-        position: point.lnglat,
-        offset: new AMap.Pixel(-10, -20)
-      });
-    });
+      state.ftuOnlineList.push(markerData)
 
-    //非聚合点样式
-    var _renderMarker = function(context) {
-      // 避免重复添加样式
-      if (!document.getElementById('marker-styles')) {
-        const style = document.createElement('style');
-        style.id = 'marker-styles';
-        style.textContent = `
-      /* 电流负荷小 - 缓慢闪烁 */
-      @keyframes smallLoadBlink {
-        0% { opacity: 0.3; }
-        50% { opacity: 1; }
-        100% { opacity: 0.3; }
-      }
-      .small-load-blink {
-        animation: smallLoadBlink 3s infinite;
-      }
-
-      /* 电流负荷大 - 中等速度闪烁 */
-      @keyframes bigLoadBlink {
-        0% { opacity: 0.2; }
-        50% { opacity: 1; }
-        100% { opacity: 0.2; }
-      }
-      .big-load-blink {
-        animation: bigLoadBlink 2s infinite;
-      }
-
-      /* 负荷过载 - 快速闪烁（警告效果） */
-      @keyframes overloadBlink {
-        0% { opacity: 0; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.1); }
-        100% { opacity: 0; transform: scale(1); }
-      }
-      .overload-blink {
-        animation: overloadBlink 1s infinite;
-        box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
-      }
-
-      /* 通信质量差 - 不稳定闪烁 */
-      @keyframes poorSignalBlink {
-        0% { opacity: 0.2; }
-        50% { opacity: 1; }
-        100% { opacity: 0.2; }
-      }
-      .poor-signal-blink {
-        animation: poorSignalBlink 2s infinite;
-      }
-
-      .blink-container {
-        position: relative;
-      }
-    `;
-        document.head.appendChild(style);
-      }
-
-      const status = context.data[0].status;
-      // 判断设备状态类型
-      const isSmallLoad = status === 'overload-small';
-      const isBigLoad = status === 'overload-big';
-      const isOverload = status === 'overload';
-      const isPoorSignal = status === 'small';
       let markerContent;
       if (isSmallLoad) {
         markerContent = `
-      <div class="small-load-blink" style="
-        background: ${context.data[0].color};
-        width: 20px;
-        height: 20px;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      "></div>
-    `;
+          <div class="small-load-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
       } else if (isBigLoad) {
         markerContent = `
-      <div class="big-load-blink" style="
-        background: ${context.data[0].color};
-        width: 20px;
-        height: 20px;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      "></div>
-    `;
+          <div class="big-load-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
       } else if (isOverload) {
         markerContent = `
-      <div class="overload-blink" style="
-        background: ${context.data[0].color};
-        width: 20px;
-        height: 20px;
-        border: 2px solid white;
-        border-radius: 50%;
-      "></div>
-    `;
+          <div class="overload-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+          "></div>
+        `;
       } else if (isPoorSignal) {
         markerContent = `
-      <div class="poor-signal-blink" style="
-        background: ${context.data[0].color};
-        width: 20px;
-        height: 20px;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      "></div>
-    `;
+          <div class="poor-signal-blink" style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
       } else {
         markerContent = `
-      <div style="
-        background: ${context.data[0].color};
-        width: 20px;
-        height: 20px;
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      "></div>
-    `;
+          <div style="
+            background: ${markerData.color};
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          "></div>
+        `;
       }
 
-      // 设置标记点内容
-      context.marker.setContent(markerContent);
-
-      // 存储所有信息窗口的引用
-      if (!window.mapInfoWindows) {
-        window.mapInfoWindows = [];
-      }
-
-      // 绑定标记点点击事件
-      context.marker.on("click", async (e) => {
-        // 先关闭所有已打开的信息窗口
-        window.mapInfoWindows.forEach(infoWindow => infoWindow.close());
-        window.mapInfoWindows = [];
-
+      const marker = new AMap.Marker({
+        position: markerData.position,
+        content: markerContent,
+        offset: new AMap.Pixel(-10, -20)
+      });
+      marker.on("click", async () => {
         try {
-          const data = await defHttp.get({
-            url: ftuF411DeviceList,
-            params: { id: context.data[0].id }
-          });
+          const data = await defHttp.get({url: ftuF411DeviceList,params: { id: markerData.id }});
 
           const infoWindowContent = `
-        <div style="background: black">
-          <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/18.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
-            <div style="width: 100%;text-align: right;color: white;font-weight: bold">${context.data[0].commStatus}--${context.data[0].deviceName}</div>
-            <div style="height: 84%;width: 100%;display: flex">
-              <div style="width: 60%;height: 100%;color: #ffffff">
-                <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${context.data[0].deviceName}</div>
-                <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${context.data[0].insLineName}</div>
-                <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0]?.deviceCode || '未知'}</div>
-                <div style="height: 18%;margin-top: 2%;margin-left: 2%">当前状态：${context.data[0].deviceStatus}</div>
-                <div style="margin-top: 2%;margin-left: 2%">历史数据：<span class="info-content" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">查看</span></div>
-              </div>
-              <div style="width: 40%;height: 96%;margin-top:4%">
-                <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
+            <div style="background: black">
+              <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/18.png');height: 250px;width: 500px;background-repeat: no-repeat;background-size: cover">
+                <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.commStatus}--${markerData.deviceName}</div>
+                <div style="height: 84%;width: 100%;display: flex">
+                  <div style="width: 60%;height: 100%;color: #ffffff">
+                    <div style="height: 24%;margin-top: 4%;margin-left: 2%">设备名称：${markerData.deviceName}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">线路名称：${markerData.insLineName}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">设备编码：${data[0]?.deviceCode || '未知'}</div>
+                    <div style="height: 18%;margin-top: 2%;margin-left: 2%">当前状态：${markerData.deviceStatus}</div>
+                    <div style="margin-top: 2%;margin-left: 2%">历史数据：<span class="info-content" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">查看</span></div>
+                  </div>
+                  <div style="width: 40%;height: 96%;margin-top:4%">
+                    <img src='https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/ftu.jpg' style='width: 100%;height:100%'/>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
 
-          let infoWindow = context.marker.infoWindow;
+          let infoWindow = marker.infoWindow;
           if (!infoWindow) {
             infoWindow = new AMap.InfoWindow({
               offset: new AMap.Pixel(0, -15),
               content: infoWindowContent
             });
-            context.marker.infoWindow = infoWindow;
+            marker.infoWindow = infoWindow;
           } else {
             infoWindow.setContent(infoWindowContent);
           }
 
-          // 打开新的信息窗口并存储引用
-          infoWindow.open(map, context.marker.getPosition());
-          window.mapInfoWindows.push(infoWindow);
+          infoWindow.open(map, marker.getPosition());
 
           // 绑定历史数据点击事件
           setTimeout(() => {
             const infoWindowContent = document.querySelector('.info-content');
             if (infoWindowContent) {
-              infoWindowContent.onclick = () => goData(context.data[0]);
+              infoWindowContent.onclick = () => goData(markerData);
             }
           }, 0);
+
         } catch (error) {
           console.error('获取设备详情失败:', error);
         }
-
-        // 阻止事件冒泡到地图
-        e.stopPropagation();
       });
-    };
-    var count = points.length;
-    var _renderClusterMarker = function (context) {
-      var factor = Math.pow(context.count / count, 1 / 18);
-      var div = document.createElement('div');
-      var Hue = 180 - factor * 180;
-      var bgColor = 'hsla(' + Hue + ',100%,40%,0.7)';
-      var fontColor = 'hsla(' + Hue + ',100%,90%,1)';
-      var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
-      var shadowColor = 'hsla(' + Hue + ',100%,90%,1)';
-      div.style.backgroundColor = bgColor;
-      var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
-      div.style.width = div.style.height = size + 'px';
-      div.style.border = 'solid 1px ' + borderColor;
-      div.style.borderRadius = size / 2 + 'px';
-      div.style.boxShadow = '0 0 5px ' + shadowColor;
-      div.innerHTML = context.count;
-      div.style.lineHeight = size + 'px';
-      div.style.color = fontColor;
-      div.style.fontSize = '14px';
-      div.style.textAlign = 'center';
-      context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
-      context.marker.on('click', function(e) {
-        var curZoom = map.getZoom();
-        if(curZoom < 20){
-          curZoom += 2;
-        }
-        map.setZoomAndCenter(curZoom, e.lnglat);
-      });
-      context.marker.setContent(div)
-    };
 
-// 在地图初始化后添加点击事件监听
-    map.on('click', function() {
-      // 关闭所有已打开的信息窗口
-      if (window.mapInfoWindows && window.mapInfoWindows.length > 0) {
-        window.mapInfoWindows.forEach(infoWindow => infoWindow.close());
-        window.mapInfoWindows = [];
+      return marker;
+    });
+    map.add(markers);
+
+    map.setFitView(markers)
+    map.on("click", (e) => {
+      if (!(e.target instanceof AMap.Marker)) {
+        // 关闭所有信息窗口
+        markers.forEach(marker => {
+          if (marker.infoWindow) {
+            marker.infoWindow.close();
+          }
+        });
       }
     });
 
-
-    cluster = new AMap.MarkerCluster(
-      map, //地图实例
-      points, //海量点数据，数据中需包含经纬度信息字段 lnglat
-      {
-        gridSize: 60, //数据聚合计算时网格的像素大小
-        renderMarker: _renderMarker,
-        renderClusterMarker:_renderClusterMarker
-      }
-    );
-    map.setFitView(markers)
   }).catch((e) => {
     console.error("地图加载失败:", e);
   });
@@ -962,7 +899,7 @@ const go = useGo();
 
 function goData(v) {
   go({
-    path: '/index/componets',
+    path: '/index/componets/ftu',
     query: {
       ftu: v.id,
       device: v.deviceName
@@ -1091,6 +1028,7 @@ body {
   position: relative;
   height: 60px;
   border-radius: 12px;
+  flex-shrink: 0;
 }
 
 /* 主内容区样式 */

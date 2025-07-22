@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.generate.mapper.FdqTrackMapper">
+
+    <select id="getByAssetNumber" resultType="org.jeecg.generate.vo.FdqTrackVO">
+        SELECT *
+        FROM (
+        SELECT DISTINCT
+        pt.MOTION_STATUS AS POWER,
+        pt.PLATE_NUMBER AS PLATENUMBER,
+        pt.CREATE_TIME AS CREATETIME,
+        UNIX_TIMESTAMP(pt.CREATE_TIME) AS timestamp,
+        pt.LNG,
+        pt.LAT,
+        pt.SPEED
+        FROM FDQ_TRACK pt
+        WHERE pt.PLATE_NUMBER = #{dto.plateNumber}
+        <if test="dto.strTime != null and dto.strTime != ''">
+            AND pt.CREATE_TIME BETWEEN #{dto.strTime} AND #{dto.endTime}
+        </if>
+        <if test="dto.strTime == null or dto.strTime == ''">
+            AND pt.CREATE_TIME BETWEEN TO_CHAR(TRUNC(SYSDATE), 'YYYY-MM-DD') || ' 00:00:00'
+            AND TO_CHAR(SYSDATE, 'YYYY-MM-DD') || ' 23:59:59'
+        </if>
+        ORDER BY pt.CREATE_TIME DESC
+        ) subquery
+        ORDER BY CREATETIME ASC;
+    </select>
+
+</mapper>
