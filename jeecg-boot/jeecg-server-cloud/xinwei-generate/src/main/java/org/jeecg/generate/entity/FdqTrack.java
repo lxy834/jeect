@@ -12,6 +12,7 @@ import org.jeecgframework.poi.excel.annotation.Excel;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @Description: 定位数据
@@ -92,4 +93,8 @@ public class FdqTrack implements Serializable {
     @Excel(name = "车牌号", width = 15)
     @Schema(description = "车牌号")
     private java.lang.String plateNumber;
+
+    private Date satelliteTime;
+
+    private Double angle;
 }

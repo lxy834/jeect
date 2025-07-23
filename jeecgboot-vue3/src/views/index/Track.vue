@@ -15,6 +15,9 @@ import { GraspRoadPath } from "@/utils/graspRoadPath";
 import { truck } from "@/assets/images";
 const route = useRoute();
 const plateNumber = computed(() => route.query.plateNumber );
+window._AMapSecurityConfig = {
+  securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
+};
 const state = reactive({
   map:null,
   strTime:'',
@@ -99,11 +102,18 @@ async function getTrack() {
 
   const map = state.map
 
+  for (let i = 0; i < lineArr.length; i++) {
+    new AMap.Marker({
+      map,
+      position: lineArr[i],
+    });
+  }
+
   new AMap.Polyline({
     map,
     path: lineArr,
     showDir: true,
-    strokeColor: "#28F",  //线颜色
+    strokeColor: "#00ffff",  //线颜色
     strokeWeight: 6      //线宽
   });
 

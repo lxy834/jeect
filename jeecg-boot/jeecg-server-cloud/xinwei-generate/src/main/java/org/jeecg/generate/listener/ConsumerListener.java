@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import lombok.SneakyThrows;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.jeecg.common.util.Gps;
 import org.jeecg.common.util.GpsTransfer;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -71,7 +74,6 @@ public class ConsumerListener {
                     .getJSONArray("services")
                     .getJSONObject(0)
                     .getJSONObject("data");
-            System.out.println(dataJson);
             FdqHeartBeat heartBeat = dataJson.toJavaObject(FdqHeartBeat.class);
             heartBeat.setPlateNumber(property.getPlateNumber());
             heartBeatService.save(heartBeat);
@@ -118,6 +120,7 @@ public class ConsumerListener {
         fdqControllerService.save(controller);
     }
 
+    @SneakyThrows
     public void saveLocation(JSONObject json, String card) {
         FdqProperty property = fdqPropertyService.getOne(Wrappers.<FdqProperty>query().lambda().eq(FdqProperty::getSn, card));
         if (property != null) {
@@ -126,10 +129,21 @@ public class ConsumerListener {
                     .getJSONArray("services")
                     .getJSONObject(0)
                     .getJSONArray("data");
+            System.out.println(jsonArray);
+            // 定义输入格式（原字符串的格式）
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            // 定义输出格式（目标格式）
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             List<FdqTrack> trackList = new ArrayList<>();
             jsonArray.forEach(arr -> {
                 JSONObject dataJson = (JSONObject) arr;
                 FdqTrack track = dataJson.toJavaObject(FdqTrack.class);
+                try {
+                    Date date = inputFormat.parse(dataJson.getString("satelliteTime"));
+                    track.setSatelliteTime(date);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
                 Gps gps = GpsTransfer.wgs84_To_Gcj02(track.getLat(), track.getLng());
                 track.setPlateNumber(property.getPlateNumber());
                 track.setLat(gps.getLat());

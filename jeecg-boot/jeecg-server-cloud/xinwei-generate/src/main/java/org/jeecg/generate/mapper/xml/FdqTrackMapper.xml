@@ -8,21 +8,21 @@
         SELECT DISTINCT
         pt.MOTION_STATUS AS POWER,
         pt.PLATE_NUMBER AS PLATENUMBER,
-        pt.CREATE_TIME AS CREATETIME,
-        UNIX_TIMESTAMP(pt.CREATE_TIME) AS timestamp,
+        pt.SATELLITE_TIME AS CREATETIME,
+        UNIX_TIMESTAMP(pt.SATELLITE_TIME) AS timestamp,
         pt.LNG,
         pt.LAT,
         pt.SPEED
         FROM FDQ_TRACK pt
         WHERE pt.PLATE_NUMBER = #{dto.plateNumber}
         <if test="dto.strTime != null and dto.strTime != ''">
-            AND pt.CREATE_TIME BETWEEN #{dto.strTime} AND #{dto.endTime}
+            AND pt.SATELLITE_TIME BETWEEN #{dto.strTime} AND #{dto.endTime}
         </if>
         <if test="dto.strTime == null or dto.strTime == ''">
-            AND pt.CREATE_TIME BETWEEN TO_CHAR(TRUNC(SYSDATE), 'YYYY-MM-DD') || ' 00:00:00'
+            AND pt.SATELLITE_TIME BETWEEN TO_CHAR(TRUNC(SYSDATE), 'YYYY-MM-DD') || ' 00:00:00'
             AND TO_CHAR(SYSDATE, 'YYYY-MM-DD') || ' 23:59:59'
         </if>
-        ORDER BY pt.CREATE_TIME DESC
+        ORDER BY pt.SATELLITE_TIME DESC
         ) subquery
         ORDER BY CREATETIME ASC;
     </select>
