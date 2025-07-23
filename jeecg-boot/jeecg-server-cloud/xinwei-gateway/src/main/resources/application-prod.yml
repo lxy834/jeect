@@ -6,7 +6,7 @@ jeecg:
       data-id: jeecg-gateway-router
 spring:
   application:
-    name: xinwei5-gateway-dev
+    name: xinwei5-gateway
   cloud:
     nacos:
       discovery:
@@ -25,7 +25,7 @@ spring:
             allowedHeaders: "*"
       routes:
         [ {
-          "id": "xinwei5-auth-dev",
+          "id": "xinwei5-auth",
           "order": 0,
           "predicates": [ {
             "name": "Path",
@@ -43,9 +43,9 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-auth-dev"
+          "uri": "lb://xinwei5-auth"
         }, {
-          "id": "xinwei5-generate-dev",
+          "id": "xinwei5-generate",
           "order": 1,
           "predicates": [ {
             "name": "Path",
@@ -54,9 +54,9 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-generate-dev"
+          "uri": "lb://xinwei5-generate"
         },{
-          "id": "xinwei5-ftu-dev",
+          "id": "xinwei5-ftu",
           "order": 2,
           "predicates": [ {
             "name": "Path",
@@ -65,14 +65,14 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-ftu-dev"
+          "uri": "lb://xinwei5-ftu"
         } ]
   redis:
     database: 1
-    host: 127.0.0.1
-    password:
-    port: 6379
+    host: 162.14.66.67
+    password: fxtd@2025
+    port: 6389
 knife4j:
   production: false
 server:
-  port: 9999
+  port: 9856

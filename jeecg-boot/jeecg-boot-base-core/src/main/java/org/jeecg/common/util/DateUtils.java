@@ -26,6 +26,13 @@ import java.util.GregorianCalendar;
  */
 public class DateUtils extends PropertyEditorSupport {
 
+    /**
+     * 以毫秒表示的时间
+     */
+    private static final long DAY_IN_MILLIS = 24 * 3600 * 1000;
+    private static final long HOUR_IN_MILLIS = 3600 * 1000;
+    private static final long MINUTE_IN_MILLIS = 60 * 1000;
+    private static final long SECOND_IN_MILLIS = 1000;
     public static ThreadLocal<SimpleDateFormat> date_sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
@@ -69,16 +76,25 @@ public class DateUtils extends PropertyEditorSupport {
         }
     };
 
-    /**
-     * 以毫秒表示的时间
-     */
-    private static final long DAY_IN_MILLIS = 24 * 3600 * 1000;
-    private static final long HOUR_IN_MILLIS = 3600 * 1000;
-    private static final long MINUTE_IN_MILLIS = 60 * 1000;
-    private static final long SECOND_IN_MILLIS = 1000;
+    public static Date getStartOfDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        return cal.getTime();
+    }
+
+    public static Date getEndOfDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        return cal.getTime();
+    }
 
     /**
      * 指定模式的时间格式
+     *
      * @param pattern
      * @return
      */
@@ -121,8 +137,8 @@ public class DateUtils extends PropertyEditorSupport {
     public static Date getDate() {
         return new Date();
     }
-    
-    
+
+
     /**
      * 当前日期
      *
@@ -227,7 +243,7 @@ public class DateUtils extends PropertyEditorSupport {
     /**
      * 日期转换为字符串
      *
-     * @param date     日期
+     * @param date    日期
      * @param dateSdf 日期格式
      * @return 字符串
      */
@@ -654,33 +670,6 @@ public class DateUtils extends PropertyEditorSupport {
         return Long.valueOf(DateUtils.yyyymmddhhmmss.get().format(new Date()));
     }
 
-    /**
-     * String类型 转换为Date, 如果参数长度为10 转换格式”yyyy-MM-dd“ 如果参数长度为19 转换格式”yyyy-MM-dd
-     * HH:mm:ss“ * @param text String类型的时间值
-     */
-    @Override
-    public void setAsText(String text) throws IllegalArgumentException {
-        if (StringUtils.hasText(text)) {
-            try {
-                int length10 = 10;
-                int length19 = 19;
-                if (text.indexOf(SymbolConstant.COLON) == -1 && text.length() == length10) {
-                    setValue(DateUtils.date_sdf.get().parse(text));
-                } else if (text.indexOf(SymbolConstant.COLON) > 0 && text.length() == length19) {
-                    setValue(DateUtils.datetimeFormat.get().parse(text));
-                } else {
-                    throw new IllegalArgumentException("Could not parse date, date format is error ");
-                }
-            } catch (ParseException ex) {
-                IllegalArgumentException iae = new IllegalArgumentException("Could not parse date: " + ex.getMessage());
-                iae.initCause(ex);
-                throw iae;
-            }
-        } else {
-            setValue(null);
-        }
-    }
-
     public static int getYear() {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(getDate());
@@ -689,13 +678,14 @@ public class DateUtils extends PropertyEditorSupport {
 
     /**
      * 将字符串转成时间
+     *
      * @param str
      * @return
      */
-    public static Date parseDatetime(String str){
+    public static Date parseDatetime(String str) {
         try {
             return datetimeFormat.get().parse(str);
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         return null;
     }
@@ -812,6 +802,33 @@ public class DateUtils extends PropertyEditorSupport {
         Calendar calendar2 = Calendar.getInstance();
         calendar2.setTime(date2);
         return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR);
+    }
+
+    /**
+     * String类型 转换为Date, 如果参数长度为10 转换格式”yyyy-MM-dd“ 如果参数长度为19 转换格式”yyyy-MM-dd
+     * HH:mm:ss“ * @param text String类型的时间值
+     */
+    @Override
+    public void setAsText(String text) throws IllegalArgumentException {
+        if (StringUtils.hasText(text)) {
+            try {
+                int length10 = 10;
+                int length19 = 19;
+                if (text.indexOf(SymbolConstant.COLON) == -1 && text.length() == length10) {
+                    setValue(DateUtils.date_sdf.get().parse(text));
+                } else if (text.indexOf(SymbolConstant.COLON) > 0 && text.length() == length19) {
+                    setValue(DateUtils.datetimeFormat.get().parse(text));
+                } else {
+                    throw new IllegalArgumentException("Could not parse date, date format is error ");
+                }
+            } catch (ParseException ex) {
+                IllegalArgumentException iae = new IllegalArgumentException("Could not parse date: " + ex.getMessage());
+                iae.initCause(ex);
+                throw iae;
+            }
+        } else {
+            setValue(null);
+        }
     }
 
 }

@@ -3,7 +3,7 @@
     <div class="header-panel">
       <div style="text-align: right;width: 100%">
         <div class="qp icon-white">
-          <i class="fas fa-expand"  v-show="state.show" @click="exit(true)"/>
+          <i  id="screenFull" class="fas fa-expand"  v-show="state.show" @click="exit(true)"/>
           <i class="fa fa-compress" v-show="!state.show" @click="exit(false)"/>
         </div>
       </div>
@@ -145,7 +145,7 @@
                   <tr class="head">
                   </tr>
                   <tr v-for="(item,i) of state.heartList" :key="i">
-                    <td class="alarm-time">{{item.plateNumber}}</td>
+                    <td class="alarm-time">{{item.createTime}}-{{item.plateNumber}}</td>
                     <td class="alarm-content">开机运行{{(item.runningTime/1000/60/60).toFixed(2)}}分钟，当前通信质量{{item.signalQuality}}，内部电压{{item.internalBattery}}V,当前设备固件版本V{{item.appVersion}}</td>
                   </tr>
                   </thead>
@@ -337,10 +337,11 @@ function exit(v) {
     appStore.setLayoutHideMultiTabs(true);
   } else {
     state.show = true;
+    screenfull.exit();
     setMenuSetting({ show: true });
-    appStore.setLayoutHideHeader(false);
-    appStore.setLayoutHideMultiTabs(false);
-    appStore.setLayoutHideSider(false);
+    appStore.setLayoutHideHeader(true);
+    appStore.setLayoutHideMultiTabs(true);
+    appStore.setLayoutHideSider(true);
   }
 }
 
@@ -436,13 +437,15 @@ async function getList(){
 }
 
 onMounted(() => {
+
   // 键盘事件监听
   document.addEventListener('keydown', function(event) {
     if (event.keyCode === 27) { // ESC键
+      state.show = true
       setMenuSetting({ show: true });
-      appStore.setLayoutHideHeader(false);
-      appStore.setLayoutHideMultiTabs(false);
-      appStore.setLayoutHideSider(false);
+      appStore.setLayoutHideHeader(true);
+      appStore.setLayoutHideMultiTabs(true);
+      appStore.setLayoutHideSider(true);
     }
   });
 
@@ -452,6 +455,7 @@ onMounted(() => {
   appStore.setLayoutHideMultiTabs(true);
   appStore.setLayoutHideSider(true);
   getList()
+
 });
 
 // 组件卸载时清除定时器
@@ -505,7 +509,7 @@ function initMap() {
     state.map = new AMap.Map("fdq_map", {
       center: [105.768654, 26.539309],
       zoom: 11,
-      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
+      mapStyle: "amap://styles/macaron"
     });
 
     // 地图点击事件：点击空白处关闭信息窗口 - 放在这里只绑定一次
@@ -543,6 +547,7 @@ function initMap() {
           plateNumber: device.plateNumber,
           position: [device.lastLng, device.lastLat],
           id: device.id,
+          lastBdTime:device.lastBdTime,
           ...statusInfo
         };
 
@@ -575,22 +580,22 @@ function initMap() {
             const data = stat;
 
             const infoWindowContent = `
-              <div style="background: black">
-                <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/18.png');width: 350px;background-repeat: no-repeat;background-size: cover">
-                  <div style="width: 100%;text-align: right;color: white;font-weight: bold">${markerData.plateNumber}</div>
-                  <div style="height: 84%;width: 100%;display: flex">
-                    <div style="width: 50%;height: 100%;color: #ffffff">
-                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${data.KWH}kwh</div>
-                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${data.NEXT_REPAIR}小时</div>
-                    </div>
-                    <div style="width: 50%;height: 100%;color: #ffffff">
-                     <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${data.RUNNING_HOURS}小时</div>
-                      <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus}</div>
-                    </div>
-                  </div>
-                  <div style="margin-top: 4%;width: 100%;text-align: center;color: #ffffff">历史轨迹记录：<span class="info-track" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">查看</span></div>
-                </div>
-              </div>
+<div >
+  <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');width: 400px;background-repeat: no-repeat;background-size: cover">
+    <div style="width: 100%;text-align: right;font-weight: bold">${markerData.plateNumber || ''}-最后定位时间${(markerData && markerData.lastBdTime) || '未知'}</div>
+    <div style="height: 84%;width: 100%;display: flex">
+      <div style="width: 50%;height: 100%;color: black">
+        <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${(data && data.KWH) || 0}kwh</div>
+        <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${(data && data.NEXT_REPAIR) || 0}小时</div>
+      </div>
+      <div style="width: 50%;height: 100%;color: black">
+        <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${(data && data.RUNNING_HOURS) || 0}小时</div>
+        <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus || '未知'}</div>
+      </div>
+    </div>
+    <div style="margin-top: 4%;width: 100%;text-align: center;color: black"><span class="info-track" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">历史轨迹记录</span></div>
+  </div>
+</div>
             `;
 
             let infoWindow = marker.infoWindow;
@@ -669,7 +674,7 @@ function initMap() {
       } catch (error) {
         console.error('刷新数据失败:', error);
       }
-    }, 5000*6); // 每5秒刷新一次
+    }, 5000*6);
 
 
   }).catch((e) => {
@@ -885,23 +890,9 @@ html, body {
   overflow: hidden; // 禁止页面滚动
 }
 
-.amap-copyright {
-  opacity: 0;
-}
-
-.amap-container {
-  background-image: none;
-}
-
 ::v-deep .amap-marker-label {
   padding: 0;
-  background: red;
   border: 3px solid white;
-}
-
-::v-deep .amap-logo {
-  display: none;
-  opacity: 0 !important;
 }
 
 body {
@@ -912,19 +903,20 @@ body {
 
 // 容器占满整个屏幕
 .fdq_container {
-  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/fdq_bg.png");
-  background-size: cover;
+  //background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/fdq_bg.png");
+  //background-size: cover;
+
   position: relative;
   z-index: 200;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  gap: 5px;
+
 }
 
 /* 头部样式 - 固定高度 */
 .header-panel {
-  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/fdq_header.png");
+  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/head.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
@@ -961,7 +953,7 @@ body {
 .right-stats .stat-card {
   flex: 1; // 平均分配高度
   box-sizing: border-box;
-  min-height: 300px;
+  min-height: 280px;
   max-height: calc((100vh - 60px)/3);
   padding: 10px; // 增加内边距
   display: flex;
@@ -1021,7 +1013,7 @@ body {
   bottom: 0; // 与父容器内边距一致
   //left: 15px;
   border-radius: 12px;
-  background: rgba(14, 38, 59, 0.9);
+  background: rgba(14, 38, 59, 0.3);
   z-index: 201;
   box-sizing: border-box;
   padding: 10px;
@@ -1075,7 +1067,7 @@ body {
 
 /* 卡片样式调整 */
 .stat-card {
-  background: rgba(14, 38, 59, 0.9);
+  background: rgba(14, 38, 59, 0.35);
   border-radius: 12px;
   position: relative;
   overflow: hidden;
@@ -1179,13 +1171,17 @@ body {
 }
 
 ::v-deep .el-step__description {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: white !important;
   font-size: 0.8rem !important;
 }
 
 ::v-deep .el-step__title {
   color: white !important;
   font-size: 0.9rem !important;
+}
+
+::v-deep .el-step__line{
+  color: black
 }
 
 /* 3. 实时发电数据 */
@@ -1207,7 +1203,7 @@ body {
 
 .realtime-label {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 1);
+  color: white;
   margin-bottom: 5px;
 }
 
@@ -1252,14 +1248,14 @@ body {
   display: flex;
   grid-template-columns: repeat(1, 1fr);
   gap: 10px;
-  //padding: 5px 0;
+  padding: 5px 0;
   overflow-y: auto;
 }
 
 .statistic-item {
   background: rgba(20, 33, 51, 0.3);
   border-radius: 8px;
-  padding: 10px;
+  padding: 2px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -1276,14 +1272,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+
 }
 
 .statistic-value {
   font-size: 1.3rem;
   font-weight: bold;
   color: #00F0FF;
-  margin-bottom: 5px;
+
 }
 
 .statistic-label {
@@ -1305,7 +1301,7 @@ body {
 // 确保图表容器有足够高度
 .chart-wrapper {
   flex: 1;
-  min-height: 240px;
+  min-height: 180px;
 }
 
 /* 告警信息列表 */
@@ -1423,7 +1419,7 @@ body {
 
 .icon-white {
   background: rgba(47, 137, 252, 0);
-  color: #ffffff;
+  color: black;
 }
 
 .qp {

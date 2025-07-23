@@ -155,6 +155,7 @@ public class ConsumerListener {
             property.setLastStatus(Integer.valueOf(trackList.get(trackList.size() - 1).getMotionStatus()));
             property.setLastLng(trackList.get(trackList.size() - 1).getLng());
             property.setLastLat(trackList.get(trackList.size() - 1).getLat());
+            property.setLastBdTime(trackList.get(trackList.size() - 1).getSatelliteTime());
             fdqPropertyService.updateById(property);
         }
     }

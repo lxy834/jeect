@@ -4,8 +4,8 @@ spring:
       discovery:
         enabled: false
     consul:
-      host: 127.0.0.1
-      #      host: 162.14.66.67
+      #      host: 127.0.0.1
+      host: 162.14.66.67
       port: 8500
       discovery:
         health-check-critical-timeout: 30s

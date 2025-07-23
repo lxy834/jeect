@@ -1,4 +1,22 @@
 spring:
+  application:
+    name: xinwei5-ftu
+  kafka:
+    consumer:
+      bootstrap-servers: 140.143.85.108:9092
+      auto-commit-interval: 5000
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      enable-auto-commit: true
+      auto-offset-reset: latest
+      group-id: kafka.consumer.group
+      client-id: kafka.consumer.client.id
+      fetch-max-wait: 400
+      fetch-min-size: 1
+      heartbeat-interval: 3000
+      isolation-level: read_committed
+      topic-name: ftu_device_1859887
   datasource:
     druid:
       stat-view-servlet:
@@ -40,7 +58,7 @@ spring:
           password: qwer1234Q
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
-    database: 2
+    database: 1
     host: 162.14.66.67
     password: fxtd@2025
     port: 6389
@@ -126,7 +144,7 @@ jeecg:
       table: embeddings
 logging:
   level:
-    org.jeecg.modules.system.mapper : info
+    org.jeecg.modules.system.mapper: info
 cas:
   prefixUrl: http://localhost:8888/cas
 knife4j:
@@ -168,3 +186,5 @@ third-app:
       client-id: ??
       client-secret: ??
       agent-id: ??
+server:
+  port: 7003

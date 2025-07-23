@@ -85,7 +85,7 @@ public class FtuF411DeviceController {
     @RequiresPermissions("ftu:ftu_f411_device:stat")
     public Result<List<Map<String, Object>>> stat() {
         QueryWrapper<FtuF411Device> queryWrapper = Wrappers.query();
-        queryWrapper.select("count(1) as count", "COMMUNICATION_MODE")
+        queryWrapper.select("count(1) as COUNT", "COMMUNICATION_MODE")
                 .groupBy("COMMUNICATION_MODE");
         return Result.ok(ftuF411DeviceService.listMaps(queryWrapper));
     }

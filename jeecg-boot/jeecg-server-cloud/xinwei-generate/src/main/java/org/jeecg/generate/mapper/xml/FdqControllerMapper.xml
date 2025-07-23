@@ -28,7 +28,7 @@
         WHERE rn = 1;
     </select>
     <select id="selectOrderCount" resultType="java.util.Map">
-        select count(1) as count_num, ORDER_TYPE
+        select count(1) as COUNT_NUM, ORDER_TYPE
         from FDQ_ORDER
         GROUP BY ORDER_TYPE
     </select>

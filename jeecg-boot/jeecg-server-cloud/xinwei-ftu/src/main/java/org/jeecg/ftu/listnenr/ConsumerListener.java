@@ -72,7 +72,7 @@ public class ConsumerListener {
         double lat = jsonObject.getJSONArray("devices").getJSONObject(0).getJSONArray("services").getJSONObject(0).getJSONObject("data").getDoubleValue("lat");
         if (!Objects.isNull(card)) {
             FtuF411Device f411Device = ftuF411DeviceService.get411Device(card);
-            FtuDevice device = deviceService.getById(f411Device.getFtuId());
+            FtuDevice device = deviceService.dataById(f411Device.getFtuId());
             deviceService.updateLngLat(lng, lat, 0, f411Device.getFtuId());
             saveInfo(device.getDeviceName() + "获取定位", "主站指令", device.getId(), device.getDeviceName(), device.getDeviceName(), device.getInsLineName(), "其他", f411Device.getTenantId());
         }
@@ -85,7 +85,7 @@ public class ConsumerListener {
         FtuF411Device f411Device = ftuF411DeviceService.get411Device(card);
         if (!Objects.isNull(card)) {
             volumeService.insertVolume(uabFor4, currentFor211OutputB, f411Device.getFtuId(), sendMode);
-            FtuDevice device = deviceService.getById(f411Device.getFtuId());
+            FtuDevice device = deviceService.dataById(f411Device.getFtuId());
             saveInfo(device.getDeviceName() + "总召唤", "主站指令", device.getId(), device.getDeviceName(), device.getDeviceName(), device.getInsLineName(), "其他", f411Device.getTenantId());
         }
     }

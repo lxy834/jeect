@@ -1,7 +1,7 @@
 package org.jeecg.generate.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +10,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
-import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.util.DateUtils;
 import org.jeecg.generate.entity.FdqHeartBeat;
 import org.jeecg.generate.service.IFdqHeartBeatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * @Description: 系统
@@ -51,9 +52,13 @@ public class FdqHeartBeatController extends JeecgController<FdqHeartBeat, IFdqHe
                                                      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
                                                      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                                      HttpServletRequest req) {
-        QueryWrapper<FdqHeartBeat> queryWrapper = QueryGenerator.initQueryWrapper(fdqHeartBeat, req.getParameterMap());
+        // 获取当前日期的开始时间
+        Date start = DateUtils.getStartOfDay();
+// 获取当前日期的结束时间
+        Date end = DateUtils.getEndOfDay();
         Page<FdqHeartBeat> page = new Page<FdqHeartBeat>(pageNo, pageSize);
-        IPage<FdqHeartBeat> pageList = fdqHeartBeatService.page(page, queryWrapper);
+        IPage<FdqHeartBeat> pageList = fdqHeartBeatService.page(page, Wrappers.<FdqHeartBeat>lambdaQuery()
+                .between(FdqHeartBeat::getCreateTime, start, end).orderByAsc(FdqHeartBeat::getCreateTime));
         return Result.OK(pageList);
     }
 

@@ -1,13 +1,8 @@
-server:
-  port: 9856
-
 knife4j:
   gateway:
     enabled: true
 
 spring:
-  application:
-    name: xinwei5-gateway
   main:
     allow-circular-references: true
   profiles:
@@ -71,4 +66,4 @@ spring:
           } ],
           "filters": [ ],
           "uri": "lb://xinwei5-ftu"
-        }]
+        } ]

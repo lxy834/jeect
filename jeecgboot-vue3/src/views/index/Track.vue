@@ -103,10 +103,18 @@ async function getTrack() {
   const map = state.map
 
   for (let i = 0; i < lineArr.length; i++) {
-    new AMap.Marker({
+    const demo = new AMap.Marker({
       map,
       position: lineArr[i],
     });
+    // demo.setTitle(state.basicInfo[i].createTime)
+//     demo.setLabel({
+//       direction:'top',
+//       offset: new AMap.Pixel(10, 0),  //设置文本标注偏移量
+//       content: `<div style="color: white">时间：${state.basicInfo[i].createTime}</div>
+// <div style="color: white">坐标：${state.basicInfo[i].lng},${state.basicInfo[i].lat}</div>
+// <div style="color: white">速度：${state.basicInfo[i].speed}</div>`, //设置文本标注内容
+//     });
   }
 
   new AMap.Polyline({
@@ -186,7 +194,7 @@ function initMap() {
     state.map = new AMap.Map("track-map", {
       center: [104.830389, 26.592528],
       zoom: 11,
-      mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
+      mapStyle: "amap://styles/macaron"
     });
     getTrack()
   }).catch((e) => {
@@ -238,5 +246,6 @@ body {
   background-size: cover;
   position: relative;
   z-index: 200;
+  min-height: 100vh;
 }
 </style>

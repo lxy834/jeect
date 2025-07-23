@@ -10,6 +10,7 @@ import org.jeecgframework.poi.excel.annotation.Excel;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @Description: 应急装备
@@ -118,6 +119,8 @@ public class FdqProperty implements Serializable {
     @Excel(name = "最后纬度", width = 15)
     @Schema(description = "最后纬度")
     private java.lang.Double lastLat;
+
+    private Date lastBdTime;
 
     private Integer lastStatus;
 

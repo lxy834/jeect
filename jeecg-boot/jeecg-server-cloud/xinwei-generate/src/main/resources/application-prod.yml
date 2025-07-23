@@ -1,7 +1,7 @@
 spring:
   kafka:
     consumer:
-      bootstrap-servers: 162.14.66.67:9092
+      bootstrap-servers: 140.143.85.108:9092
       auto-commit-interval: 5000
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -16,7 +16,7 @@ spring:
       isolation-level: read_committed
       topic-name: fdq_service_4144000000040968
   application:
-    name: xinwei5-generate-dev
+    name: xinwei5-generate
   datasource:
     druid:
       stat-view-servlet:
@@ -48,14 +48,14 @@ spring:
           slow-sql-millis: 5000
       datasource:
         master:
-          url: jdbc:dm://162.14.66.67:5236/FDQ
+          url: jdbc:dm://140.143.85.108:5236/FDQ
           username: FDQ
-          password: Fdq@2025
+          password: qwer1234Q
           driver-class-name: dm.jdbc.driver.DmDriver
         sys:
-          url: jdbc:dm://162.14.66.67:5236/FXTD_DEV
-          username: FXTD_DEV
-          password: Vrj3.nkF]8p+2M/jha]t
+          url: jdbc:dm://140.143.85.108:5236/FXTD
+          username: FXTD
+          password: qwer1234Q
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
     database: 1
@@ -187,4 +187,4 @@ third-app:
       client-secret: ??
       agent-id: ??
 server:
-  port: 7102
+  port: 7002

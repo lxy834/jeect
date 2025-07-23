@@ -269,7 +269,7 @@
                 <tr class="head"></tr>
                 <tr v-for="(item,i) of state.volumeList" :key="i">
                   <td>{{item.insLineName}}</td>
-                  <td>{{item.voltage}}V</td>
+                  <td>{{item.voltage}}KV</td>
                   <td>{{item.ftuCurrent}}A</td>
                   <td>{{item.activePower}}</td>
                   <td>{{item.factor}}</td>
@@ -1051,7 +1051,7 @@ body {
 .left-stats .stat-card,
 .right-stats .stat-card {
   flex: 1;
-  min-height: 300px;
+  min-height: 200px;
 }
 
 .map-container {

@@ -164,8 +164,16 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
         vo.setCountHours(stringDoubleMap.get("RUNNING_HOURS").intValue());
         vo.setTotalRevenue((int) (totalPower * 2.5));
         Map<String, Map<String, Long>> countMap = fdqControllerMapper.selectOrderCount();
-        vo.setYearlyTasks(countMap.get("应急发电任务").get("COUNT_NUM").intValue());
-        vo.setMaintenanceCount(countMap.get("维护任务").get("COUNT_NUM").intValue());
+        try {
+            vo.setYearlyTasks(countMap.get("应急发电任务").get("COUNT_NUM").intValue());
+        } catch (Exception e) {
+            vo.setYearlyTasks(0);
+        }
+        try {
+            vo.setMaintenanceCount(countMap.get("维护任务").get("COUNT_NUM").intValue());
+        } catch (Exception e) {
+            vo.setMaintenanceCount(0);
+        }
         return vo;
     }
 
