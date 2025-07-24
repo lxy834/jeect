@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -81,21 +82,16 @@ public class ConsumerListener {
     }
 
     public void saveController(JSONObject json, String card) {
-        // 1. 获取设备属性并校验
         FdqProperty property = fdqPropertyService.getOne(
                 Wrappers.<FdqProperty>query().lambda().eq(FdqProperty::getSn, card)
         );
         if (property == null) {
             throw new IllegalArgumentException("未找到SN为" + card + "的设备属性信息");
         }
-
-        // 2. 安全提取JSON数据（避免空指针异常）
         JSONObject dataJson = extractDataJson(json);
         if (dataJson == null) {
             throw new IllegalArgumentException("JSON数据格式不正确，无法提取data节点");
         }
-
-        // 3. 转换为实体对象
         FdqController controller = dataJson.toJavaObject(FdqController.class);
         controller.setPlateNumber(property.getPlateNumber());
         if (controller.getWaterTemperature() == 32768) {
@@ -111,7 +107,7 @@ public class ConsumerListener {
                 handleExistingOrder(plateNumber, controller);
             } else if (redisUtil.hasKey(TIMEOUT_ORDER_CACHE_PREFIX + plateNumber)) {
                 refreshTimeoutOrderCache(plateNumber);
-            } else {
+            } else if (!redisUtil.hasKey(ORDER_CACHE_PREFIX + plateNumber) && !redisUtil.hasKey(TIMEOUT_ORDER_CACHE_PREFIX + plateNumber)) {
                 createNewOrder(controller, property);
             }
         }
@@ -129,11 +125,8 @@ public class ConsumerListener {
                     .getJSONArray("services")
                     .getJSONObject(0)
                     .getJSONArray("data");
-            System.out.println(jsonArray);
             // 定义输入格式（原字符串的格式）
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            // 定义输出格式（目标格式）
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             List<FdqTrack> trackList = new ArrayList<>();
             jsonArray.forEach(arr -> {
                 JSONObject dataJson = (JSONObject) arr;
@@ -149,13 +142,13 @@ public class ConsumerListener {
                 track.setLat(gps.getLat());
                 track.setLng(gps.getLon());
                 trackList.add(track);
-
             });
-            trackService.saveBatch(trackList);
+            FdqTrack track = trackList.stream().max(Comparator.comparing(FdqTrack::getSatelliteTime)).get();
+            trackService.save(track);
             property.setLastStatus(Integer.valueOf(trackList.get(trackList.size() - 1).getMotionStatus()));
-            property.setLastLng(trackList.get(trackList.size() - 1).getLng());
-            property.setLastLat(trackList.get(trackList.size() - 1).getLat());
-            property.setLastBdTime(trackList.get(trackList.size() - 1).getSatelliteTime());
+            property.setLastLng(track.getLng());
+            property.setLastLat(track.getLat());
+            property.setLastBdTime(track.getSatelliteTime());
             fdqPropertyService.updateById(property);
         }
     }

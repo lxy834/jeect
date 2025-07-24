@@ -242,7 +242,7 @@ body {
 }
 
 .trackMap{
-  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/fdq_bg.png");
+  //background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/fdq_bg.png");
   background-size: cover;
   position: relative;
   z-index: 200;

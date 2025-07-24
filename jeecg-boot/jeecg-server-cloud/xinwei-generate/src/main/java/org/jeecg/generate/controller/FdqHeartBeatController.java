@@ -58,7 +58,7 @@ public class FdqHeartBeatController extends JeecgController<FdqHeartBeat, IFdqHe
         Date end = DateUtils.getEndOfDay();
         Page<FdqHeartBeat> page = new Page<FdqHeartBeat>(pageNo, pageSize);
         IPage<FdqHeartBeat> pageList = fdqHeartBeatService.page(page, Wrappers.<FdqHeartBeat>lambdaQuery()
-                .between(FdqHeartBeat::getCreateTime, start, end).orderByAsc(FdqHeartBeat::getCreateTime));
+                .between(FdqHeartBeat::getCreateTime, start, end).orderByDesc(FdqHeartBeat::getCreateTime));
         return Result.OK(pageList);
     }
 
