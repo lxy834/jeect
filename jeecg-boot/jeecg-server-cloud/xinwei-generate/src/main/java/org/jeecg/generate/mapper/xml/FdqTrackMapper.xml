@@ -12,7 +12,8 @@
         UNIX_TIMESTAMP(pt.SATELLITE_TIME) AS timestamp,
         pt.LNG,
         pt.LAT,
-        pt.SPEED
+        pt.SPEED,
+        pt.ANGLE
         FROM FDQ_TRACK pt
         WHERE pt.PLATE_NUMBER = #{dto.plateNumber}
         <if test="dto.strTime != null and dto.strTime != ''">

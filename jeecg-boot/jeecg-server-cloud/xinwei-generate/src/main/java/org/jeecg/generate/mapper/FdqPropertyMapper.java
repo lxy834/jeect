@@ -3,6 +3,7 @@ package org.jeecg.generate.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.generate.entity.FdqProperty;
+import org.jeecg.generate.vo.AppStatVO;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -15,4 +16,6 @@ import java.util.Map;
  */
 public interface FdqPropertyMapper extends BaseMapper<FdqProperty> {
     Map<String, BigDecimal> selectCountKwh(@Param("plate") String plate);
+
+    AppStatVO getStat(@Param("month") String month);
 }

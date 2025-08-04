@@ -154,7 +154,11 @@ public class FtuDevice implements Serializable {
     @Schema(description = "经度")
     private java.lang.Double lng;
 
+    @Schema(description = "允许电流")
     private Double ratedCurrent;
+
+    @Schema(description = "实时电流")
+    private Double realCurrent;
 
 
 }

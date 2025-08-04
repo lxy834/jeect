@@ -32,5 +32,40 @@
         from FDQ_ORDER
         GROUP BY ORDER_TYPE
     </select>
+    <select id="selectOrderCountByTime" resultType="java.util.Map">
+        select count(1) as COUNT_NUM, ORDER_TYPE
+        from FDQ_ORDER
+        where PLATE_NUMBER is not null
+        <if test="startTime != null">
+            and CREATE_TIME like concat('%',#{startTime},'%')
+        </if>
+        GROUP BY ORDER_TYPE
+    </select>
+    <select id="getStat" resultType="org.jeecg.generate.vo.AppStatVO">
+        WITH vehicle_latest_data AS (SELECT PLATE_NUMBER,
+                                            KWH,
+                                            CREATE_TIME,
+                                            LAG(KWH) OVER (PARTITION BY PLATE_NUMBER ORDER BY CREATE_TIME) AS lastKwh
+                                     FROM FDQ_CONTROLLER
+                                     WHERE CREATE_TIME >= TRUNC(SYSDATE - 2)),
+             daily_data AS (SELECT PLATE_NUMBER,
+                                   TRUNC(CREATE_TIME) AS createTime,
+                                   KWH - lastKwh      AS dayVolume
+                            FROM vehicle_latest_data),
+             vehicle_daily_total AS (SELECT PLATE_NUMBER   AS plateNumber,
+                                            createTime,
+                                            SUM(dayVolume) AS carDayVolume
+                                     FROM daily_data
+                                     WHERE createTime >= TRUNC(SYSDATE - 1)
+                                     GROUP BY PLATE_NUMBER, createTime),
+             date_total AS (SELECT createTime,
+                                   SUM(carDayVolume) AS allCarDayVolume
+                            FROM vehicle_daily_total
+                            GROUP BY createTime)
+        SELECT COALESCE(MAX(CASE WHEN createTime = TRUNC(SYSDATE - 1) THEN allCarDayVolume END), 0) AS lastVolume,
+               COALESCE(MAX(CASE WHEN createTime = TRUNC(SYSDATE) THEN allCarDayVolume END), 0)     AS volume
+        FROM date_total;
+
+    </select>
 
 </mapper>

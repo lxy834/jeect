@@ -158,6 +158,22 @@
           <div class="card-title" :style="titleStyle">
             <i class="fas fa-clipboard-list"></i>
             任务清单
+            <div style="position: absolute;z-index: 999;right:0">
+              <el-select
+                filterable
+                v-model="state.plateNumber"
+                placeholder="选择或搜索车辆"
+                @change="selectPlateNumber"
+                @selectedLabel="selectPlateNumber"
+              >
+                <el-option
+                  v-for="item in state.propertyList"
+                  :key="item.plateNumber"
+                  :label="item.plateNumber"
+                  :value="item.plateNumber"
+                />
+              </el-select>
+            </div>
           </div>
           <!-- 任务清单样式 -->
           <div
@@ -170,7 +186,7 @@
               :ref="(el) => taskRefs[index] = el"
               class="task-item"
               :class="{ 'active-task': activeTaskIndex === index }"
-              @click="selectTask(index)"
+              @click="selectTask(index,1)"
             >
               <div class="task-vehicle">{{ task.plateNumber }}</div>
               <div class="task-name">{{ task.orderType }}</div>
@@ -289,7 +305,7 @@
                   </tr>
                   <tr v-for="(item,i) of state.heartList" :key="i">
                     <td class="alarm-time">{{item.createTime}}-{{item.plateNumber}}</td>
-                    <td class="alarm-content">开机运行{{(item.runningTime/1000/60/60).toFixed(2)}}分钟，当前通信质量{{item.signalQuality}}，内部电压{{item.internalBattery}}V,当前设备固件版本V{{item.appVersion}}</td>
+                    <td class="alarm-content">开机运行{{(item.runningTime/1000/60).toFixed(2)}}分钟，当前通信质量{{item.signalQuality}}，内部电压{{item.internalBattery}}V,当前设备固件版本V{{item.appVersion}}</td>
                   </tr>
                   </thead>
                 </table>
@@ -453,18 +469,18 @@ const toggleDrawer = () => {
 const saveConfig = () => {
   localStorage.setItem('fdqCustomConfig', JSON.stringify(customConfig));
   // 重新应用地图样式
-  if (state.map) {
-    state.map.setMapStyle(customConfig.mapStyle);
+  if (window.map) {
+    window.map.setMapStyle(customConfig.mapStyle);
   }
   const satelliteLayer = new AMap.TileLayer.Satellite();
   if(state.showSate==='卫星图层'){
-    state.map.add(satelliteLayer);
+    window.map.add(satelliteLayer);
   }else{
 // 获取所有图层并筛选出卫星图层
-    const layers = state.map.getLayers();
+    const layers = window.map.getLayers();
     layers.forEach(layer => {
       if (layer instanceof AMap.TileLayer.Satellite) {
-        state.map.remove(layer);
+        window.map.remove(layer);
       }
     });
   }
@@ -524,6 +540,7 @@ const titleStyle = computed(()=>({
 }))
 
 const state = reactive({
+  plateNumber:'',
   changed:false,
   classList:[
     {
@@ -546,6 +563,7 @@ const state = reactive({
   stat:{},
   controller:{},
   map:null,
+  markers:[],
   showSate:"标准图层",
   show:true,
   isOpen:false,
@@ -680,6 +698,11 @@ const stopDrag = () => {
   }
 };
 
+function selectPlateNumber(){
+  window.map.setCenter([state.propertyList.find(item=>item.plateNumber===state.plateNumber).lastLng, state.propertyList.find(item=>item.plateNumber===state.plateNumber).lastLat])
+  window.map.setZoom(18);
+}
+
 function exit(v) {
   if (v) {
     state.show = false;
@@ -699,7 +722,7 @@ function exit(v) {
 }
 
 // 切换任务
-const selectTask = async (index: number) => {
+const selectTask = async (index: number,type:number) => {
   const params = {
     id: state.orderList[index].id,
     plateNumber: state.orderList[index].plateNumber
@@ -711,10 +734,13 @@ const selectTask = async (index: number) => {
   currentStep.value = orderInfo.step;
   steps.value = orderInfo.stepList;
   if(orderInfo.controller!==null){
+    console.log(orderInfo.controller);
     realtimeData.value = orderInfo.controller;
   }
-
-
+  state.plateNumber = state.orderList[index].plateNumber
+  if(type===1){
+    selectPlateNumber()
+  }
   // 滚动到选中项
   scrollToActiveTask(index);
 };
@@ -746,11 +772,14 @@ const startTaskAutoScroll = async () => {
   ])
   currentStep.value = orderInfo.step;
   steps.value = orderInfo.stepList;
-  realtimeData.value = orderInfo.controller;
+  if(orderInfo.controller!==null){
+    console.log(orderInfo.controller);
+    realtimeData.value = orderInfo.controller;
+  }
   taskInterval = setInterval(() => {
     // 计算下一个任务索引，循环切换
     const nextIndex = (activeTaskIndex.value + 1) % state.orderList.length;
-    selectTask(nextIndex);
+    selectTask(nextIndex,0);
   }, 5000*12); // 5秒切换一次
 };
 
@@ -772,12 +801,17 @@ async function getList(){
   const pageParams = {
     order: 'desc',
     pageNo: 1,
+    pageSize: 100
+  };
+  const params = {
+    order: 'desc',
+    pageNo: 1,
     pageSize: 5
   };
   const [listRes,orderRes,heartRes,statRes] = await Promise.all([
     list(pageParams),
     orderList(pageParams),
-    getHeartList(pageParams),
+    getHeartList(params),
     defHttp.get({url:stat})
   ])
   state.propertyList = listRes.records
@@ -849,7 +883,8 @@ function initMap() {
     0: { status: "0", deviceStatus: "正在发电", color: "#41C23C" },
     1: { status: "1", deviceStatus: "车辆驻留", color: "#2F89FC" },
     2: { status: "2", deviceStatus: "正在移动", color: "#FFC600" },
-    3: { status: "3", deviceStatus: "通信掉线", color: "#9BA3A9" }
+    3: { status: "3", deviceStatus: "通信掉线", color: "#9BA3A9" },
+    4: { status: "4", deviceStatus: "定位丢失", color: "#cc07ff" }
   };
 
   // 存储当前地图上的标记点
@@ -871,14 +906,14 @@ function initMap() {
       "AMap.MarkerClusterer"
     ]
   }).then((AMap) => {
-    state.map = new AMap.Map("fdq_map", {
+    window.map = new AMap.Map("fdq_map", {
       center: [105.768654, 26.539309],
       zoom: 11,
       mapStyle: customConfig.mapStyle  // 使用自定义地图样式
     });
 
     // 地图点击事件：点击空白处关闭信息窗口 - 放在这里只绑定一次
-    state.map.on("click", (e) => {
+    window.map.on("click", (e) => {
       // 判断点击的不是标记点
       if (!(e.target instanceof AMap.Marker)) {
         // 关闭当前所有标记点的信息窗口
@@ -900,7 +935,7 @@ function initMap() {
 
       // 移除旧的标记点
       if (currentMarkers.length > 0) {
-        state.map.remove(currentMarkers);
+        window.map.remove(currentMarkers);
         currentMarkers = [];
       }
 
@@ -911,6 +946,7 @@ function initMap() {
           plateNumber: device.plateNumber,
           position: [device.lastLng, device.lastLat],
           id: device.id,
+          speed: device.lastSpeed,
           lastBdTime:device.lastBdTime,
           ...statusInfo
         };
@@ -944,22 +980,25 @@ function initMap() {
             const data = stat;
 
             const infoWindowContent = `
-<div >
-  <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');width: 400px;background-repeat: no-repeat;background-size: cover">
-    <div style="width: 100%;text-align: right;font-weight: bold;color: black">${markerData.plateNumber || ''}-最后定位时间${(markerData && markerData.lastBdTime) || '未知'}</div>
-    <div style="height: 84%;width: 100%;display: flex">
-      <div style="width: 50%;height: 100%;color: black">
-        <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${(data && data.KWH) || 0}kwh</div>
-        <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${(data && data.NEXT_REPAIR) || 0}小时</div>
-      </div>
-      <div style="width: 50%;height: 100%;color: black">
-        <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${(data && data.RUNNING_HOURS) || 0}小时</div>
-        <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus || '未知'}</div>
-      </div>
-    </div>
-    <div style="margin-top: 4%;width: 100%;text-align: center;color: black"><span class="info-track" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">历史轨迹记录</span></div>
-  </div>
-</div>
+                  <div >
+                    <div style="background-image: url('https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/17.png');width: 400px;background-repeat: no-repeat;background-size: cover">
+                      <div style="width: 100%;text-align: right;font-weight: bold;color: black">${markerData.plateNumber || ''}-最后定位时间${(markerData && markerData.lastBdTime) || '未知'}</div>
+                      <div style="height: 84%;width: 100%;display: flex">
+                        <div style="width: 50%;height: 100%;color: black">
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${(data && data.KWH) || 0}kwh</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${(data && data.NEXT_REPAIR) || 0}小时</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">当前移动速度：${Math.round((markerData.speed*60*60/1000/2))}km/h</div>
+                        </div>
+                        <div style="width: 50%;height: 100%;color: black">
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${(data && data.RUNNING_HOURS) || 0}小时</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus || '未知'}</div>
+
+                        </div>
+
+                      </div>
+                      <div style="margin-top: 4%;width: 100%;text-align:center;color: black"><span class="info-track" style="cursor: pointer;text-decoration: underline;color: skyblue;font-weight: bold">历史轨迹记录</span></div>
+                    </div>
+                  </div>
             `;
 
             let infoWindow = marker.infoWindow;
@@ -973,7 +1012,7 @@ function initMap() {
               infoWindow.setContent(infoWindowContent);
             }
 
-            infoWindow.open(state.map, marker.getPosition());
+            infoWindow.open(window.map, marker.getPosition());
 
             // 绑定历史数据点击事件
             setTimeout(() => {
@@ -990,14 +1029,15 @@ function initMap() {
 
         return marker;
       });
+      state.markers = markers
 
       // 添加新标记点到地图
-      state.map.add(markers);
+      window.map.add(markers);
       currentMarkers = markers;
 
       // 调整地图视野以显示所有标记点
       if (markers.length > 0 && state.setFit) {
-        state.map.setFitView(markers);
+        window.map.setFitView(markers);
       }
     };
     // 初始加载数据并创建标记点
@@ -1957,6 +1997,10 @@ body {
   ::v-deep .el-step__line{
     color: inherit
   }
+  ::v-deep .el-select__wrapper.is-filterable{
+    background: none;
+  }
+
 }
 
 

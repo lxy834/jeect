@@ -12,7 +12,9 @@ import org.jeecg.generate.entity.FdqOrderStep;
 import org.jeecg.generate.mapper.FdqControllerMapper;
 import org.jeecg.generate.mapper.FdqOrderMapper;
 import org.jeecg.generate.mapper.FdqOrderStepMapper;
+import org.jeecg.generate.mapper.FdqPropertyMapper;
 import org.jeecg.generate.service.IFdqOrderService;
+import org.jeecg.generate.vo.AppStatVO;
 import org.jeecg.generate.vo.IndexOrderVO;
 import org.jeecg.generate.vo.IndexStatVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +46,8 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
     private FdqOrderStepMapper fdqOrderStepMapper;
     @Autowired
     private FdqControllerMapper fdqControllerMapper;
+    @Autowired
+    private FdqPropertyMapper propertyMapper;
     @Autowired
     private RedisUtil redisUtil;
 
@@ -175,6 +181,62 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
             vo.setMaintenanceCount(0);
         }
         return vo;
+    }
+
+    @Override
+    public AppStatVO getStat() {
+        // 日期处理
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        LocalDate lastMonth = today.minusMonths(1);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+
+        AppStatVO vo = new AppStatVO();
+
+        // 处理车辆统计
+        String lastMonthStr = lastMonth.format(monthFormatter);
+        AppStatVO carStat = propertyMapper.getStat(lastMonthStr);
+        vo.setCarCount(carStat != null ? carStat.getCarCount() : 0);
+        // 修复原代码中重复设置carCount的问题，假设应为lastCarCount
+        vo.setLastCarCount(carStat != null ? carStat.getLastCarCount() : 0);
+
+        // 处理任务统计
+        String yesterdayStr = yesterday.format(dateFormatter);
+        Map<String, Map<String, Long>> totalTaskMap = fdqControllerMapper.selectOrderCountByTime(null);
+        Map<String, Map<String, Long>> yesterdayTaskMap = fdqControllerMapper.selectOrderCountByTime(yesterdayStr);
+
+        // 设置总任务数
+        vo.setWorking(getTaskCount(totalTaskMap, "应急发电任务"));
+        vo.setManual(getTaskCount(totalTaskMap, "维护任务"));
+
+        // 设置昨日任务数
+        vo.setLastWorking(getTaskCount(yesterdayTaskMap, "应急发电任务"));
+        vo.setLastManual(getTaskCount(yesterdayTaskMap, "维护任务"));
+
+        // 处理容量统计
+        AppStatVO volumeStat = fdqControllerMapper.getStat();
+        vo.setLastVolume(volumeStat != null ? volumeStat.getLastVolume() : 0);
+        vo.setVolume(volumeStat != null ? volumeStat.getVolume() : 0);
+
+        return vo;
+    }
+
+    /**
+     * 从任务统计map中获取指定任务类型的数量
+     */
+    private int getTaskCount(Map<String, Map<String, Long>> taskMap, String taskType) {
+        if (taskMap == null || taskMap.isEmpty()) {
+            return 0;
+        }
+
+        Map<String, Long> typeMap = taskMap.get(taskType);
+        if (typeMap == null || typeMap.get("COUNT_NUM") == null) {
+            return 0;
+        }
+
+        return typeMap.get("COUNT_NUM").intValue();
     }
 
 

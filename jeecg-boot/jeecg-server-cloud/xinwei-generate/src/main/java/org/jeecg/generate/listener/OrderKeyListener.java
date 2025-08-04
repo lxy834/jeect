@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.generate.entity.FdqOrder;
 import org.jeecg.generate.entity.FdqOrderStep;
+import org.jeecg.generate.entity.FdqProperty;
 import org.jeecg.generate.service.IFdqOrderService;
 import org.jeecg.generate.service.IFdqOrderStepService;
+import org.jeecg.generate.service.IFdqPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
@@ -23,6 +25,8 @@ public class OrderKeyListener extends KeyExpirationEventMessageListener {
     private IFdqOrderService orderService;
     @Autowired
     private IFdqOrderStepService stepService;
+    @Autowired
+    private IFdqPropertyService fdqPropertyService;
 
     public OrderKeyListener(RedisMessageListenerContainer listenerContainer) {
         super(listenerContainer);
@@ -55,6 +59,18 @@ public class OrderKeyListener extends KeyExpirationEventMessageListener {
                 }
             });
             stepService.saveBatch(steps);
+        } else if (expireKey.contains("timeout_location_")) {
+            String plateNumber = expireKey.replaceAll("timeout_location_", "");
+            FdqProperty property = fdqPropertyService.getOne(Wrappers.<FdqProperty>query().lambda()
+                    .eq(FdqProperty::getPlateNumber, plateNumber));
+            property.setLastStatus(4);
+            fdqPropertyService.updateById(property);
+        } else if (expireKey.contains("timeout_heart_status_")) {
+            String plateNumber = expireKey.replaceAll("timeout_heart_status_", "");
+            FdqProperty property = fdqPropertyService.getOne(Wrappers.<FdqProperty>query().lambda()
+                    .eq(FdqProperty::getPlateNumber, plateNumber));
+            property.setLastStatus(0);
+            fdqPropertyService.updateById(property);
         }
     }
 

@@ -23,5 +23,12 @@
 
 
     </select>
+    <select id="getStat" resultType="org.jeecg.generate.vo.AppStatVO">
+        select count(1)                                            as carCount,
+               (SELECT count(1)
+                FROM FDQ_PROPERTY
+                where CREATE_TIME LIKE concat('%', #{month}, '%')) AS lastCarCount
+        from FDQ_PROPERTY
+    </select>
 
 </mapper>

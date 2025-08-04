@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.generate.dto.FdqOrderDTO;
 import org.jeecg.generate.entity.FdqOrder;
 import org.jeecg.generate.entity.FdqOrderStep;
+import org.jeecg.generate.vo.AppStatVO;
 import org.jeecg.generate.vo.IndexOrderVO;
 import org.jeecg.generate.vo.IndexStatVO;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,5 +54,7 @@ public interface IFdqOrderService extends IService<FdqOrder> {
     IndexOrderVO indexOrder(@RequestBody FdqOrderDTO fdqOrderPage);
 
     IndexStatVO statVOResult();
+
+    AppStatVO getStat();
 
 }

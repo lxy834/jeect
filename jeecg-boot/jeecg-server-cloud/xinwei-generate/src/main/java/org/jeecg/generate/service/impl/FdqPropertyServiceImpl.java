@@ -59,24 +59,11 @@ public class FdqPropertyServiceImpl extends ServiceImpl<FdqPropertyMapper, FdqPr
     public void updateMain(FdqProperty fdqProperty, List<FdqBasic> fdqBasicList, List<FdqController> fdqControllerList) {
         fdqPropertyMapper.updateById(fdqProperty);
 
-        //1.先删除子表数据
-        fdqBasicMapper.deleteByMainId(fdqProperty.getId());
-        fdqControllerMapper.deleteByMainId(fdqProperty.getId());
-
-        //2.子表数据重新插入
-        if (fdqBasicList != null && fdqBasicList.size() > 0) {
-            for (FdqBasic entity : fdqBasicList) {
-                //外键设置
-                entity.setPlateNumber(fdqProperty.getPlateNumber());
-                fdqBasicMapper.insert(entity);
-            }
-        }
-        if (fdqControllerList != null && fdqControllerList.size() > 0) {
-            for (FdqController entity : fdqControllerList) {
-                //外键设置
-                entity.setPlateNumber(fdqProperty.getPlateNumber());
-                fdqControllerMapper.insert(entity);
-            }
+        if (fdqBasicList != null && !fdqBasicList.isEmpty()) {
+            FdqBasic entity = new FdqBasic();
+            entity.setPlateNumber(fdqProperty.getPlateNumber());
+            entity.setAssetNumber(fdqBasicList.get(0).getAssetNumber());
+            fdqBasicMapper.updateById(entity);
         }
     }
 

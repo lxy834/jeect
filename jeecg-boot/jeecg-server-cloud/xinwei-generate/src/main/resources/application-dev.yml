@@ -8,13 +8,13 @@ spring:
       max-poll-records: 500
       enable-auto-commit: true
       auto-offset-reset: latest
-      group-id: kafka.consumer.group
-      client-id: kafka.consumer.client.id
+      group-id: fdq.device.group
+      client-id: fdq.device.group
       fetch-max-wait: 400
       fetch-min-size: 1
       heartbeat-interval: 3000
       isolation-level: read_committed
-      topic-name: fdq_service_4144000000040968
+      topic-name: fdq_device_f803
   application:
     name: xinwei5-generate-dev
   datasource:
@@ -59,9 +59,9 @@ spring:
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
     database: 1
-    host: 162.14.66.67
-    password: fxtd@2025
-    port: 6389
+    host: 127.0.0.1
+    password:
+    port: 6379
   rabbitmq:
     host: jeecg-boot-rabbitmq
     username: guest

@@ -122,6 +122,8 @@ public class FdqProperty implements Serializable {
 
     private Date lastBdTime;
 
+    private String lastSpeed;
+
     private Integer lastStatus;
 
     private String sn;

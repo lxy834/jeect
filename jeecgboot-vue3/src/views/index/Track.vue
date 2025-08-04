@@ -1,6 +1,25 @@
 <template>
   <div style="height: 100%;width: 100%" id="track-map" class="trackMap">
-
+    <div style="position: absolute;z-index: 100;margin-top: 10px;width: 100%">
+      <el-date-picker
+        v-model="state.timeList"
+        type="datetimerange"
+        range-separator="至"
+        start-placeholder="开始时间"
+        end-placeholder="结束时间"
+        value-format="YYYY-MM-DD HH:mm:ss"
+      />
+      <el-button @click="getTrack" style="margin-left: 1%">查询</el-button>
+      <el-switch
+        v-model="state.process"
+        class="ml-2"
+        inline-prompt
+        style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+        active-text="纠偏"
+        inactive-text="原始"
+        @change="open"
+      />
+    </div>
   </div>
 </template>
 
@@ -19,7 +38,9 @@ window._AMapSecurityConfig = {
   securityJsCode: "d1243371803f635fdfa7b253ffb723e0" // 安全密钥
 };
 const state = reactive({
+  process:false,
   map:null,
+  timeList:[],
   strTime:'',
   endTime:'',
   basicInfo:[],
@@ -28,6 +49,10 @@ const state = reactive({
   marker:null
 })
 const correction = ref(false);
+function open(){
+  correction.value = !correction.value;
+  getTrack();
+}
 async function processArray(lineArr: any[]): Promise<any[]> {
   const chunkSize = 500;
   const chunks: any[][] = [];
@@ -73,8 +98,11 @@ async function processArray(lineArr: any[]): Promise<any[]> {
 
 async function getTrack() {
   let params = {
-    plateNumber:plateNumber.value
+    plateNumber:plateNumber.value,
+    strTime:state.timeList[0],
+    endTime:state.timeList[1]
   }
+  window.map.clearMap()
   const [trackRes] = await Promise.all([
     defHttp.post({url:track,params})
   ])
@@ -92,7 +120,7 @@ async function getTrack() {
     ag: 0,
     tm: item.timestamp
   }));
-  state.map.clearMap();
+  window.map.clearMap();
   var line: GraspRoadPath[] = state.lineArr;
   if (correction.value){
     line = await processArray(line);
@@ -100,28 +128,28 @@ async function getTrack() {
 
   let lineArr: number[][] = line.map(item => [item.x, item.y]);
 
-  const map = state.map
+  const map = window.map
 
-  for (let i = 0; i < lineArr.length; i++) {
-    const demo = new AMap.Marker({
-      map,
-      position: lineArr[i],
-    });
-    // demo.setTitle(state.basicInfo[i].createTime)
-//     demo.setLabel({
-//       direction:'top',
-//       offset: new AMap.Pixel(10, 0),  //设置文本标注偏移量
-//       content: `<div style="color: white">时间：${state.basicInfo[i].createTime}</div>
-// <div style="color: white">坐标：${state.basicInfo[i].lng},${state.basicInfo[i].lat}</div>
-// <div style="color: white">速度：${state.basicInfo[i].speed}</div>`, //设置文本标注内容
+//   for (let i = 0; i < lineArr.length; i++) {
+//     const demo = new AMap.Marker({
+//       map,
+//       position: lineArr[i],
 //     });
-  }
+//     demo.setTitle(state.basicInfo[i].createTime)
+// //     demo.setLabel({
+// //       direction:'top',
+// //       offset: new AMap.Pixel(10, 0),  //设置文本标注偏移量
+// //       content: `<div style="color: white">时间：${state.basicInfo[i].createTime}</div>
+// // <div style="color: white">坐标：${state.basicInfo[i].lng},${state.basicInfo[i].lat}</div>
+// // <div style="color: white">速度：${state.basicInfo[i].speed}</div>`, //设置文本标注内容
+// //     });
+//   }
 
   new AMap.Polyline({
     map,
     path: lineArr,
     showDir: true,
-    strokeColor: "#00ffff",  //线颜色
+    strokeColor: "#003cff",  //线颜色
     strokeWeight: 6      //线宽
   });
 
@@ -144,10 +172,10 @@ async function getTrack() {
   state.marker = marker;
   marker.on("moving", (e) => {
     passedPolyline.setPath(e.passedPath);
-    state.map.setCenter(e.target.getPosition(), true);
+    window.map.setCenter(e.target.getPosition(), true);
   });
 
-  state.map.setFitView();
+  window.map.setFitView();
 
   window.startAnimation = function startAnimation() {
     marker.moveAlong(lineArr, {
@@ -191,7 +219,7 @@ function initMap() {
       "AMap.GraspRoad"
     ]
   }).then((AMap) => {
-    state.map = new AMap.Map("track-map", {
+    window.map = new AMap.Map("track-map", {
       center: [104.830389, 26.592528],
       zoom: 11,
       mapStyle: "amap://styles/macaron"

@@ -30,7 +30,7 @@ spring:
           "predicates": [ {
             "name": "Path",
             "args": {
-              "_genkey_0": "/sys/**",
+              "_genkey_0": "/api/sys/**",
               "_genkey_1": "/jmreport/**",
               "_genkey_3": "/online/**",
               "_genkey_4": "/generic/**",

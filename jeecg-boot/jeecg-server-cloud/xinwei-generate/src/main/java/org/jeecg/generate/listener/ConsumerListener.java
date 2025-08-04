@@ -30,7 +30,11 @@ public class ConsumerListener {
 
     public static final String ORDER_CACHE_PREFIX = "order_";
     public static final String TIMEOUT_ORDER_CACHE_PREFIX = "timeout_order_";
-    public static final long TIMEOUT_ORDER_EXPIRE = 20 * 60L; // 20分钟，单位：秒
+    public static final String TIMEOUT_LOCATION = "timeout_location_";
+    public static final long TIMEOUT_ORDER_EXPIRE = 20 * 60L;
+    public static final long TIMEOUT_LOCATION_EXPIRE = 3 * 60L;
+    public static final long TIMEOUT_HEART_EXPIRE = 3 * 60L;
+    private static final String TIMEOUT_HEART_STATUS = "timeout_heart_status_";
     private static final Logger log = LoggerFactory.getLogger(ConsumerListener.class);
     @Autowired
     private IFdqPropertyService fdqPropertyService;
@@ -54,6 +58,7 @@ public class ConsumerListener {
         try {
             JSONObject jsonObject = JSON.parseObject(msg);
             String messageType = jsonObject.getJSONArray("devices").getJSONObject(0).getJSONArray("services").getJSONObject(0).get("serviceId").toString();
+            log.info(messageType);
             String card = (String) jsonObject.getJSONArray("devices").getJSONObject(0).get("deviceId");
             switch (messageType) {
                 case "Controller" -> saveController(jsonObject, card);
@@ -61,7 +66,6 @@ public class ConsumerListener {
                 case "HeartBeat" -> saveHeartBeat(jsonObject, card);
                 default -> log.warn("错误数据：{}", msg);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,6 +82,7 @@ public class ConsumerListener {
             FdqHeartBeat heartBeat = dataJson.toJavaObject(FdqHeartBeat.class);
             heartBeat.setPlateNumber(property.getPlateNumber());
             heartBeatService.save(heartBeat);
+            redisUtil.set(TIMEOUT_HEART_STATUS + property.getPlateNumber(), property.getId(), TIMEOUT_HEART_EXPIRE);
         }
     }
 
@@ -149,8 +154,13 @@ public class ConsumerListener {
             property.setLastLng(track.getLng());
             property.setLastLat(track.getLat());
             property.setLastBdTime(track.getSatelliteTime());
+            property.setLastSpeed("1".equals(track.getMotionStatus()) || "0".equals(track.getMotionStatus()) ? "0" : track.getSpeed());
             fdqPropertyService.updateById(property);
+            // 监听定位状态
+            redisUtil.set(TIMEOUT_LOCATION + property.getPlateNumber(), property.getId(), TIMEOUT_LOCATION_EXPIRE);
+
         }
+
     }
 
     /**

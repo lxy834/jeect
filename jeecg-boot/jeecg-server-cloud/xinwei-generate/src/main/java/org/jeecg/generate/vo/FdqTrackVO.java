@@ -22,6 +22,8 @@ public class FdqTrackVO {
     private Double lat;
     @Schema(description = "速度（m/s）")
     private Double speed;
+    @Schema(description = "方向角")
+    private Double angle;
 
 
 //    public FdqTrackVO setCreateTime(Date time) {

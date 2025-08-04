@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.generate.entity.FdqController;
+import org.jeecg.generate.vo.AppStatVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,5 +40,8 @@ public interface FdqControllerMapper extends BaseMapper<FdqController> {
     @MapKey("ORDER_TYPE")
     Map<String, Map<String, Long>> selectOrderCount();
 
+    @MapKey("ORDER_TYPE")
+    Map<String, Map<String, Long>> selectOrderCountByTime(@Param("startTime") String startTime);
 
+    AppStatVO getStat();
 }

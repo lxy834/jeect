@@ -728,7 +728,7 @@ function initMap() {
       "AMap.MarkerClusterer"
     ]
   }).then((AMap) => {
-    const map = new AMap.Map("map", {
+    window.map = new AMap.Map("map", {
       center: [104.830389, 26.592528],
       zoom: 11,
       mapStyle: "amap://styles/d86da4c2ed42be8272eb068059df8719"
@@ -854,7 +854,7 @@ function initMap() {
             infoWindow.setContent(infoWindowContent);
           }
 
-          infoWindow.open(map, marker.getPosition());
+          infoWindow.open(window.map, marker.getPosition());
 
           // 绑定历史数据点击事件
           setTimeout(() => {
@@ -871,10 +871,10 @@ function initMap() {
 
       return marker;
     });
-    map.add(markers);
+    window.map.add(markers);
 
-    map.setFitView(markers)
-    map.on("click", (e) => {
+    window.map.setFitView(markers)
+    window.map.on("click", (e) => {
       if (!(e.target instanceof AMap.Marker)) {
         // 关闭所有信息窗口
         markers.forEach(marker => {
@@ -1017,7 +1017,7 @@ body {
 
 /* 头部样式 */
 .header-panel {
-  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/xtmc.png");
+  background-image: url("https://yyjf-1304521166.cos.ap-chongqing.myqcloud.com/xtmc_ftu.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
