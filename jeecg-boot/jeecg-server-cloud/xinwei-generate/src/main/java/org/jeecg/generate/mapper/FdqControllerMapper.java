@@ -44,4 +44,5 @@ public interface FdqControllerMapper extends BaseMapper<FdqController> {
     Map<String, Map<String, Long>> selectOrderCountByTime(@Param("startTime") String startTime);
 
     AppStatVO getStat();
+
 }
