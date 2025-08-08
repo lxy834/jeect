@@ -284,6 +284,10 @@
               <span class="status-dot offline-bg"></span>
               <span>通信掉线</span>
             </div>
+            <div class="status-item">
+              <span class="status-dot purple-bg"></span>
+              <span>定位丢失</span>
+            </div>
           </div>
           <div class="card-title" :style="titleStyle">
             <i class="fas fa-exclamation-triangle"></i>
@@ -986,12 +990,12 @@ function initMap() {
                       <div style="height: 84%;width: 100%;display: flex">
                         <div style="width: 50%;height: 100%;color: black">
                           <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计发电总量：${(data && data.KWH) || 0}kwh</div>
-                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${(data && data.NEXT_REPAIR) || 0}小时</div>
-                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">当前移动速度：${Math.round((markerData.speed*60*60/1000/2))}km/h</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">剩余维护时间：${(data && data.NEXT_REPAIR) || 0}h</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">最后移动速度：${Math.round((markerData.speed*60*60/1000/2))}km/h</div>
                         </div>
                         <div style="width: 50%;height: 100%;color: black">
-                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${(data && data.RUNNING_HOURS) || 0}小时</div>
-                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产当前状态：${markerData.deviceStatus || '未知'}</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">累计运行小时：${(data && data.RUNNING_HOURS) || 0}h</div>
+                          <div style="height: 20%;margin-top: 8%;margin-left: 2%">资产最后状态：${markerData.deviceStatus || '未知'}</div>
 
                         </div>
 
@@ -1447,6 +1451,10 @@ body {
 
 .offline-bg {
   background: #9BA3A9;
+}
+
+.purple-bg {
+  background: #cc07ff;
 }
 
 /* 卡片样式调整 */

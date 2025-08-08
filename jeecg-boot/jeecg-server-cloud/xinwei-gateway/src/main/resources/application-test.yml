@@ -1,12 +1,12 @@
-knife4j:
-  gateway:
-    enabled: true
-
+jeecg:
+  route:
+    config:
+      #type:database nacos yml
+      data-type: yml
+      data-id: jeecg-gateway-router
 spring:
-  main:
-    allow-circular-references: true
-  profiles:
-    active: prod
+  application:
+    name: xinwei5-gateway-test
   cloud:
     nacos:
       discovery:
@@ -25,12 +25,12 @@ spring:
             allowedHeaders: "*"
       routes:
         [ {
-          "id": "xinwei5-auth",
+          "id": "xinwei5-auth-test",
           "order": 0,
           "predicates": [ {
             "name": "Path",
             "args": {
-              "_genkey_0": "/api/sys/**",
+              "_genkey_0": "/sys/**",
               "_genkey_1": "/jmreport/**",
               "_genkey_3": "/online/**",
               "_genkey_4": "/generic/**",
@@ -43,9 +43,9 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-auth"
+          "uri": "lb://xinwei5-auth-test"
         }, {
-          "id": "xinwei5-generate",
+          "id": "xinwei5-generate-test",
           "order": 1,
           "predicates": [ {
             "name": "Path",
@@ -54,9 +54,9 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-generate"
+          "uri": "lb://xinwei5-generate-test"
         },{
-          "id": "xinwei5-ftu",
+          "id": "xinwei5-ftu-test",
           "order": 2,
           "predicates": [ {
             "name": "Path",
@@ -65,5 +65,14 @@ spring:
             }
           } ],
           "filters": [ ],
-          "uri": "lb://xinwei5-ftu"
+          "uri": "lb://xinwei5-ftu-test"
         } ]
+  redis:
+    database: 1
+    host: 192.168.0.100
+    password:
+    port: 6379
+knife4j:
+  production: false
+server:
+  port: 9856

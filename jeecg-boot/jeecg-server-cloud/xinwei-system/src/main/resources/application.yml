@@ -32,7 +32,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   application:
-    name: xinwei5-auth-dev
+    name: xinwei5-auth-test
   servlet:
     multipart:
       max-file-size: 10MB

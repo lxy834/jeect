@@ -69,7 +69,7 @@ public class OrderKeyListener extends KeyExpirationEventMessageListener {
             String plateNumber = expireKey.replaceAll("timeout_heart_status_", "");
             FdqProperty property = fdqPropertyService.getOne(Wrappers.<FdqProperty>query().lambda()
                     .eq(FdqProperty::getPlateNumber, plateNumber));
-            property.setLastStatus(0);
+            property.setLastStatus(3);
             fdqPropertyService.updateById(property);
         }
     }

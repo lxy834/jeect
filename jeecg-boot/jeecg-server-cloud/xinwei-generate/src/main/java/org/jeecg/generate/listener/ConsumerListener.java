@@ -98,6 +98,9 @@ public class ConsumerListener {
             throw new IllegalArgumentException("JSON数据格式不正确，无法提取data节点");
         }
         FdqController controller = dataJson.toJavaObject(FdqController.class);
+        property.setKwh(controller.getKwh() == 0 ? property.getKwh() : controller.getKwh());
+        property.setRunningHours(controller.getRunningHours() == 0 ? property.getRunningHours() : controller.getRunningHours());
+        property.setNextRepair(controller.getNextRepair() == 0 ? property.getNextRepair() : controller.getNextRepair());
         controller.setPlateNumber(property.getPlateNumber());
         if (controller.getWaterTemperature() == 32768) {
             controller.setWaterTemperature(0.0);

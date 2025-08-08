@@ -6,6 +6,7 @@ import org.jeecg.generate.entity.FdqProperty;
 import org.jeecg.generate.vo.AppStatVO;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,4 +19,6 @@ public interface FdqPropertyMapper extends BaseMapper<FdqProperty> {
     Map<String, BigDecimal> selectCountKwh(@Param("plate") String plate);
 
     AppStatVO getStat(@Param("month") String month);
+
+    List<String> getPlate();
 }

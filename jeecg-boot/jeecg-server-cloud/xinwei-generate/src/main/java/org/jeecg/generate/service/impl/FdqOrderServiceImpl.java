@@ -148,7 +148,7 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
                 .eq(FdqOrderStep::getOrderId, fdqOrderPage.getId()).orderByAsc(FdqOrderStep::getStep));
         vo.setStepList(step);
         step.forEach(v -> {
-            if (v.getStatus().equals("process")) {
+            if ("process".equals(v.getStatus())) {
                 vo.setStep(v.getStep());
             }
         });
@@ -194,17 +194,15 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
 
         AppStatVO vo = new AppStatVO();
-
         // 处理车辆统计
         String lastMonthStr = lastMonth.format(monthFormatter);
         AppStatVO carStat = propertyMapper.getStat(lastMonthStr);
         vo.setCarCount(carStat != null ? carStat.getCarCount() : 0);
-        // 修复原代码中重复设置carCount的问题，假设应为lastCarCount
         vo.setLastCarCount(carStat != null ? carStat.getLastCarCount() : 0);
 
         // 处理任务统计
         String yesterdayStr = yesterday.format(dateFormatter);
-        Map<String, Map<String, Long>> totalTaskMap = fdqControllerMapper.selectOrderCountByTime(null);
+        Map<String, Map<String, Long>> totalTaskMap = fdqControllerMapper.selectOrderCount();
         Map<String, Map<String, Long>> yesterdayTaskMap = fdqControllerMapper.selectOrderCountByTime(yesterdayStr);
 
         // 设置总任务数
@@ -215,10 +213,10 @@ public class FdqOrderServiceImpl extends ServiceImpl<FdqOrderMapper, FdqOrder> i
         vo.setLastWorking(getTaskCount(yesterdayTaskMap, "应急发电任务"));
         vo.setLastManual(getTaskCount(yesterdayTaskMap, "维护任务"));
 
-        // 处理容量统计
+        // 统计发电量和历史数据
         AppStatVO volumeStat = fdqControllerMapper.getStat();
-        vo.setLastVolume(volumeStat != null ? volumeStat.getLastVolume() : 0);
-        vo.setVolume(volumeStat != null ? volumeStat.getVolume() : 0);
+        vo.setVolume(volumeStat != null ? volumeStat.getVolume() : 0.0);
+        vo.setLastVolume(volumeStat != null ? volumeStat.getLastVolume() : 0.0);
 
         return vo;
     }

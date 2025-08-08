@@ -90,4 +90,9 @@ public class FdqPropertyServiceImpl extends ServiceImpl<FdqPropertyMapper, FdqPr
         return baseMapper.selectCountKwh(plate);
     }
 
+    @Override
+    public List<String> getPlate() {
+        return baseMapper.getPlate();
+    }
+
 }

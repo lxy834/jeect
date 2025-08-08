@@ -54,4 +54,6 @@ public interface IFdqPropertyService extends IService<FdqProperty> {
 
     Map<String, BigDecimal> queryPlateList(@RequestParam("plate") String plate);
 
+    List<String> getPlate();
+
 }

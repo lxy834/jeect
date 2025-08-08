@@ -27,7 +27,7 @@ management:
       show-details: ALWAYS
 spring:
   profiles:
-    active: dev
+    active: prod
   main:
     allow-bean-definition-overriding: true
   servlet:

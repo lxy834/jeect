@@ -4,7 +4,7 @@ spring:
       discovery:
         enabled: false
     consul:
-      host: 127.0.0.1
+      host: 192.168.0.100
       #      host: 162.14.66.67
       port: 8500
       discovery:
@@ -14,3 +14,4 @@ spring:
           enabled: true
         instance-id: ${spring.application.name}-${server.port}
         enabled: true
+        prefer-ip-address: true

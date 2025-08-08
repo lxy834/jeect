@@ -128,4 +128,13 @@ public class FdqProperty implements Serializable {
 
     private String sn;
 
+    private Double kwh;
+
+    private Integer runningHours;
+
+    @Excel(name = "下次维护剩余时间", width = 15)
+    @Schema(description = "下次维护剩余时间")
+    private java.lang.Integer nextRepair;
+
+
 }

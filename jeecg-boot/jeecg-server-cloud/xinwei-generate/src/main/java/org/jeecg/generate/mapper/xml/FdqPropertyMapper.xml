@@ -3,25 +3,9 @@
 <mapper namespace="org.jeecg.generate.mapper.FdqPropertyMapper">
 
     <select id="selectCountKwh" resultType="java.util.Map">
-
-
-        WITH max_kwh_car_data AS (SELECT PLATE_NUMBER,
-                                         RUNNING_HOURS,
-                                         KWH,
-                                         NEXT_REPAIR,
-                                         ROW_NUMBER() OVER (
-            PARTITION BY PLATE_NUMBER
-            ORDER BY KWH DESC
-        ) AS rn
-                                  FROM FDQ_CONTROLLER
-                                  WHERE PLATE_NUMBER = #{plate})
-        SELECT SUM(RUNNING_HOURS) AS RUNNING_HOURS,
-               SUM(KWH)           AS KWH,
-               SUM(NEXT_REPAIR)   as NEXT_REPAIR
-        FROM max_kwh_car_data
-        WHERE rn = 1;
-
-
+        select NEXT_REPAIR, KWH, RUNNING_HOURS
+        from FDQ_PROPERTY
+        where plate_number = #{plate}
     </select>
     <select id="getStat" resultType="org.jeecg.generate.vo.AppStatVO">
         select count(1)                                            as carCount,
@@ -29,6 +13,10 @@
                 FROM FDQ_PROPERTY
                 where CREATE_TIME LIKE concat('%', #{month}, '%')) AS lastCarCount
         from FDQ_PROPERTY
+    </select>
+    <select id="getPlate" resultType="java.lang.String">
+        select plate_number
+        from fdq_property
     </select>
 
 </mapper>

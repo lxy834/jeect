@@ -28,7 +28,7 @@ public interface ServiceNameConstants {
     /**
      * 微服务名：系统管理模块
      */
-    String SERVICE_SYSTEM = "xinwei5-auth";
+    String SERVICE_SYSTEM = "xinwei5-auth-test";
     /**
      * 微服务名： demo模块
      */

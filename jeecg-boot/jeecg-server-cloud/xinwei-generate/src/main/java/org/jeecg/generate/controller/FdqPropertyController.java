@@ -2,6 +2,7 @@ package org.jeecg.generate.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -86,6 +87,12 @@ public class FdqPropertyController {
     @GetMapping(value = "/index/stat/plate")
     public Result<Map<String, BigDecimal>> queryPlateList(@RequestParam("plate") String plate) {
         return Result.OK(fdqPropertyService.queryPlateList(plate));
+    }
+
+    @Operation(summary = "应急装备-通过车牌查询")
+    @GetMapping(value = "/queryByPlate")
+    public Result<FdqProperty> queryByPlate(@RequestParam("plate") String plate) {
+        return Result.OK(fdqPropertyService.getOne(Wrappers.<FdqProperty>query().lambda().eq(FdqProperty::getPlateNumber, plate)));
     }
 
     /**

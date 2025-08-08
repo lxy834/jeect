@@ -1,4 +1,22 @@
 spring:
+  application:
+    name: xinwei5-ftu-test
+  kafka:
+    consumer:
+      bootstrap-servers: 192.168.0.100:9092
+      auto-commit-interval: 5000
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      enable-auto-commit: true
+      auto-offset-reset: latest
+      group-id: kafka.consumer.group
+      client-id: kafka.consumer.client.id
+      fetch-max-wait: 400
+      fetch-min-size: 1
+      heartbeat-interval: 3000
+      isolation-level: read_committed
+      topic-name: ftu_device_1859887
   datasource:
     druid:
       stat-view-servlet:
@@ -30,20 +48,20 @@ spring:
           slow-sql-millis: 5000
       datasource:
         master:
+          url: jdbc:dm://192.168.0.100:5236/FTU
+          username: FTU
+          password: qwer1234Q
+          driver-class-name: dm.jdbc.driver.DmDriver
+        sys:
           url: jdbc:dm://192.168.0.100:5236/FXTD
           username: FXTD
           password: qwer1234Q
           driver-class-name: dm.jdbc.driver.DmDriver
   redis:
     database: 1
-    host: 192.168.0.100
+    host: 127.0.0.1
     password:
     port: 6379
-    serialization:
-      key:
-        serializer: org.springframework.data.redis.serializer.StringRedisSerializer
-      value:
-        serializer: org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
   rabbitmq:
     host: jeecg-boot-rabbitmq
     username: guest
@@ -74,7 +92,7 @@ jeecg:
     pc: http://localhost:3100
     app: http://localhost:8051
   path:
-    upload: E:\备份
+    upload: /opt/upFiles
     webapp: /opt/webapp
   shiro:
     excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**
@@ -168,3 +186,5 @@ third-app:
       client-id: ??
       client-secret: ??
       agent-id: ??
+server:
+  port: 7003
